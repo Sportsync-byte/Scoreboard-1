@@ -81,7 +81,12 @@
 
     <script>
         function openScorersScreen() {
-            window.open("scorers-screen.html", "_blank");
+            let scorersURL = "scorers-screen.html"; // Ensure this file exists in the same folder
+            let scorersWindow = window.open(scorersURL, "_blank");
+
+            if (!scorersWindow) {
+                alert("Popup Blocked! Please allow popups for this site.");
+            }
         }
     </script>
 
