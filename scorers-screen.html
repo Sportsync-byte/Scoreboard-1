@@ -36,19 +36,28 @@
     <div class="container">
         <h1>Scorers Screen</h1>
 
+        <label>Select Game Format:</label>
+        <button class="update-btn" onclick="setGameFormat(6)">6-a-side</button>
+        <button class="update-btn" onclick="setGameFormat(8)">8-a-side</button>
+
         <div class="input-group">
             <button class="update-btn" onclick="addRuns(1)">+1 Run</button>
             <button class="update-btn" onclick="addRuns(2)">+2 Runs</button>
             <button class="update-btn" onclick="addRuns(3)">+3 Runs</button>
             <button class="update-btn" onclick="addRuns(4)">+4 Runs</button>
             <button class="update-btn" onclick="addRuns(6)">+6 Runs</button>
-            <button class="reset-btn" onclick="addWicket()">Wicket (-5)</button>
+            <button class="update-btn" onclick="addRuns(7)">+7 Runs</button>
+            <button class="reset-btn" onclick="addWicket()">Wicket</button>
         </div>
 
         <button class="reset-btn" onclick="resetGame()">Reset Game</button>
     </div>
 
     <script>
+        function setGameFormat(players) {
+            localStorage.setItem("gameFormat", players);
+        }
+
         function addRuns(runs) {
             let totalScore = parseInt(localStorage.getItem("totalScore")) || 0;
             totalScore += runs;
@@ -58,7 +67,7 @@
 
         function addWicket() {
             let totalScore = parseInt(localStorage.getItem("totalScore")) || 0;
-            totalScore -= 5; // Deduct 5 runs for a wicket
+            totalScore -= 5;
             localStorage.setItem("totalScore", totalScore);
             updateScoreboard();
         }
@@ -67,13 +76,8 @@
             let totalScore = localStorage.getItem("totalScore") || "0";
             let scoreboardWindow = window.opener;
             if (scoreboardWindow) {
-                scoreboardWindow.document.getElementById("totalScore").innerText = totalScore;
+                scoreboardWindow.document.getElementById("teamAScore").innerText = totalScore;
             }
-        }
-
-        function resetGame() {
-            localStorage.setItem("totalScore", "0");
-            updateScoreboard();
         }
     </script>
 
