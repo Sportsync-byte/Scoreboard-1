@@ -46,10 +46,6 @@
             margin-top: 20px;
             font-size: 18px;
         }
-        .timer {
-            font-size: 30px;
-            margin: 20px 0;
-        }
     </style>
 </head>
 <body onload="openScorersScreen()">
@@ -58,11 +54,9 @@
         <h1>Indoor Cricket Scoreboard</h1>
 
         <div class="team-names">
-            <span id="teamA">Team A</span>
-            <span id="teamB">Team B</span>
+            <span id="teamA">Team A</span> - <span id="teamAScore">0</span>
+            <span id="teamB">Team B</span> - <span id="teamBScore">0</span>
         </div>
-
-        <div class="score" id="totalScore">0</div>
 
         <div class="partnerships">
             <div class="partnership-box">Partnership 1: <span id="partnership1">0</span></div>
@@ -81,7 +75,7 @@
 
     <script>
         function openScorersScreen() {
-            let scorersURL = "scorers-screen.html"; // Ensure this file exists in the same folder
+            let scorersURL = "scorers-screen.html";
             let scorersWindow = window.open(scorersURL, "_blank");
 
             if (!scorersWindow) {
