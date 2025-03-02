@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scorers Screen</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #222;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            background: #333;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        input, button {
+            font-size: 18px;
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+        }
+        .update-btn { background: #FF6600; color: white; cursor: pointer; }
+        .reset-btn { background: #FF0000; color: white; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Scorers Screen</h1>
+
+        <label>Select Game Format:</label>
+        <button class="update-btn" onclick="setGameFormat(6)">6-a-side</button>
+        <button class="update-btn" onclick="setGameFormat(8)">8-a-side</button>
+
+        <div class="input-group">
+            <button class="update-btn" onclick="addRuns(1)">+1 Run</button>
+            <button class="update-btn" onclick="addRuns(2)">+2 Runs</button>
+            <button class="update-btn" onclick="addRuns(3)">+3 Runs</button>
+            <button class="update-btn" onclick="addRuns(4)">+4 Runs</button>
+            <button class="update-btn" onclick="addRuns(6)">+6 Runs</button>
+            <button class="update-btn" onclick="addRuns(7)">+7 Runs</button>
+            <button class="reset-btn" onclick="addWicket()">Wicket</button>
+        </div>
+
+        <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <script>
+        function setGameFormat(players) {
+            localStorage.setItem("gameFormat", players);
+        }
+
+        function addRuns(runs) {
+            let totalScore = parseInt(localStorage.getItem("totalScore")) || 0;
+            totalScore += runs;
+            localStorage.setItem("totalScore", totalScore);
+            updateScoreboard();
+        }
+
+        function addWicket() {
+            let totalScore = parseInt(localStorage.getItem("totalScore")) || 0;
+            totalScore -= 5;
+            localStorage.setItem("totalScore", totalScore);
+            updateScoreboard();
+        }
+
+        function updateScoreboard() {
+            let totalScore = localStorage.getItem("totalScore") || "0";
+            let scoreboardWindow = window.opener;
+            if (scoreboardWindow) {
+                scoreboardWindow.document.getElementById("teamAScore").innerText = totalScore;
+            }
+        }
+    </script>
+
+</body>
+</html>
