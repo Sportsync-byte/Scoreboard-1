@@ -1,75 +1,76 @@
-// Indoor Cricket Scoreboard (Spectator View)
-
-const scoreboard = {
-    teamA: "Team A",
-    teamB: "Team B",
-    score: 0,
-    wickets: 0,
-    overs: 0,
-    balls: 0,
-    partnership: [0, 0, 0, 0],
-    currentBatsmen: ["Batsman 1", "Batsman 2"],
-    bowler: "Bowler Name",
-    bowlerStats: { overs: 0, runs: 0, wickets: 0 },
-    isTeamABatting: true
-};
-
-function updateScore(runs, isWicket = false) {
-    if (isWicket) {
-        scoreboard.wickets++;
-        scoreboard.score -= 5;
-    } else {
-        scoreboard.score += runs;
-        scoreboard.partnership[Math.floor(scoreboard.overs / 4)] += runs;
-    }
-    scoreboard.balls++;
-    if (scoreboard.balls === 6) {
-        scoreboard.balls = 0;
-        scoreboard.overs++;
-        scoreboard.bowlerStats.overs++;
-    }
-    syncWithScorersScreen();
-}
-
-function changeStrike() {
-    [scoreboard.currentBatsmen[0], scoreboard.currentBatsmen[1]] = [scoreboard.currentBatsmen[1], scoreboard.currentBatsmen[0]];
-    syncWithScorersScreen();
-}
-
-function endInnings() {
-    scoreboard.isTeamABatting = !scoreboard.isTeamABatting;
-    scoreboard.score = 0;
-    scoreboard.wickets = 0;
-    scoreboard.overs = 0;
-    scoreboard.balls = 0;
-    scoreboard.partnership = [0, 0, 0, 0];
-    syncWithScorersScreen();
-}
-
-function syncWithScorersScreen() {
-    localStorage.setItem("scoreboard", JSON.stringify(scoreboard));
-}
-
-window.onload = function () {
-    setInterval(() => {
-        const updatedData = JSON.parse(localStorage.getItem("scoreboard"));
-        if (updatedData) {
-            Object.assign(scoreboard, updatedData);
-            renderScoreboard();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indoor Cricket Scoreboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #003366;
+            color: white;
+            padding: 20px;
         }
-    }, 1000);
-}
-
-function renderScoreboard() {
-    document.getElementById("teamA").innerText = scoreboard.teamA;
-    document.getElementById("teamB").innerText = scoreboard.teamB;
-    document.getElementById("totalScore").innerText = scoreboard.score;
-    document.getElementById("wickets").innerText = scoreboard.wickets;
-    document.getElementById("overs").innerText = `${scoreboard.overs}.${scoreboard.balls}`;
-    document.getElementById("batsman1").innerText = scoreboard.currentBatsmen[0];
-    document.getElementById("batsman2").innerText = scoreboard.currentBatsmen[1];
-    document.getElementById("bowler").innerText = scoreboard.bowler;
-}
-
-// Auto-open Scorers Screen
-window.open("scorers-screen.html", "_blank");
+        .scoreboard {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        .team-names {
+            display: flex;
+            justify-content: space-between;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .score {
+            font-size: 50px;
+            font-weight: bold;
+        }
+        .partnerships {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        .partnership-box {
+            width: 22%;
+            padding: 10px;
+            background: #444;
+            border-radius: 5px;
+        }
+        .player-info {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="scoreboard">
+        <h1>Indoor Cricket Scoreboard</h1>
+        <div class="team-names">
+            <span id="teamA">Team A</span>
+            <span id="teamB">Team B</span>
+        </div>
+        <div class="score" id="totalScore">0</div>
+        <div class="partnerships">
+            <div class="partnership-box">P1: <span id="partnership1">0</span></div>
+            <div class="partnership-box">P2: <span id="partnership2">0</span></div>
+            <div class="partnership-box">P3: <span id="partnership3">0</span></div>
+            <div class="partnership-box">P4: <span id="partnership4">0</span></div>
+        </div>
+        <div class="player-info">
+            Batsman 1: <span id="batsman1">---</span> | Batsman 2: <span id="batsman2">---</span>
+        </div>
+        <div class="player-info">
+            Bowler: <span id="bowler">---</span> | Bowling Figures: <span id="bowlingFigure">0-0-0</span>
+        </div>
+    </div>
+    <script>
+        window.open("scorers-screen.html", "_blank"); // Auto-open Scorers Screen
+    </script>
+</body>
+</html>
