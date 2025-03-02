@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 500px;
+            max-width: 600px;
             margin: auto;
             padding: 20px;
             background: #333;
@@ -21,7 +21,7 @@
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
         input, button {
-            font-size: 18px;
+            font-size: 20px;
             padding: 10px;
             margin: 5px;
             border: none;
@@ -29,6 +29,7 @@
         }
         .update-btn { background: #FF6600; color: white; cursor: pointer; }
         .reset-btn { background: #FF0000; color: white; cursor: pointer; }
+        .extras-btn { background: #009688; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -40,14 +41,51 @@
         <button class="update-btn" onclick="setGameFormat(6)">6-a-side</button>
         <button class="update-btn" onclick="setGameFormat(8)">8-a-side</button>
 
+        <div>
+            <label>Enter Team Names:</label>
+            <input type="text" id="teamAName" placeholder="Team A">
+            <input type="text" id="teamBName" placeholder="Team B">
+            <button class="update-btn" onclick="setTeams()">Set Teams</button>
+        </div>
+
+        <div>
+            <label>Select Batsmen:</label>
+            <input type="text" id="batsman1" placeholder="Batsman 1">
+            <input type="text" id="batsman2" placeholder="Batsman 2">
+            <button class="update-btn" onclick="setBatsmen()">Set Batsmen</button>
+        </div>
+
+        <div>
+            <label>Select Bowler:</label>
+            <input type="text" id="bowlerName" placeholder="Bowler">
+            <button class="update-btn" onclick="setBowler()">Set Bowler</button>
+        </div>
+
         <div class="input-group">
+            <button class="update-btn" onclick="addRuns(0)">Dot Ball</button>
             <button class="update-btn" onclick="addRuns(1)">+1 Run</button>
             <button class="update-btn" onclick="addRuns(2)">+2 Runs</button>
             <button class="update-btn" onclick="addRuns(3)">+3 Runs</button>
             <button class="update-btn" onclick="addRuns(4)">+4 Runs</button>
             <button class="update-btn" onclick="addRuns(6)">+6 Runs</button>
             <button class="update-btn" onclick="addRuns(7)">+7 Runs</button>
-            <button class="reset-btn" onclick="addWicket()">Wicket</button>
+        </div>
+
+        <div>
+            <label>Extras:</label>
+            <button class="extras-btn" onclick="addExtra('No Ball')">No Ball</button>
+            <button class="extras-btn" onclick="addExtra('Wide')">Wide</button>
+            <button class="extras-btn" onclick="addExtra('Leg-Side Wide')">Leg-Side Wide</button>
+        </div>
+
+        <div>
+            <label>Wickets:</label>
+            <button class="reset-btn" onclick="addWicket('Bowled')">Bowled</button>
+            <button class="reset-btn" onclick="addWicket('Caught')">Caught</button>
+            <button class="reset-btn" onclick="addWicket('Stumped')">Stumped</button>
+            <button class="reset-btn" onclick="addWicket('Run Out')">Run Out</button>
+            <button class="reset-btn" onclick="addWicket('Hit Wicket')">Hit Wicket</button>
+            <button class="reset-btn" onclick="addWicket('3rd Ball Out')">3rd Ball Out</button>
         </div>
 
         <button class="reset-btn" onclick="resetGame()">Reset Game</button>
@@ -56,6 +94,29 @@
     <script>
         function setGameFormat(players) {
             localStorage.setItem("gameFormat", players);
+            alert(`Game format set: ${players}-a-side`);
+        }
+
+        function setTeams() {
+            let teamA = document.getElementById("teamAName").value;
+            let teamB = document.getElementById("teamBName").value;
+            localStorage.setItem("teamA", teamA);
+            localStorage.setItem("teamB", teamB);
+            alert(`Teams Set: ${teamA} vs ${teamB}`);
+        }
+
+        function setBatsmen() {
+            let batsman1 = document.getElementById("batsman1").value;
+            let batsman2 = document.getElementById("batsman2").value;
+            localStorage.setItem("batsman1", batsman1);
+            localStorage.setItem("batsman2", batsman2);
+            alert(`Batsmen Set: ${batsman1} & ${batsman2}`);
+        }
+
+        function setBowler() {
+            let bowler = document.getElementById("bowlerName").value;
+            localStorage.setItem("bowler", bowler);
+            alert(`Bowler Set: ${bowler}`);
         }
 
         function addRuns(runs) {
@@ -65,7 +126,13 @@
             updateScoreboard();
         }
 
-        function addWicket() {
+        function addExtra(type) {
+            alert(`${type} Given!`);
+            addRuns(1); // Most extras count as 1 run
+        }
+
+        function addWicket(type) {
+            alert(`Wicket: ${type}`);
             let totalScore = parseInt(localStorage.getItem("totalScore")) || 0;
             totalScore -= 5;
             localStorage.setItem("totalScore", totalScore);
@@ -78,6 +145,12 @@
             if (scoreboardWindow) {
                 scoreboardWindow.document.getElementById("teamAScore").innerText = totalScore;
             }
+        }
+
+        function resetGame() {
+            localStorage.clear();
+            alert("Game Reset!");
+            updateScoreboard();
         }
     </script>
 
