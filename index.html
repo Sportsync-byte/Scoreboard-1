@@ -1,89 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indoor Cricket Scoreboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background: #003366;
-            color: white;
-            padding: 20px;
-        }
-        .scoreboard {
-            max-width: 90%;
-            margin: auto;
-            padding: 20px;
-            background: #222;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-            font-size: 2vw;
-        }
-        .team-names {
-            display: flex;
-            justify-content: space-between;
-            font-size: 3vw;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .score {
-            font-size: 5vw;
-            font-weight: bold;
-        }
-        .partnerships {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 10px;
-        }
-        .partnership-box {
-            width: 22%;
-            padding: 10px;
-            background: #444;
-            border-radius: 5px;
-        }
-        .player-info {
-            margin-top: 20px;
-            font-size: 2vw;
-        }
-    </style>
-</head>
-<body onload="openScorersScreen()">
+// Indoor Cricket Scoreboard (Spectator View)
 
-    <div class="scoreboard">
-        <h1>Indoor Cricket Scoreboard</h1>
+const scoreboard = {
+    teamA: "Team A",
+    teamB: "Team B",
+    score: 0,
+    wickets: 0,
+    overs: 0,
+    balls: 0,
+    partnership: [0, 0, 0, 0],
+    currentBatsmen: ["Batsman 1", "Batsman 2"],
+    bowler: "Bowler Name",
+    bowlerStats: { overs: 0, runs: 0, wickets: 0 },
+    isTeamABatting: true
+};
 
-        <div class="team-names">
-            <span id="teamA">Team A</span> - <span id="teamAScore">0</span>
-            <span id="teamB">Team B</span> - <span id="teamBScore">0</span>
-        </div>
+function updateScore(runs, isWicket = false) {
+    if (isWicket) {
+        scoreboard.wickets++;
+        scoreboard.score -= 5;
+    } else {
+        scoreboard.score += runs;
+        scoreboard.partnership[Math.floor(scoreboard.overs / 4)] += runs;
+    }
+    scoreboard.balls++;
+    if (scoreboard.balls === 6) {
+        scoreboard.balls = 0;
+        scoreboard.overs++;
+        scoreboard.bowlerStats.overs++;
+    }
+    syncWithScorersScreen();
+}
 
-        <div class="partnerships">
-            <div class="partnership-box">Partnership 1: <span id="partnership1">0</span></div>
-            <div class="partnership-box">Partnership 2: <span id="partnership2">0</span></div>
-            <div class="partnership-box">Partnership 3: <span id="partnership3">0</span></div>
-            <div class="partnership-box" id="partnership4Box">Partnership 4: <span id="partnership4">0</span></div>
-        </div>
+function changeStrike() {
+    [scoreboard.currentBatsmen[0], scoreboard.currentBatsmen[1]] = [scoreboard.currentBatsmen[1], scoreboard.currentBatsmen[0]];
+    syncWithScorersScreen();
+}
 
-        <div class="player-info">
-            Batsman 1: <span id="batsman1">---</span> | Batsman 2: <span id="batsman2">---</span>
-        </div>
-        <div class="player-info">
-            Bowler: <span id="bowler">---</span> | Bowling Figures: <span id="bowlingFigure">0-0-0</span>
-        </div>
-    </div>
+function endInnings() {
+    scoreboard.isTeamABatting = !scoreboard.isTeamABatting;
+    scoreboard.score = 0;
+    scoreboard.wickets = 0;
+    scoreboard.overs = 0;
+    scoreboard.balls = 0;
+    scoreboard.partnership = [0, 0, 0, 0];
+    syncWithScorersScreen();
+}
 
-    <script>
-        function openScorersScreen() {
-            let scorersURL = "scorers-screen.html";
-            let scorersWindow = window.open(scorersURL, "_blank");
+function syncWithScorersScreen() {
+    localStorage.setItem("scoreboard", JSON.stringify(scoreboard));
+}
 
-            if (!scorersWindow) {
-                alert("Popup Blocked! Please allow popups for this site.");
-            }
+window.onload = function () {
+    setInterval(() => {
+        const updatedData = JSON.parse(localStorage.getItem("scoreboard"));
+        if (updatedData) {
+            Object.assign(scoreboard, updatedData);
+            renderScoreboard();
         }
-    </script>
+    }, 1000);
+}
 
-</body>
-</html>
+function renderScoreboard() {
+    document.getElementById("teamA").innerText = scoreboard.teamA;
+    document.getElementById("teamB").innerText = scoreboard.teamB;
+    document.getElementById("totalScore").innerText = scoreboard.score;
+    document.getElementById("wickets").innerText = scoreboard.wickets;
+    document.getElementById("overs").innerText = `${scoreboard.overs}.${scoreboard.balls}`;
+    document.getElementById("batsman1").innerText = scoreboard.currentBatsmen[0];
+    document.getElementById("batsman2").innerText = scoreboard.currentBatsmen[1];
+    document.getElementById("bowler").innerText = scoreboard.bowler;
+}
+
+// Auto-open Scorers Screen
+window.open("scorers-screen.html", "_blank");
