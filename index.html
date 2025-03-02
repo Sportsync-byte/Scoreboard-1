@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background: #003366;
+            background: linear-gradient(to bottom, #002244, #000000);
             color: white;
             padding: 20px;
         }
@@ -16,20 +16,22 @@
             max-width: 900px;
             margin: auto;
             padding: 20px;
-            background: #222;
+            background: #1E1E1E;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
         }
         .team-names {
             display: flex;
             justify-content: space-between;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            margin-bottom: 20px;
+            color: #FFD700;
         }
         .score {
-            font-size: 50px;
+            font-size: 60px;
             font-weight: bold;
+            color: #FFFFFF;
+            text-shadow: 2px 2px 10px #FFD700;
         }
         .partnerships {
             display: flex;
@@ -38,30 +40,32 @@
         }
         .partnership-box {
             width: 22%;
-            padding: 10px;
-            background: #444;
+            padding: 15px;
+            background: #003366;
             border-radius: 5px;
+            color: #00CCFF;
         }
         .player-info {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 22px;
         }
         .match-info {
             margin-top: 20px;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
+            color: #FFD700;
         }
     </style>
 </head>
 <body>
     <div class="scoreboard">
-        <h1>Indoor Cricket Scoreboard</h1>
+        <h1 style="color: #FFD700;">Indoor Cricket Scoreboard</h1>
         <div class="match-info">Format: <span id="matchFormat">---</span></div>
         <div class="team-names">
             <span id="teamA">Team A</span> vs <span id="teamB">Team B</span>
         </div>
         <div class="score" id="totalScore">0</div>
-        <p>Wickets: <span id="wickets">0</span> | Overs: <span id="overs">0.0</span></p>
+        <p style="font-size: 22px;">Wickets: <span style="color:#FF3333;" id="wickets">0</span> | Overs: <span id="overs">0.0</span></p>
         <div class="partnerships">
             <div class="partnership-box">P1: <span id="partnership1">0</span></div>
             <div class="partnership-box">P2: <span id="partnership2">0</span></div>
