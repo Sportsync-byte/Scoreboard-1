@@ -78,6 +78,7 @@
         <div class="player-info">
             Bowler: <span id="bowler">---</span>
         </div>
+        <button onclick="printScoresheet()" style="margin-top: 20px; padding: 10px; font-size: 18px; background: #FFD700; color: black; border: none; border-radius: 5px; cursor: pointer;">Save & Print Scoresheet</button>
     </div>
     <script>
         function updateScoreboard() {
@@ -97,6 +98,11 @@
                 document.getElementById("partnership4Box").style.display = "block";
             }
         }
+
+        function printScoresheet() {
+            window.print();
+        }
+
         window.onload = function() {
             updateScoreboard();
             window.open("scorers-screen.html", "_blank"); // Auto-open Scorers Screen
