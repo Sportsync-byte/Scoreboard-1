@@ -93,7 +93,10 @@
                 document.getElementById("partnership4Box").style.display = "block";
             }
         }
-        window.onload = updateScoreboard;
+        window.onload = function() {
+            updateScoreboard();
+            window.open("scorers-screen.html", "_blank"); // Auto-open Scorers Screen
+        };
     </script>
 </body>
 </html>
