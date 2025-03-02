@@ -78,6 +78,7 @@
         <div class="player-info">
             Bowler: <span id="bowler">---</span>
         </div>
+        <button onclick="resetGame()" style="margin-top: 20px; padding: 10px; font-size: 18px; background: #FF3333; color: white; border: none; border-radius: 5px; cursor: pointer;">Reset Game</button>
     </div>
     <script>
         function updateScoreboard() {
@@ -96,6 +97,11 @@
             } else {
                 document.getElementById("partnership4Box").style.display = "block";
             }
+        }
+
+        function resetGame() {
+            localStorage.clear();
+            location.reload();
         }
 
         window.onload = function() {
