@@ -13,146 +13,96 @@
             padding: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 500px;
             margin: auto;
             padding: 20px;
             background: #333;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
+        .input-group {
+            margin: 10px 0;
+        }
         input, button {
-            font-size: 20px;
+            font-size: 18px;
             padding: 10px;
             margin: 5px;
             border: none;
             border-radius: 5px;
         }
         .update-btn { background: #FF6600; color: white; cursor: pointer; }
+        .timer-btn { background: #00CC66; color: white; cursor: pointer; }
         .reset-btn { background: #FF0000; color: white; cursor: pointer; }
-        .extras-btn { background: #009688; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>Scorers Screen</h1>
-
-        <label>Select Game Format:</label>
-        <button class="update-btn" onclick="setGameFormat(6)">6-a-side</button>
-        <button class="update-btn" onclick="setGameFormat(8)">8-a-side</button>
-
-        <div>
-            <label>Enter Team Names:</label>
-            <input type="text" id="teamAName" placeholder="Team A">
-            <input type="text" id="teamBName" placeholder="Team B">
-            <button class="update-btn" onclick="setTeams()">Set Teams</button>
-        </div>
-
-        <div>
-            <label>Select Batsmen:</label>
-            <input type="text" id="batsman1" placeholder="Batsman 1">
-            <input type="text" id="batsman2" placeholder="Batsman 2">
-            <button class="update-btn" onclick="setBatsmen()">Set Batsmen</button>
-        </div>
-
-        <div>
-            <label>Select Bowler:</label>
-            <input type="text" id="bowlerName" placeholder="Bowler">
-            <button class="update-btn" onclick="setBowler()">Set Bowler</button>
-        </div>
-
         <div class="input-group">
-            <button class="update-btn" onclick="addRuns(0)">Dot Ball</button>
-            <button class="update-btn" onclick="addRuns(1)">+1 Run</button>
-            <button class="update-btn" onclick="addRuns(2)">+2 Runs</button>
-            <button class="update-btn" onclick="addRuns(3)">+3 Runs</button>
-            <button class="update-btn" onclick="addRuns(4)">+4 Runs</button>
-            <button class="update-btn" onclick="addRuns(6)">+6 Runs</button>
-            <button class="update-btn" onclick="addRuns(7)">+7 Runs</button>
+            <label>Batsman 1:</label>
+            <input type="text" id="batsman1Input" placeholder="Enter Batsman 1">
+            <label>Batsman 2:</label>
+            <input type="text" id="batsman2Input" placeholder="Enter Batsman 2">
+            <button class="update-btn" id="updateBatsmen">Update Batsmen</button>
         </div>
-
-        <div>
-            <label>Extras:</label>
-            <button class="extras-btn" onclick="addExtra('No Ball')">No Ball</button>
-            <button class="extras-btn" onclick="addExtra('Wide')">Wide</button>
-            <button class="extras-btn" onclick="addExtra('Leg-Side Wide')">Leg-Side Wide</button>
+        <div class="input-group">
+            <label>Bowler:</label>
+            <input type="text" id="bowlerInput" placeholder="Enter Bowler">
+            <button class="update-btn" id="updateBowler">Update Bowler</button>
         </div>
-
-        <div>
-            <label>Wickets:</label>
-            <button class="reset-btn" onclick="addWicket('Bowled')">Bowled</button>
-            <button class="reset-btn" onclick="addWicket('Caught')">Caught</button>
-            <button class="reset-btn" onclick="addWicket('Stumped')">Stumped</button>
-            <button class="reset-btn" onclick="addWicket('Run Out')">Run Out</button>
-            <button class="reset-btn" onclick="addWicket('Hit Wicket')">Hit Wicket</button>
-            <button class="reset-btn" onclick="addWicket('3rd Ball Out')">3rd Ball Out</button>
+        <div class="input-group">
+            <button class="update-btn" id="addRun1">+1 Run</button>
+            <button class="update-btn" id="addRun2">+2 Runs</button>
+            <button class="update-btn" id="addRun3">+3 Runs</button>
+            <button class="update-btn" id="addRun4">+4 Runs</button>
+            <button class="update-btn" id="addRun6">+6 Runs</button>
+            <button class="reset-btn" id="wicket">Wicket (-5)</button>
         </div>
-
-        <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+        <button class="reset-btn" id="endInnings">End Innings</button>
     </div>
-
     <script>
-        function setGameFormat(players) {
-            localStorage.setItem("gameFormat", players);
-            alert(`Game format set: ${players}-a-side`);
+        function syncWithScoreboard() {
+            localStorage.setItem("scoreboard", JSON.stringify(scoreboard));
         }
 
-        function setTeams() {
-            let teamA = document.getElementById("teamAName").value;
-            let teamB = document.getElementById("teamBName").value;
-            localStorage.setItem("teamA", teamA);
-            localStorage.setItem("teamB", teamB);
-            alert(`Teams Set: ${teamA} vs ${teamB}`);
-        }
+        document.getElementById("addRun1").addEventListener("click", () => updateScorersScreen(1));
+        document.getElementById("addRun2").addEventListener("click", () => updateScorersScreen(2));
+        document.getElementById("addRun3").addEventListener("click", () => updateScorersScreen(3));
+        document.getElementById("addRun4").addEventListener("click", () => updateScorersScreen(4));
+        document.getElementById("addRun6").addEventListener("click", () => updateScorersScreen(6));
+        document.getElementById("wicket").addEventListener("click", () => updateScorersScreen(0, true));
+        document.getElementById("endInnings").addEventListener("click", endInnings);
 
-        function setBatsmen() {
-            let batsman1 = document.getElementById("batsman1").value;
-            let batsman2 = document.getElementById("batsman2").value;
-            localStorage.setItem("batsman1", batsman1);
-            localStorage.setItem("batsman2", batsman2);
-            alert(`Batsmen Set: ${batsman1} & ${batsman2}`);
-        }
+        document.getElementById("updateBatsmen").addEventListener("click", () => {
+            scoreboard.currentBatsmen[0] = document.getElementById("batsman1Input").value;
+            scoreboard.currentBatsmen[1] = document.getElementById("batsman2Input").value;
+            syncWithScoreboard();
+        });
 
-        function setBowler() {
-            let bowler = document.getElementById("bowlerName").value;
-            localStorage.setItem("bowler", bowler);
-            alert(`Bowler Set: ${bowler}`);
-        }
+        document.getElementById("updateBowler").addEventListener("click", () => {
+            scoreboard.bowler = document.getElementById("bowlerInput").value;
+            syncWithScoreboard();
+        });
 
-        function addRuns(runs) {
-            let totalScore = parseInt(localStorage.getItem("totalScore")) || 0;
-            totalScore += runs;
-            localStorage.setItem("totalScore", totalScore);
-            updateScoreboard();
-        }
-
-        function addExtra(type) {
-            alert(`${type} Given!`);
-            addRuns(1); // Most extras count as 1 run
-        }
-
-        function addWicket(type) {
-            alert(`Wicket: ${type}`);
-            let totalScore = parseInt(localStorage.getItem("totalScore")) || 0;
-            totalScore -= 5;
-            localStorage.setItem("totalScore", totalScore);
-            updateScoreboard();
-        }
-
-        function updateScoreboard() {
-            let totalScore = localStorage.getItem("totalScore") || "0";
-            let scoreboardWindow = window.opener;
-            if (scoreboardWindow) {
-                scoreboardWindow.document.getElementById("teamAScore").innerText = totalScore;
+        function updateScorersScreen(runs, isWicket = false) {
+            const updatedData = JSON.parse(localStorage.getItem("scoreboard"));
+            if (updatedData) {
+                if (isWicket) {
+                    updatedData.wickets++;
+                    updatedData.score -= 5;
+                } else {
+                    updatedData.score += runs;
+                    updatedData.partnership[Math.floor(updatedData.overs / 4)] += runs;
+                }
+                updatedData.balls++;
+                if (updatedData.balls === 6) {
+                    updatedData.balls = 0;
+                    updatedData.overs++;
+                    updatedData.bowlerStats.overs++;
+                }
+                localStorage.setItem("scoreboard", JSON.stringify(updatedData));
             }
         }
-
-        function resetGame() {
-            localStorage.clear();
-            alert("Game Reset!");
-            updateScoreboard();
-        }
     </script>
-
 </body>
 </html>
