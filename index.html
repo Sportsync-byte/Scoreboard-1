@@ -101,6 +101,12 @@
 
         window.onload = function() {
             updateScoreboard();
+            setTimeout(() => {
+                let scorerScreen = window.open("scorers-screen.html", "_blank");
+                if (!scorerScreen) {
+                    alert("Scorers Screen was blocked by the browser. Please allow pop-ups.");
+                }
+            }, 1000);
         };
     </script>
 </body>
