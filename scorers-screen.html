@@ -1,127 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scorers Screen</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background: linear-gradient(to bottom, #1E1E1E, #000000);
-            color: white;
-            padding: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin: auto;
-            padding: 20px;
-            background: #222;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-        }
-        .input-group {
-            margin: 10px 0;
-        }
-        input, select, button {
-            font-size: 18px;
-            padding: 10px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-        }
-        .update-btn { background: #FFD700; color: black; cursor: pointer; }
-        .reset-btn { background: #FF3333; color: white; cursor: pointer; }
-        .timer-btn { background: #00CC66; color: white; cursor: pointer; }
-        .small-scoreboard {
-            background: #003366;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 8px;
-            text-align: center;
-            color: #00CCFF;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1 style="color: #FFD700;">Scorers Screen</h1>
-        
-        <div id="preGameSetup">
-            <h2>Pre-Game Setup</h2>
-            <label>Select Match Format:</label>
-            <select id="matchFormat">
-                <option value="6aside">6-a-side (12 overs, 3 partnerships)</option>
-                <option value="8aside">8-a-side (16 overs, 4 partnerships)</option>
-            </select>
-            <br>
-            <label>Enter Team Names:</label>
-            <input type="text" id="teamAInput" placeholder="Team A">
-            <input type="text" id="teamBInput" placeholder="Team B">
-            <br>
-            <label>Select Who Bats First:</label>
-            <select id="battingFirst">
-                <option value="teamA">Team A</option>
-                <option value="teamB">Team B</option>
-            </select>
-            <br>
-            <label>Set Innings Timer (Minutes):</label>
-            <input type="number" id="inningsTimer" min="1" value="10">
-            <br>
-            <button class="update-btn" onclick="startMatch()">Start Match</button>
-        </div>
-        
-        <div id="batsmanBowlerSetup" style="display:none;">
-            <h2>Enter First Batsmen & Bowler</h2>
-            <label>Batsman 1:</label>
-            <input type="text" id="batsman1Input" placeholder="Enter Batsman 1">
-            <label>Batsman 2:</label>
-            <input type="text" id="batsman2Input" placeholder="Enter Batsman 2">
-            <label>Bowler:</label>
-            <input type="text" id="bowlerInput" placeholder="Enter Bowler">
-            <button class="update-btn" onclick="confirmBatsmenBowler()">Confirm</button>
-        </div>
-        
-        <div id="scoringControls" style="display:none;">
-            <h2>Scoring Controls</h2>
-            <div class="input-group">
-                <button class="update-btn" onclick="addRun(0)">0 Runs</button>
-                <button class="update-btn" onclick="addRun(1)">+1 Run</button>
-                <button class="update-btn" onclick="addRun(2)">+2 Runs</button>
-                <button class="update-btn" onclick="addRun(3)">+3 Runs</button>
-                <button class="update-btn" onclick="addRun(4)">+4 Runs</button>
-                <button class="update-btn" onclick="addRun(6)">+6 Runs</button>
-            </div>
-        </div>
+// ... existing code ...
 
-        <div class="small-scoreboard">
-            <h3>Live Scoreboard Preview</h3>
-            <p><strong><span id="teamA">Team A</span> vs <span id="teamB">Team B</span></strong></p>
-            <p>Score: <span id="totalScoreA">0</span> / <span id="wicketsA">0</span></p>
-            <p>Score: <span id="totalScoreB">0</span> / <span id="wicketsB">0</span></p>
-            <p>Overs: <span id="overs">0.0</span></p>
-            <p>Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span></p>
-            <p>Bowler: <span id="bowler">---</span></p>
-        </div>
+<div id="scoringControls" style="display:none;">
+    <div class="input-group">
+        <button class="update-btn" onclick="addRun(1)">+1 Run</button>
+        <button class="update-btn" onclick="addRun(2)">+2 Runs</button>
+        <button class="update-btn" onclick="addRun(3)">+3 Runs</button>
+        <button class="update-btn" onclick="addRun(4)">+4 Runs</button>
+        <button class="update-btn" onclick="addRun(6)">+6 Runs</button>
+        <button class="reset-btn" onclick="wicket()">Wicket (-5)</button>
     </div>
-    <script>
-        function startMatch() {
-            localStorage.setItem("matchFormat", document.getElementById("matchFormat").value);
-            localStorage.setItem("teamA", document.getElementById("teamAInput").value);
-            localStorage.setItem("teamB", document.getElementById("teamBInput").value);
-            localStorage.setItem("battingFirst", document.getElementById("battingFirst").value);
-            localStorage.setItem("inningsTimer", document.getElementById("inningsTimer").value);
-            document.getElementById("preGameSetup").style.display = "none";
-            document.getElementById("batsmanBowlerSetup").style.display = "block";
-        }
-        
-        function confirmBatsmenBowler() {
-            localStorage.setItem("batsman1", document.getElementById("batsman1Input").value);
-            localStorage.setItem("batsman2", document.getElementById("batsman2Input").value);
-            localStorage.setItem("bowler", document.getElementById("bowlerInput").value);
-            document.getElementById("batsmanBowlerSetup").style.display = "none";
-            document.getElementById("scoringControls").style.display = "block";
-        }
-    </script>
-</body>
-</html>
+    <div class="input-group">
+        <button class="update-btn" onclick="wide()">Wide</button>
+        <button class="update-btn" onclick="noBall()">No Ball</button>
+        <button class="update-btn" onclick="endOver()">End Over</button>
+        <button class="update-btn" onclick="changeBowler()">Change Bowler</button>
+    </div>
+    <div class="small-scoreboard">
+        <h3>Current Score: <span id="currentScoreDisplay">0/0</span></h3>
+        <h4>Overs: <span id="oversDisplay">0.0</span></h4>
+    </div>
+</div>
+
+<script>
+// ... existing code ...
+
+function addRun(runs) {
+    let currentScore = parseInt(localStorage.getItem("totalScoreA")) || 0;
+    let currentBatsman = localStorage.getItem("onStrike") || "batsman1";
+    let batsman1Score = parseInt(localStorage.getItem("batsman1Score")) || 0;
+    let batsman2Score = parseInt(localStorage.getItem("batsman2Score")) || 0;
+    let batsman1Balls = parseInt(localStorage.getItem("batsman1Balls")) || 0;
+    let batsman2Balls = parseInt(localStorage.getItem("batsman2Balls")) || 0;
+
+    // Update total score
+    localStorage.setItem("totalScoreA", currentScore + runs);
+    
+    // Update individual batsman score
+    if (currentBatsman === "batsman1") {
+        localStorage.setItem("batsman1Score", batsman1Score + runs);
+        localStorage.setItem("batsman1Balls", batsman1Balls + 1);
+        if (runs % 2 === 1) localStorage.setItem("onStrike", "batsman2");
+    } else {
+        localStorage.setItem("batsman2Score", batsman2Score + runs);
+        localStorage.setItem("batsman2Balls", batsman2Balls + 1);
+        if (runs % 2 === 1) localStorage.setItem("onStrike", "batsman1");
+    }
+
+    updateDisplay();
+    window.dispatchEvent(new Event('storage'));
+}
+
+function updateDisplay() {
+    let score = localStorage.getItem("totalScoreA") || "0";
+    let wickets = localStorage.getItem("wicketsA") || "0";
+    let overs = localStorage.getItem("overs") || "0.0";
+    document.getElementById("currentScoreDisplay").textContent = `${score}/${wickets}`;
+    document.getElementById("oversDisplay").textContent = overs;
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    updateDisplay();
+});
+</script>
+// ... existing code ...
