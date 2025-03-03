@@ -52,42 +52,40 @@
                 <option value="6aside">6-a-side (12 overs, 3 partnerships)</option>
                 <option value="8aside">8-a-side (16 overs, 4 partnerships)</option>
             </select>
-            <button class="update-btn" id="setFormat">Set Format</button>
+            <button class="update-btn" onclick="setFormat()">Set Format</button>
         </div>
         <div class="input-group">
             <label>Enter Team Names:</label>
             <input type="text" id="teamAInput" placeholder="Team A">
             <input type="text" id="teamBInput" placeholder="Team B">
-            <button class="update-btn" id="updateTeams">Update Teams</button>
+            <button class="update-btn" onclick="updateTeams()">Update Teams</button>
         </div>
         <div class="input-group">
             <label>Batsman 1:</label>
             <input type="text" id="batsman1Input" placeholder="Enter Batsman 1">
             <label>Batsman 2:</label>
             <input type="text" id="batsman2Input" placeholder="Enter Batsman 2">
-            <button class="update-btn" id="updateBatsmen">Update Batsmen</button>
+            <button class="update-btn" onclick="updateBatsmen()">Update Batsmen</button>
         </div>
         <div class="input-group">
             <label>Bowler:</label>
             <input type="text" id="bowlerInput" placeholder="Enter Bowler">
-            <button class="update-btn" id="updateBowler">Update Bowler</button>
+            <button class="update-btn" onclick="updateBowler()">Update Bowler</button>
         </div>
         <div class="input-group">
-            <button class="update-btn" id="addRun1">+1 Run</button>
-            <button class="update-btn" id="addRun2">+2 Runs</button>
-            <button class="update-btn" id="addRun3">+3 Runs</button>
-            <button class="update-btn" id="addRun4">+4 Runs</button>
-            <button class="update-btn" id="addRun6">+6 Runs</button>
-            <button class="update-btn" id="addRun7">+7 Runs</button>
-            <button class="reset-btn" id="wicket">Wicket (-5)</button>
+            <button class="update-btn" onclick="addRun(1)">+1 Run</button>
+            <button class="update-btn" onclick="addRun(2)">+2 Runs</button>
+            <button class="update-btn" onclick="addRun(3)">+3 Runs</button>
+            <button class="update-btn" onclick="addRun(4)">+4 Runs</button>
+            <button class="update-btn" onclick="addRun(6)">+6 Runs</button>
+            <button class="reset-btn" onclick="wicket()">Wicket (-5)</button>
         </div>
         <div class="input-group">
-            <button class="update-btn" id="dotBall">0 Runs</button>
-            <button class="update-btn" id="addBall">Add Ball</button>
-            <button class="update-btn" id="changeStrike">Manual Strike Change</button>
-            <button class="reset-btn" id="undoLast">Undo Last Action</button>
+            <button class="update-btn" onclick="addBall()">Add Ball</button>
+            <button class="update-btn" onclick="changeStrike()">Manual Strike Change</button>
+            <button class="reset-btn" onclick="undoLast()">Undo Last Action</button>
         </div>
-        <button class="reset-btn" id="endInnings">End Innings</button>
+        <button class="reset-btn" onclick="endInnings()">End Innings</button>
         <div class="small-scoreboard">
             <h3>Live Scoreboard Preview</h3>
             <p><strong><span id="teamA">Team A</span> vs <span id="teamB">Team B</span></strong></p>
