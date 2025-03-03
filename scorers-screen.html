@@ -72,18 +72,17 @@
         </div>
         
         <div id="scoringControls" style="display:none;">
-            <div class="input-group">
+            <div id="batsmanBowlerSetup">
+                <h2>Enter First Batsmen & Bowler</h2>
                 <label>Batsman 1:</label>
                 <input type="text" id="batsman1Input" placeholder="Enter Batsman 1">
                 <label>Batsman 2:</label>
                 <input type="text" id="batsman2Input" placeholder="Enter Batsman 2">
-                <button class="update-btn" onclick="updateBatsmen()">Update Batsmen</button>
-            </div>
-            <div class="input-group">
                 <label>Bowler:</label>
                 <input type="text" id="bowlerInput" placeholder="Enter Bowler">
-                <button class="update-btn" onclick="updateBowler()">Update Bowler</button>
+                <button class="update-btn" onclick="confirmBatsmenBowler()">Confirm</button>
             </div>
+            
             <div class="input-group">
                 <button class="update-btn" onclick="addRun(1)">+1 Run</button>
                 <button class="update-btn" onclick="addRun(2)">+2 Runs</button>
@@ -116,24 +115,15 @@
             localStorage.setItem("battingFirst", document.getElementById("battingFirst").value);
             localStorage.setItem("inningsTimer", document.getElementById("inningsTimer").value);
             document.getElementById("preGameSetup").style.display = "none";
+            document.getElementById("batsmanBowlerSetup").style.display = "block";
+        }
+        function confirmBatsmenBowler() {
+            localStorage.setItem("batsman1", document.getElementById("batsman1Input").value);
+            localStorage.setItem("batsman2", document.getElementById("batsman2Input").value);
+            localStorage.setItem("bowler", document.getElementById("bowlerInput").value);
+            document.getElementById("batsmanBowlerSetup").style.display = "none";
             document.getElementById("scoringControls").style.display = "block";
         }
-        function resetGame() {
-            localStorage.clear();
-            updateScoreboard();
-            document.getElementById("preGameSetup").style.display = "block";
-            document.getElementById("scoringControls").style.display = "none";
-            window.opener.postMessage("reset", "*"); // Send reset command to Scoreboard window
-        }
-        
-        window.addEventListener("message", function(event) {
-            if (event.data === "reset") {
-                localStorage.clear();
-                updateScoreboard();
-                document.getElementById("preGameSetup").style.display = "block";
-                document.getElementById("scoringControls").style.display = "none";
-            }
-        });
     </script>
 </body>
 </html>
