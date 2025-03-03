@@ -1,66 +1,18 @@
-// ... existing code ...
-
-<div id="scoringControls" style="display:none;">
-    <div class="input-group">
-        <button class="update-btn" onclick="addRun(1)">+1 Run</button>
-        <button class="update-btn" onclick="addRun(2)">+2 Runs</button>
-        <button class="update-btn" onclick="addRun(3)">+3 Runs</button>
-        <button class="update-btn" onclick="addRun(4)">+4 Runs</button>
-        <button class="update-btn" onclick="addRun(6)">+6 Runs</button>
-        <button class="reset-btn" onclick="wicket()">Wicket (-5)</button>
-    </div>
-    <div class="input-group">
-        <button class="update-btn" onclick="wide()">Wide</button>
-        <button class="update-btn" onclick="noBall()">No Ball</button>
-        <button class="update-btn" onclick="endOver()">End Over</button>
-        <button class="update-btn" onclick="changeBowler()">Change Bowler</button>
-    </div>
-    <div class="small-scoreboard">
-        <h3>Current Score: <span id="currentScoreDisplay">0/0</span></h3>
-        <h4>Overs: <span id="oversDisplay">0.0</span></h4>
-    </div>
-</div>
-
-<script>
-// ... existing code ...
-
-function addRun(runs) {
-    let currentScore = parseInt(localStorage.getItem("totalScoreA")) || 0;
-    let currentBatsman = localStorage.getItem("onStrike") || "batsman1";
-    let batsman1Score = parseInt(localStorage.getItem("batsman1Score")) || 0;
-    let batsman2Score = parseInt(localStorage.getItem("batsman2Score")) || 0;
-    let batsman1Balls = parseInt(localStorage.getItem("batsman1Balls")) || 0;
-    let batsman2Balls = parseInt(localStorage.getItem("batsman2Balls")) || 0;
-
-    // Update total score
-    localStorage.setItem("totalScoreA", currentScore + runs);
-    
-    // Update individual batsman score
-    if (currentBatsman === "batsman1") {
-        localStorage.setItem("batsman1Score", batsman1Score + runs);
-        localStorage.setItem("batsman1Balls", batsman1Balls + 1);
-        if (runs % 2 === 1) localStorage.setItem("onStrike", "batsman2");
-    } else {
-        localStorage.setItem("batsman2Score", batsman2Score + runs);
-        localStorage.setItem("batsman2Balls", batsman2Balls + 1);
-        if (runs % 2 === 1) localStorage.setItem("onStrike", "batsman1");
-    }
-
-    updateDisplay();
-    window.dispatchEvent(new Event('storage'));
-}
-
-function updateDisplay() {
-    let score = localStorage.getItem("totalScoreA") || "0";
-    let wickets = localStorage.getItem("wicketsA") || "0";
-    let overs = localStorage.getItem("overs") || "0.0";
-    document.getElementById("currentScoreDisplay").textContent = `${score}/${wickets}`;
-    document.getElementById("oversDisplay").textContent = overs;
-}
-
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    updateDisplay();
-});
-</script>
-// ... existing code ...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scorer's Screen - Test</title>
+</head>
+<body>
+    <h1>Scorer's Screen Test</h1>
+    <button onclick="testStorage()">Test Button</button>
+    <script>
+        function testStorage() {
+            localStorage.setItem("test", "working");
+            alert("Test button clicked!");
+        }
+    </script>
+</body>
+</html>
