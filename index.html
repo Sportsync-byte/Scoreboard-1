@@ -73,6 +73,26 @@
             margin: 10px 0 5px;
             color: #FFD700;
         }
+        .dismissal-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .dismissal-buttons button {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            background: #FF3333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .dismissal-buttons button:hover {
+            background: #EE2222;
+        }
     </style>
 </head>
 <body>
@@ -141,8 +161,17 @@
                 <button class="update-btn" onclick="addExtra('legBye')">Leg Bye</button>
             </div>
 
+            <div class="dismissal-buttons">
+                <h3 style="color: #FFD700;">Dismissals (-5 runs)</h3>
+                <button onclick="wicket('bowled')">Bowled</button>
+                <button onclick="wicket('caught')">Caught</button>
+                <button onclick="wicket('runOut')">Run Out</button>
+                <button onclick="wicket('stumped')">Stumped</button>
+                <button onclick="wicket('hitWicket')">Hit Wicket</button>
+                <button onclick="wicket('obstructing')">Obstructing Field</button>
+            </div>
+
             <div class="input-group">
-                <button class="reset-btn" onclick="wicket()">Wicket (-5)</button>
                 <button class="update-btn" onclick="endOver()">End Over</button>
                 <button class="update-btn" onclick="changeBowler()">Change Bowler</button>
             </div>
@@ -161,7 +190,8 @@
             currentBowler: '',
             onStrike: 'batsman1',
             partnershipOvers: 0,
-            partnershipNumber: 1
+            partnershipNumber: 1,
+            consecutiveDotBalls: 0
         };
 
         function isLocalStorageAvailable() {
@@ -225,17 +255,25 @@
                 if (currentInningsData.onStrike === 'batsman1') {
                     currentInningsData.batsman1Score += runs;
                     currentInningsData.batsman1Balls++;
-                    // Change strike after any runs
                     currentInningsData.onStrike = 'batsman2';
                 } else {
                     currentInningsData.batsman2Score += runs;
                     currentInningsData.batsman2Balls++;
-                    // Change strike after any runs
                     currentInningsData.onStrike = 'batsman1';
                 }
                 
                 currentInningsData.balls++;
                 currentInningsData.partnershipOvers = currentInningsData.overs + (currentInningsData.balls / 6);
+
+                // Handle dot balls and 3rd ball prompt
+                if (runs === 0) {
+                    currentInningsData.consecutiveDotBalls++;
+                    if (currentInningsData.consecutiveDotBalls === 2) {
+                        alert("3rd ball - Please notify batsmen and fielders");
+                    }
+                } else {
+                    currentInningsData.consecutiveDotBalls = 0;
+                }
 
                 if (currentInningsData.partnershipOvers >= 4) {
                     promptNewBatsmen();
@@ -284,10 +322,24 @@
             }
         }
 
-        function wicket() {
+        function wicket(dismissalType) {
             try {
                 currentInningsData.wickets++;
                 currentInningsData.totalScore -= 5;
+                
+                // Apply -5 runs to the batsman on strike
+                if (currentInningsData.onStrike === 'batsman1') {
+                    currentInningsData.batsman1Score -= 5;
+                } else {
+                    currentInningsData.batsman2Score -= 5;
+                }
+
+                // Reset consecutive dot balls counter
+                currentInningsData.consecutiveDotBalls = 0;
+
+                // Log the dismissal type
+                console.log(`Wicket: ${dismissalType}`);
+                
                 updateStorage();
                 updateDisplay();
             } catch (error) {
