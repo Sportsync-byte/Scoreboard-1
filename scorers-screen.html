@@ -71,7 +71,25 @@
                 <button class="update-btn" onclick="addBall()">Add Ball</button>
             </div>
         </div>
-
+</div>
+    <script>
+        function startMatch() {
+            localStorage.setItem("matchFormat", document.getElementById("matchFormat").value);
+            localStorage.setItem("teamA", document.getElementById("teamAInput").value);
+            localStorage.setItem("teamB", document.getElementById("teamBInput").value);
+            localStorage.setItem("battingFirst", document.getElementById("battingFirst").value);
+            localStorage.setItem("inningsTimer", document.getElementById("inningsTimer").value);
+            document.getElementById("preGameSetup").style.display = "none";
+            document.getElementById("batsmanBowlerSetup").style.display = "block";
+        }
+        
+        function confirmBatsmenBowler() {
+            localStorage.setItem("batsman1", document.getElementById("batsman1Input").value);
+            localStorage.setItem("batsman2", document.getElementById("batsman2Input").value);
+            localStorage.setItem("bowler", document.getElementById("bowlerInput").value);
+            document.getElementById("batsmanBowlerSetup").style.display = "none";
+            document.getElementById("scoringControls").style.display = "block";
+        }
         <div class="small-scoreboard">
             <h3>Live Scoreboard Preview</h3>
             <p><strong><span id="teamA">Team A</span> vs <span id="teamB">Team B</span></strong></p>
