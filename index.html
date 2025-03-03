@@ -3,86 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indoor Cricket Scoreboard</title>
+    <title>Live Scoreboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
             background: linear-gradient(to bottom, #1E1E1E, #000000);
             color: white;
             padding: 20px;
         }
-        .container {
-            max-width: 900px;
+        .scoreboard {
+            max-width: 1200px;
             margin: auto;
             padding: 20px;
             background: #222;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
         }
-        .scoreboard {
+        .team-score {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 20px;
-            border-radius: 10px;
-            background: #444;
-            color: #FFD700;
+            background: #003366;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .score {
+            font-size: 48px;
+            color: #00CCFF;
+        }
+        .details {
             font-size: 24px;
+            margin: 10px 0;
+        }
+        .current-partnership {
+            background: #004400;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
         }
     </style>
-    <script>
-        function openScorersScreen() {
-            let scorersScreen = window.open('scorers-screen.html', '_blank', 'width=800,height=600');
-            if (!scorersScreen) {
-                alert('Pop-up blocked! Please allow pop-ups for this site.');
-            }
-        }
-        
-        window.onload = function() {
-            openScorersScreen();
-            updateScoreboard();
-        };
-
-        window.addEventListener("storage", function(event) {
-            if (event.key) {
-                updateScoreboard();
-            }
-        });
-
-        function updateScoreboard() {
-            document.getElementById("teamA").innerText = localStorage.getItem("teamA") || "Team A";
-            document.getElementById("teamB").innerText = localStorage.getItem("teamB") || "Team B";
-            document.getElementById("totalScoreA").innerText = localStorage.getItem("totalScoreA") || "0";
-            document.getElementById("totalScoreB").innerText = localStorage.getItem("totalScoreB") || "0";
-            document.getElementById("wicketsA").innerText = localStorage.getItem("wicketsA") || "0";
-            document.getElementById("wicketsB").innerText = localStorage.getItem("wicketsB") || "0";
-            document.getElementById("overs").innerText = localStorage.getItem("overs") || "0.0";
-            document.getElementById("batsman1").innerText = localStorage.getItem("batsman1") || "---";
-            document.getElementById("batsman2").innerText = localStorage.getItem("batsman2") || "---";
-            document.getElementById("bowler").innerText = localStorage.getItem("bowler") || "---";
-        }
-        
-        setInterval(updateScoreboard, 500); // Update scoreboard every 500ms for real-time sync
-    </script>
 </head>
 <body>
-    <div class="container">
-        <h1 style="color: #FFD700;">Indoor Cricket Scoreboard</h1>
-        <div class="scoreboard">
+    <div class="scoreboard">
+        <h1 style="color: #FFD700; text-align: center;">Live Scoreboard</h1>
+        <div class="team-score">
             <div>
-                <h2 id="teamA">Team A</h2>
-                <p>Score: <span id="totalScoreA">0</span> / <span id="wicketsA">0</span></p>
-                <p>Partnership: <span id="partnershipA">0</span></p>
+                <h2 id="battingTeam">Team A</h2>
+                <div class="score">
+                    <span id="currentScore">0</span>/<span id="currentWickets">0</span>
+                </div>
+                <div class="details">
+                    Overs: <span id="currentOvers">0.0</span>
+                </div>
             </div>
-            <div>
-                <h2 id="teamB">Team B</h2>
-                <p>Score: <span id="totalScoreB">0</span> / <span id="wicketsB">0</span></p>
-                <p>Partnership: <span id="partnershipB">0</span></p>
+            <div class="current-partnership">
+                <div id="batsman1">Batsman 1: 0 (0)</div>
+                <div id="batsman2">Batsman 2: 0 (0)</div>
+                <div id="currentBowler">Bowler: -</div>
             </div>
         </div>
-        <p>Overs: <span id="overs">0.0</span></p>
-        <p>Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span></p>
-        <p>Bowler: <span id="bowler">---</span></p>
     </div>
+
+    <script>
+        function updateScoreboard() {
+            document.getElementById('battingTeam').textContent = localStorage.getItem('teamA') || 'Team A';
+            document.getElementById('currentScore').textContent = localStorage.getItem('totalScoreA') || '0';
+            document.getElementById('currentWickets').textContent = localStorage.getItem('wicketsA') || '0';
+            document.getElementById('batsman1').textContent = `${localStorage.getItem('batsman1') || 'Batsman 1'}: ${localStorage.getItem('batsman1Score') || '0'} (${localStorage.getItem('batsman1Balls') || '0'})`;
+            document.getElementById('batsman2').textContent = `${localStorage.getItem('batsman2') || 'Batsman 2'}: ${localStorage.getItem('batsman2Score') || '0'} (${localStorage.getItem('batsman2Balls') || '0'})`;
+            document.getElementById('currentBowler').textContent = `Bowler: ${localStorage.getItem('bowler') || '-'}`;
+        }
+
+        // Listen for changes in localStorage
+        window.addEventListener('storage', updateScoreboard);
+        
+        // Initial update
+        updateScoreboard();
+    </script>
 </body>
 </html>
