@@ -148,8 +148,7 @@
             </div>
         </div>
     </div>
-
-    <script>
+        <script>
         let currentInningsData = {
             totalScore: 0,
             wickets: 0,
@@ -226,11 +225,13 @@
                 if (currentInningsData.onStrike === 'batsman1') {
                     currentInningsData.batsman1Score += runs;
                     currentInningsData.batsman1Balls++;
-                    if (runs % 2 === 1) currentInningsData.onStrike = 'batsman2';
+                    // Change strike after any runs
+                    currentInningsData.onStrike = 'batsman2';
                 } else {
                     currentInningsData.batsman2Score += runs;
                     currentInningsData.batsman2Balls++;
-                    if (runs % 2 === 1) currentInningsData.onStrike = 'batsman1';
+                    // Change strike after any runs
+                    currentInningsData.onStrike = 'batsman1';
                 }
                 
                 currentInningsData.balls++;
@@ -301,6 +302,7 @@
                     case 'wide':
                     case 'noBall':
                         currentInningsData.totalScore += 1;
+                        // Don't change strike for wides and no balls
                         break;
                     case 'bye':
                     case 'legBye':
