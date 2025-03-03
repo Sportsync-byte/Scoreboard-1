@@ -6,79 +6,124 @@
     <title>Live Scoreboard</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to bottom, #1E1E1E, #000000);
+            font-family: 'Arial', sans-serif;
+            background: #1a1a1a;
             color: white;
+            margin: 0;
             padding: 20px;
         }
         .scoreboard {
-            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1400px;
             margin: auto;
-            padding: 20px;
-            background: #222;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
         }
-        .team-score {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .main-score {
+            grid-column: 1 / -1;
+            background: #222;
             padding: 20px;
-            background: #003366;
-            margin: 10px 0;
-            border-radius: 8px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .team-name {
+            font-size: 36px;
+            color: #FFD700;
         }
         .score {
-            font-size: 48px;
+            font-size: 72px;
+            margin: 20px 0;
+        }
+        .overs {
+            font-size: 24px;
             color: #00CCFF;
         }
-        .details {
-            font-size: 24px;
-            margin: 10px 0;
+        .batting-details, .bowling-details {
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
         }
-        .current-partnership {
-            background: #004400;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
+        .player-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #444;
+        }
+        .recent-balls {
+            grid-column: 1 / -1;
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .ball {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            background: #444;
+            border-radius: 50%;
+            margin: 0 5px;
         }
     </style>
 </head>
 <body>
     <div class="scoreboard">
-        <h1 style="color: #FFD700; text-align: center;">Live Scoreboard</h1>
-        <div class="team-score">
-            <div>
-                <h2 id="battingTeam">Team A</h2>
-                <div class="score">
-                    <span id="currentScore">0</span>/<span id="currentWickets">0</span>
-                </div>
-                <div class="details">
-                    Overs: <span id="currentOvers">0.0</span>
-                </div>
+        <div class="main-score">
+            <div class="team-name">Team A</div>
+            <div class="score">157/3</div>
+            <div class="overs">Overs: 14.2</div>
+        </div>
+
+        <div class="batting-details">
+            <h2>Batting</h2>
+            <div class="player-row">
+                <span>J. Smith*</span>
+                <span>45 (28)</span>
             </div>
-            <div class="current-partnership">
-                <div id="batsman1">Batsman 1: 0 (0)</div>
-                <div id="batsman2">Batsman 2: 0 (0)</div>
-                <div id="currentBowler">Bowler: -</div>
+            <div class="player-row">
+                <span>M. Johnson</span>
+                <span>23 (15)</span>
             </div>
+            <div class="partnership">
+                Partnership: 68 (42)
+            </div>
+        </div>
+
+        <div class="bowling-details">
+            <h2>Bowling</h2>
+            <div class="player-row">
+                <span>A. Peters</span>
+                <span>2-0-24-1</span>
+            </div>
+            <div class="this-over">
+                This Over: 1 W 4 2 1
+            </div>
+        </div>
+
+        <div class="recent-balls">
+            <h3>Last 12 Balls</h3>
+            <div class="ball">1</div>
+            <div class="ball">W</div>
+            <div class="ball">4</div>
+            <div class="ball">2</div>
+            <div class="ball">1</div>
+            <div class="ball">6</div>
+            <div class="ball">0</div>
+            <div class="ball">1</div>
+            <div class="ball">4</div>
+            <div class="ball">2</div>
+            <div class="ball">1</div>
+            <div class="ball">0</div>
         </div>
     </div>
 
     <script>
         function updateScoreboard() {
-            document.getElementById('battingTeam').textContent = localStorage.getItem('teamA') || 'Team A';
-            document.getElementById('currentScore').textContent = localStorage.getItem('totalScoreA') || '0';
-            document.getElementById('currentWickets').textContent = localStorage.getItem('wicketsA') || '0';
-            document.getElementById('batsman1').textContent = `${localStorage.getItem('batsman1') || 'Batsman 1'}: ${localStorage.getItem('batsman1Score') || '0'} (${localStorage.getItem('batsman1Balls') || '0'})`;
-            document.getElementById('batsman2').textContent = `${localStorage.getItem('batsman2') || 'Batsman 2'}: ${localStorage.getItem('batsman2Score') || '0'} (${localStorage.getItem('batsman2Balls') || '0'})`;
-            document.getElementById('currentBowler').textContent = `Bowler: ${localStorage.getItem('bowler') || '-'}`;
+            // Update logic here
         }
-
-        // Listen for changes in localStorage
         window.addEventListener('storage', updateScoreboard);
-        
-        // Initial update
         updateScoreboard();
     </script>
 </body>
