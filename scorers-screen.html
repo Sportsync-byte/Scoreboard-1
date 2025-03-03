@@ -41,6 +41,12 @@
             text-align: center;
             color: #00CCFF;
         }
+        iframe {
+            width: 100%;
+            height: 250px;
+            border: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -97,6 +103,8 @@
                 <button class="reset-btn" onclick="resetGame()">Reset Game</button>
             </div>
         </div>
+        
+        <iframe id="scoreboardFrame" src="scoreboard.html"></iframe>
     </div>
     <script>
         function startMatch() {
