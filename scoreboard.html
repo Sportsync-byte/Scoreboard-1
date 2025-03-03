@@ -25,29 +25,38 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
         .team-name {
             font-size: 36px;
             color: #FFD700;
+            margin-bottom: 10px;
         }
         .score {
             font-size: 72px;
             margin: 20px 0;
+            color: #00CCFF;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
         }
         .overs {
             font-size: 24px;
-            color: #00CCFF;
+            color: #FFD700;
         }
         .batting-details, .bowling-details {
             background: #333;
             padding: 20px;
             border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
         .player-row {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
             border-bottom: 1px solid #444;
+            font-size: 18px;
+        }
+        .player-row:last-child {
+            border-bottom: none;
         }
         .recent-balls {
             grid-column: 1 / -1;
@@ -55,76 +64,178 @@
             padding: 20px;
             border-radius: 10px;
             text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
         .ball {
             display: inline-block;
-            width: 30px;
-            height: 30px;
-            line-height: 30px;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
             text-align: center;
             background: #444;
             border-radius: 50%;
             margin: 0 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .ball.wicket {
+            background: #ff3333;
+        }
+        .ball.four {
+            background: #00cc66;
+        }
+        .ball.six {
+            background: #ffcc00;
+        }
+        .partnership {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #444;
+            color: #00CCFF;
+            font-size: 18px;
+        }
+        .this-over {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #444;
+            color: #FFD700;
+            font-size: 18px;
+        }
+        h2 {
+            color: #FFD700;
+            margin-top: 0;
+        }
+        h3 {
+            color: #FFD700;
+            margin-top: 0;
         }
     </style>
 </head>
 <body>
     <div class="scoreboard">
         <div class="main-score">
-            <div class="team-name">Team A</div>
-            <div class="score">157/3</div>
-            <div class="overs">Overs: 14.2</div>
+            <div class="team-name" id="currentTeam">Team A</div>
+            <div class="score" id="currentScore">0/0</div>
+            <div class="overs" id="currentOvers">Overs: 0.0</div>
         </div>
 
-        <div class="batting-details">
+        <div class="batting-details" id="battingDetails">
             <h2>Batting</h2>
             <div class="player-row">
-                <span>J. Smith*</span>
-                <span>45 (28)</span>
+                <span id="batsman1">-</span>
+                <span id="batsman1Score">0 (0)</span>
             </div>
             <div class="player-row">
-                <span>M. Johnson</span>
-                <span>23 (15)</span>
+                <span id="batsman2">-</span>
+                <span id="batsman2Score">0 (0)</span>
             </div>
-            <div class="partnership">
-                Partnership: 68 (42)
+            <div class="partnership" id="partnership">
+                Partnership: 0 (0)
             </div>
         </div>
 
-        <div class="bowling-details">
+        <div class="bowling-details" id="bowlingDetails">
             <h2>Bowling</h2>
             <div class="player-row">
-                <span>A. Peters</span>
-                <span>2-0-24-1</span>
+                <span id="currentBowler">-</span>
+                <span id="bowlerStats">0-0-0-0</span>
             </div>
-            <div class="this-over">
-                This Over: 1 W 4 2 1
+            <div class="this-over" id="thisOver">
+                This Over: -
             </div>
         </div>
 
-        <div class="recent-balls">
+        <div class="recent-balls" id="recentBalls">
             <h3>Last 12 Balls</h3>
-            <div class="ball">1</div>
-            <div class="ball">W</div>
-            <div class="ball">4</div>
-            <div class="ball">2</div>
-            <div class="ball">1</div>
-            <div class="ball">6</div>
-            <div class="ball">0</div>
-            <div class="ball">1</div>
-            <div class="ball">4</div>
-            <div class="ball">2</div>
-            <div class="ball">1</div>
-            <div class="ball">0</div>
+            <div id="ballsContainer"></div>
         </div>
     </div>
 
     <script>
-        function updateScoreboard() {
-            // Update logic here
+        let recentBalls = [];
+        const MAX_RECENT_BALLS = 12;
+
+        // Check if we're the main window and open scorer screen if needed
+        function checkIfMainWindow() {
+            if (!window.opener) {
+                // If we're not opened by another window, open the scorer screen
+                window.open('scorer.html', 'ScorerScreen', 
+                    'width=1000,height=800,menubar=no,toolbar=no,location=no,status=no');
+            }
         }
-        window.addEventListener('storage', updateScoreboard);
-        updateScoreboard();
+
+        function updateScoreboard() {
+            // Get match data from localStorage
+            const matchData = JSON.parse(localStorage.getItem("matchData") || "{}");
+            const teamA = localStorage.getItem("teamA") || "Team A";
+            const teamB = localStorage.getItem("teamB") || "Team B";
+            const battingFirst = localStorage.getItem("battingFirst") || "teamA";
+            const batsman1 = localStorage.getItem("batsman1") || "-";
+            const batsman2 = localStorage.getItem("batsman2") || "-";
+            const bowler = localStorage.getItem("bowler") || "-";
+
+            // Update main score display
+            document.getElementById("currentTeam").textContent = battingFirst === "teamA" ? teamA : teamB;
+            document.getElementById("currentScore").textContent = `${matchData.totalScore}/${matchData.wickets}`;
+            document.getElementById("currentOvers").textContent = `Overs: ${matchData.overs}.${matchData.balls}`;
+
+            // Update batting details
+            document.getElementById("batsman1").textContent = 
+                `${batsman1}${matchData.onStrike === 'batsman1' ? '*' : ''}`;
+            document.getElementById("batsman1Score").textContent = 
+                `${matchData.batsman1Score} (${matchData.batsman1Balls})`;
+            
+            document.getElementById("batsman2").textContent = 
+                `${batsman2}${matchData.onStrike === 'batsman2' ? '*' : ''}`;
+            document.getElementById("batsman2Score").textContent = 
+                `${matchData.batsman2Score} (${matchData.batsman2Balls})`;
+
+            // Update partnership
+            const partnership = matchData.batsman1Score + matchData.batsman2Score;
+            const partnershipBalls = matchData.batsman1Balls + matchData.batsman2Balls;
+            document.getElementById("partnership").textContent = 
+                `Partnership: ${partnership} (${partnershipBalls})`;
+
+            // Update bowling details
+            document.getElementById("currentBowler").textContent = bowler;
+            document.getElementById("bowlerStats").textContent = 
+                `${matchData.overs}-${matchData.balls}-${matchData.totalScore}-${matchData.wickets}`;
+        }
+
+        function addBallToRecent(ball) {
+            recentBalls.unshift(ball);
+            if (recentBalls.length > MAX_RECENT_BALLS) {
+                recentBalls.pop();
+            }
+            updateRecentBallsDisplay();
+        }
+
+        function updateRecentBallsDisplay() {
+            const container = document.getElementById("ballsContainer");
+            container.innerHTML = recentBalls.map(ball => {
+                let className = "ball";
+                if (ball === "W") className += " wicket";
+                else if (ball === "4") className += " four";
+                else if (ball === "6") className += " six";
+                return `<div class="${className}">${ball}</div>`;
+            }).join("");
+        }
+
+        // Listen for storage changes
+        window.addEventListener('storage', (e) => {
+            if (e.key === "matchData") {
+                updateScoreboard();
+            }
+        });
+
+        // Initial update and window check
+        document.addEventListener('DOMContentLoaded', () => {
+            updateScoreboard();
+            checkIfMainWindow();
+        });
+
+        // Update every second to ensure real-time updates
+        setInterval(updateScoreboard, 1000);
     </script>
 </body>
 </html>
