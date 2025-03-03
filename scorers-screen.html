@@ -3,109 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indoor Cricket Scoreboard</title>
+    <title>Scorers Screen</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background: linear-gradient(to bottom, #002244, #000000);
+            background: linear-gradient(to bottom, #1E1E1E, #000000);
             color: white;
             padding: 20px;
         }
-        .scoreboard {
+        .container {
             max-width: 900px;
             margin: auto;
             padding: 20px;
-            background: #1E1E1E;
+            background: #222;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
         }
-        .team-names {
-            display: flex;
-            justify-content: space-between;
-            font-size: 28px;
-            font-weight: bold;
-            color: #FFD700;
+        .input-group {
+            margin: 10px 0;
         }
-        .score {
-            font-size: 60px;
-            font-weight: bold;
-            color: #FFFFFF;
-            text-shadow: 2px 2px 10px #FFD700;
-        }
-        .partnerships {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 10px;
-        }
-        .partnership-box {
-            width: 22%;
-            padding: 15px;
-            background: #003366;
+        input, select, button {
+            font-size: 18px;
+            padding: 10px;
+            margin: 5px;
+            border: none;
             border-radius: 5px;
+        }
+        .update-btn { background: #FFD700; color: black; cursor: pointer; }
+        .reset-btn { background: #FF3333; color: white; cursor: pointer; }
+        .timer-btn { background: #00CC66; color: white; cursor: pointer; }
+        .small-scoreboard {
+            background: #003366;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            text-align: center;
             color: #00CCFF;
-        }
-        .player-info {
-            margin-top: 20px;
-            font-size: 22px;
-        }
-        .match-info {
-            margin-top: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #FFD700;
         }
     </style>
 </head>
 <body>
-    <div class="scoreboard">
-        <h1 style="color: #FFD700;">Indoor Cricket Scoreboard</h1>
-        <div class="match-info">Format: <span id="matchFormat">---</span></div>
-        <div class="team-names">
-            <span id="teamA">Team A</span> vs <span id="teamB">Team B</span>
+    <div class="container">
+        <h1 style="color: #FFD700;">Scorers Screen</h1>
+        <div class="input-group">
+            <label>Select Match Format:</label>
+            <select id="matchFormat">
+                <option value="6aside">6-a-side (12 overs, 3 partnerships)</option>
+                <option value="8aside">8-a-side (16 overs, 4 partnerships)</option>
+            </select>
+            <button class="update-btn" id="setFormat">Set Format</button>
         </div>
-        <div class="score" id="totalScoreA">0</div>
-        <div class="score" id="totalScoreB">0</div>
-        <p style="font-size: 22px;">Wickets: <span style="color:#FF3333;" id="wickets">0</span> | Overs: <span id="overs">0.0</span></p>
-        <div class="partnerships" id="partnershipSection"></div>
-        <div class="player-info">
-            Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span>
+        <div class="input-group">
+            <label>Enter Team Names:</label>
+            <input type="text" id="teamAInput" placeholder="Team A">
+            <input type="text" id="teamBInput" placeholder="Team B">
+            <button class="update-btn" id="updateTeams">Update Teams</button>
         </div>
-        <div class="player-info">
-            Bowler: <span id="bowler">---</span>
+        <div class="input-group">
+            <label>Batsman 1:</label>
+            <input type="text" id="batsman1Input" placeholder="Enter Batsman 1">
+            <label>Batsman 2:</label>
+            <input type="text" id="batsman2Input" placeholder="Enter Batsman 2">
+            <button class="update-btn" id="updateBatsmen">Update Batsmen</button>
+        </div>
+        <div class="input-group">
+            <label>Bowler:</label>
+            <input type="text" id="bowlerInput" placeholder="Enter Bowler">
+            <button class="update-btn" id="updateBowler">Update Bowler</button>
+        </div>
+        <div class="input-group">
+            <button class="update-btn" id="addRun1">+1 Run</button>
+            <button class="update-btn" id="addRun2">+2 Runs</button>
+            <button class="update-btn" id="addRun3">+3 Runs</button>
+            <button class="update-btn" id="addRun4">+4 Runs</button>
+            <button class="update-btn" id="addRun6">+6 Runs</button>
+            <button class="update-btn" id="addRun7">+7 Runs</button>
+            <button class="reset-btn" id="wicket">Wicket (-5)</button>
+        </div>
+        <div class="input-group">
+            <button class="update-btn" id="dotBall">0 Runs</button>
+            <button class="update-btn" id="addBall">Add Ball</button>
+            <button class="update-btn" id="changeStrike">Manual Strike Change</button>
+            <button class="reset-btn" id="undoLast">Undo Last Action</button>
+        </div>
+        <button class="reset-btn" id="endInnings">End Innings</button>
+        <div class="small-scoreboard">
+            <h3>Live Scoreboard Preview</h3>
+            <p><strong><span id="teamA">Team A</span> vs <span id="teamB">Team B</span></strong></p>
+            <p>Score: <span id="totalScoreA">0</span> / <span id="wicketsA">0</span></p>
+            <p>Score: <span id="totalScoreB">0</span> / <span id="wicketsB">0</span></p>
+            <p>Overs: <span id="overs">0.0</span></p>
+            <p>Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span></p>
+            <p>Bowler: <span id="bowler">---</span></p>
         </div>
     </div>
     <script>
-        function updateScoreboard() {
-            document.getElementById("matchFormat").innerText = localStorage.getItem("matchFormat") || "---";
+        function updateScoreboardPreview() {
             document.getElementById("teamA").innerText = localStorage.getItem("teamA") || "Team A";
             document.getElementById("teamB").innerText = localStorage.getItem("teamB") || "Team B";
             document.getElementById("totalScoreA").innerText = localStorage.getItem("totalScoreA") || 0;
             document.getElementById("totalScoreB").innerText = localStorage.getItem("totalScoreB") || 0;
-            document.getElementById("wickets").innerText = localStorage.getItem("wickets") || 0;
+            document.getElementById("wicketsA").innerText = localStorage.getItem("wicketsA") || 0;
+            document.getElementById("wicketsB").innerText = localStorage.getItem("wicketsB") || 0;
             document.getElementById("overs").innerText = localStorage.getItem("overs") || "0.0";
             document.getElementById("batsman1").innerText = localStorage.getItem("batsman1") || "---";
             document.getElementById("batsman2").innerText = localStorage.getItem("batsman2") || "---";
             document.getElementById("bowler").innerText = localStorage.getItem("bowler") || "---";
-
-            let matchFormat = localStorage.getItem("matchFormat");
-            let partnershipsHTML = "";
-            let numPartnerships = matchFormat === "6aside" ? 3 : 4;
-            
-            for (let i = 1; i <= numPartnerships; i++) {
-                partnershipsHTML += `<div class="partnership-box">P${i} Team A: <span id="partnershipA${i}">0</span></div>`;
-                partnershipsHTML += `<div class="partnership-box">P${i} Team B: <span id="partnershipB${i}">0</span></div>`;
-            }
-            document.getElementById("partnershipSection").innerHTML = partnershipsHTML;
         }
 
-        window.onload = function() {
-            updateScoreboard();
-            let scorerScreen = window.open("scorers-screen.html", "_blank");
-            if (!scorerScreen) {
-                alert("Scorers Screen was blocked by the browser. Please allow pop-ups.");
-            }
-        };
+        window.onload = updateScoreboardPreview;
     </script>
 </body>
 </html>
