@@ -29,20 +29,30 @@
             color: #FFD700;
             font-size: 24px;
         }
+        .open-scorers-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #FFD700;
+            color: black;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
     </style>
     <script>
         function openScorersScreen() {
-            window.open('scorers_screen.html', '_blank', 'width=800,height=600');
+            let scorersScreen = window.open('scorers-screen.html', '_blank', 'width=800,height=600');
+            if (!scorersScreen) {
+                alert('Pop-up blocked! Please allow pop-ups for this site.');
+            }
         }
-        
-        window.onload = function() {
-            openScorersScreen();
-        };
     </script>
 </head>
 <body>
     <div class="container">
         <h1 style="color: #FFD700;">Indoor Cricket Scoreboard</h1>
+        <button class="open-scorers-btn" onclick="openScorersScreen()">Open Scorers Screen</button>
         <div class="scoreboard">
             <div>
                 <h2 id="teamA">Team A</h2>
