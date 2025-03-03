@@ -178,9 +178,8 @@
             // Initialize match data
             localStorage.setItem("matchData", JSON.stringify(currentInningsData));
             
-            // Open scoreboard in new window
-            window.open('scoreboard.html', 'LiveScoreboard', 
-                'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no');
+          window.open('./scoreboard.html', 'LiveScoreboard', 
+    'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no');
             
             document.getElementById("preGameSetup").style.display = "none";
             document.getElementById("batsmanBowlerSetup").style.display = "block";
