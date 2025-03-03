@@ -8,121 +8,62 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background: linear-gradient(to bottom, #002244, #000000);
+            background: linear-gradient(to bottom, #1E1E1E, #000000);
             color: white;
             padding: 20px;
         }
-        .scoreboard {
+        .container {
             max-width: 900px;
             margin: auto;
             padding: 20px;
-            background: #1E1E1E;
+            background: #222;
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
         }
-        .team-container {
+        .scoreboard {
             display: flex;
             justify-content: space-between;
-            font-size: 28px;
-            font-weight: bold;
+            padding: 20px;
+            border-radius: 10px;
+            background: #444;
             color: #FFD700;
-        }
-        .team {
-            text-align: center;
-            width: 45%;
-        }
-        .score {
-            font-size: 60px;
-            font-weight: bold;
-            color: #FFFFFF;
-            text-shadow: 2px 2px 10px #FFD700;
-        }
-        .partnerships {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 10px;
-        }
-        .partnership-box {
-            width: 22%;
-            padding: 15px;
-            background: #003366;
-            border-radius: 5px;
-            color: #00CCFF;
-        }
-        .player-info {
-            margin-top: 20px;
-            font-size: 22px;
-        }
-        .match-info {
-            margin-top: 20px;
             font-size: 24px;
-            font-weight: bold;
-            color: #FFD700;
         }
     </style>
 </head>
 <body>
-    <div class="scoreboard">
+    <div class="container">
         <h1 style="color: #FFD700;">Indoor Cricket Scoreboard</h1>
-        <div class="match-info">Format: <span id="matchFormat">---</span></div>
-        <div class="team-container">
-            <div class="team">
-                <span id="teamA">Team A</span>
-                <div class="score" id="totalScoreA">0</div>
+        <div class="scoreboard">
+            <div>
+                <h2 id="teamA">Team A</h2>
+                <p>Score: <span id="totalScoreA">0</span> / <span id="wicketsA">0</span></p>
+                <p>Partnership: <span id="partnershipA">0</span></p>
             </div>
-            <div class="team">
-                <span id="teamB">Team B</span>
-                <div class="score" id="totalScoreB">0</div>
+            <div>
+                <h2 id="teamB">Team B</h2>
+                <p>Score: <span id="totalScoreB">0</span> / <span id="wicketsB">0</span></p>
+                <p>Partnership: <span id="partnershipB">0</span></p>
             </div>
         </div>
-        <p style="font-size: 22px;">Wickets: <span style="color:#FF3333;" id="wickets">0</span> | Overs: <span id="overs">0.0</span></p>
-        <div class="partnerships" id="partnershipSection"></div>
-        <div class="player-info">
-            Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span>
-        </div>
-        <div class="player-info">
-            Bowler: <span id="bowler">---</span>
-        </div>
-        <button class="reset-btn" onclick="resetGame()">Reset Game</button>
+        <p>Overs: <span id="overs">0.0</span></p>
+        <p>Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span></p>
+        <p>Bowler: <span id="bowler">---</span></p>
     </div>
     <script>
         function updateScoreboard() {
-            document.getElementById("matchFormat").innerText = localStorage.getItem("matchFormat") || "---";
             document.getElementById("teamA").innerText = localStorage.getItem("teamA") || "Team A";
             document.getElementById("teamB").innerText = localStorage.getItem("teamB") || "Team B";
-            document.getElementById("totalScoreA").innerText = localStorage.getItem("totalScoreA") || 0;
-            document.getElementById("totalScoreB").innerText = localStorage.getItem("totalScoreB") || 0;
-            document.getElementById("wickets").innerText = localStorage.getItem("wickets") || 0;
+            document.getElementById("totalScoreA").innerText = localStorage.getItem("totalScoreA") || "0";
+            document.getElementById("totalScoreB").innerText = localStorage.getItem("totalScoreB") || "0";
+            document.getElementById("wicketsA").innerText = localStorage.getItem("wicketsA") || "0";
+            document.getElementById("wicketsB").innerText = localStorage.getItem("wicketsB") || "0";
             document.getElementById("overs").innerText = localStorage.getItem("overs") || "0.0";
             document.getElementById("batsman1").innerText = localStorage.getItem("batsman1") || "---";
             document.getElementById("batsman2").innerText = localStorage.getItem("batsman2") || "---";
             document.getElementById("bowler").innerText = localStorage.getItem("bowler") || "---";
-
-            let matchFormat = localStorage.getItem("matchFormat");
-            let partnershipsHTML = "";
-            let numPartnerships = matchFormat === "6aside" ? 3 : 4;
-            
-            for (let i = 1; i <= numPartnerships; i++) {
-                partnershipsHTML += `<div class="partnership-box">P${i} Team A: <span id="partnershipA${i}">0</span></div>`;
-                partnershipsHTML += `<div class="partnership-box">P${i} Team B: <span id="partnershipB${i}">0</span></div>`;
-            }
-            document.getElementById("partnershipSection").innerHTML = partnershipsHTML;
         }
-        
-        function resetGame() {
-            localStorage.clear();
-            updateScoreboard();
-        }
-
-        window.onload = function() {
-            updateScoreboard();
-            setTimeout(() => {
-                let scorerScreen = window.open("scorers-screen.html", "_blank");
-                if (!scorerScreen) {
-                    alert("Scorers Screen was blocked by the browser. Please allow pop-ups.");
-                }
-            }, 1000);
-        };
+        setInterval(updateScoreboard, 1000); // Update scoreboard every second
     </script>
 </body>
 </html>
