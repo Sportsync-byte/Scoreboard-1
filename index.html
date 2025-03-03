@@ -64,49 +64,43 @@
         <div class="team-names">
             <span id="teamA">Team A</span> vs <span id="teamB">Team B</span>
         </div>
-        <div class="score" id="totalScore">0</div>
+        <div class="score" id="totalScoreA">0</div>
+        <div class="score" id="totalScoreB">0</div>
         <p style="font-size: 22px;">Wickets: <span style="color:#FF3333;" id="wickets">0</span> | Overs: <span id="overs">0.0</span></p>
-        <div class="partnerships">
-            <div class="partnership-box">P1: <span id="partnership1">0</span></div>
-            <div class="partnership-box">P2: <span id="partnership2">0</span></div>
-            <div class="partnership-box">P3: <span id="partnership3">0</span></div>
-            <div class="partnership-box" id="partnership4Box">P4: <span id="partnership4">0</span></div>
-        </div>
+        <div class="partnerships" id="partnershipSection"></div>
         <div class="player-info">
             Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span>
         </div>
         <div class="player-info">
             Bowler: <span id="bowler">---</span>
         </div>
-        <button onclick="resetGame()" style="margin-top: 20px; padding: 10px; font-size: 18px; background: #FF3333; color: white; border: none; border-radius: 5px; cursor: pointer;">Reset Game</button>
     </div>
     <script>
         function updateScoreboard() {
             document.getElementById("matchFormat").innerText = localStorage.getItem("matchFormat") || "---";
             document.getElementById("teamA").innerText = localStorage.getItem("teamA") || "Team A";
             document.getElementById("teamB").innerText = localStorage.getItem("teamB") || "Team B";
-            document.getElementById("totalScore").innerText = localStorage.getItem("totalScore") || 0;
+            document.getElementById("totalScoreA").innerText = localStorage.getItem("totalScoreA") || 0;
+            document.getElementById("totalScoreB").innerText = localStorage.getItem("totalScoreB") || 0;
             document.getElementById("wickets").innerText = localStorage.getItem("wickets") || 0;
             document.getElementById("overs").innerText = localStorage.getItem("overs") || "0.0";
             document.getElementById("batsman1").innerText = localStorage.getItem("batsman1") || "---";
             document.getElementById("batsman2").innerText = localStorage.getItem("batsman2") || "---";
             document.getElementById("bowler").innerText = localStorage.getItem("bowler") || "---";
 
-            if (localStorage.getItem("matchFormat") === "6aside") {
-                document.getElementById("partnership4Box").style.display = "none";
-            } else {
-                document.getElementById("partnership4Box").style.display = "block";
+            let matchFormat = localStorage.getItem("matchFormat");
+            let partnershipsHTML = "";
+            let numPartnerships = matchFormat === "6aside" ? 3 : 4;
+            
+            for (let i = 1; i <= numPartnerships; i++) {
+                partnershipsHTML += `<div class="partnership-box">P${i} Team A: <span id="partnershipA${i}">0</span></div>`;
+                partnershipsHTML += `<div class="partnership-box">P${i} Team B: <span id="partnershipB${i}">0</span></div>`;
             }
-        }
-
-        function resetGame() {
-            localStorage.clear();
-            location.reload();
+            document.getElementById("partnershipSection").innerHTML = partnershipsHTML;
         }
 
         window.onload = function() {
             updateScoreboard();
-            window.open("scorers-screen.html", "_blank"); // Auto-open Scorers Screen
         };
     </script>
 </body>
