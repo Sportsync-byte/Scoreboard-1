@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 900px;
             margin: auto;
             padding: 20px;
             background: #222;
@@ -82,7 +82,7 @@
             <button class="reset-btn" id="wicket">Wicket (-5)</button>
         </div>
         <div class="input-group">
-            <button class="update-btn" id="dotBall">Dot Ball</button>
+            <button class="update-btn" id="dotBall">0 Runs</button>
             <button class="update-btn" id="addBall">Add Ball</button>
             <button class="update-btn" id="changeStrike">Manual Strike Change</button>
             <button class="reset-btn" id="undoLast">Undo Last Action</button>
@@ -91,7 +91,8 @@
         <div class="small-scoreboard">
             <h3>Live Scoreboard Preview</h3>
             <p><strong><span id="teamA">Team A</span> vs <span id="teamB">Team B</span></strong></p>
-            <p>Score: <span id="totalScore">0</span> / <span id="wickets">0</span></p>
+            <p>Score: <span id="totalScoreA">0</span> / <span id="wicketsA">0</span></p>
+            <p>Score: <span id="totalScoreB">0</span> / <span id="wicketsB">0</span></p>
             <p>Overs: <span id="overs">0.0</span></p>
             <p>Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span></p>
             <p>Bowler: <span id="bowler">---</span></p>
@@ -101,8 +102,10 @@
         function updateScoreboardPreview() {
             document.getElementById("teamA").innerText = localStorage.getItem("teamA") || "Team A";
             document.getElementById("teamB").innerText = localStorage.getItem("teamB") || "Team B";
-            document.getElementById("totalScore").innerText = localStorage.getItem("totalScore") || 0;
-            document.getElementById("wickets").innerText = localStorage.getItem("wickets") || 0;
+            document.getElementById("totalScoreA").innerText = localStorage.getItem("totalScoreA") || 0;
+            document.getElementById("totalScoreB").innerText = localStorage.getItem("totalScoreB") || 0;
+            document.getElementById("wicketsA").innerText = localStorage.getItem("wicketsA") || 0;
+            document.getElementById("wicketsB").innerText = localStorage.getItem("wicketsB") || 0;
             document.getElementById("overs").innerText = localStorage.getItem("overs") || "0.0";
             document.getElementById("batsman1").innerText = localStorage.getItem("batsman1") || "---";
             document.getElementById("batsman2").innerText = localStorage.getItem("batsman2") || "---";
