@@ -109,29 +109,16 @@
         </div>
     </div>
     <script>
-        function clearPreviousData() {
-            localStorage.clear();
+        function startMatch() {
+            localStorage.setItem("matchFormat", document.getElementById("matchFormat").value);
+            localStorage.setItem("teamA", document.getElementById("teamAInput").value);
+            localStorage.setItem("teamB", document.getElementById("teamBInput").value);
+            localStorage.setItem("battingFirst", document.getElementById("battingFirst").value);
+            localStorage.setItem("inningsTimer", document.getElementById("inningsTimer").value);
+            
+            document.getElementById("preGameSetup").style.display = "none";
+            document.getElementById("batsmanBowlerSetup").style.display = "block";
         }
-
-        function updateLiveScoreboard() {
-            document.getElementById("teamA").innerText = localStorage.getItem("teamA") || "Team A";
-            document.getElementById("teamB").innerText = localStorage.getItem("teamB") || "Team B";
-            document.getElementById("totalScoreA").innerText = localStorage.getItem("totalScoreA") || "0";
-            document.getElementById("totalScoreB").innerText = localStorage.getItem("totalScoreB") || "0";
-            document.getElementById("wicketsA").innerText = localStorage.getItem("wicketsA") || "0";
-            document.getElementById("wicketsB").innerText = localStorage.getItem("wicketsB") || "0";
-            document.getElementById("overs").innerText = localStorage.getItem("overs") || "0.0";
-            document.getElementById("batsman1").innerText = localStorage.getItem("batsman1") || "---";
-            document.getElementById("batsman2").innerText = localStorage.getItem("batsman2") || "---";
-            document.getElementById("bowler").innerText = localStorage.getItem("bowler") || "---";
-        }
-        
-        window.onload = function() {
-            clearPreviousData();
-            updateLiveScoreboard();
-        };
-        
-        setInterval(updateLiveScoreboard, 1000); // Update every second
     </script>
 </body>
 </html>
