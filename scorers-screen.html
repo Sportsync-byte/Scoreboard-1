@@ -46,73 +46,59 @@
 <body>
     <div class="container">
         <h1 style="color: #FFD700;">Scorers Screen</h1>
-        
-        <div id="preGameSetup">
-            <h2>Pre-Game Setup</h2>
+        <div class="input-group">
             <label>Select Match Format:</label>
             <select id="matchFormat">
                 <option value="6aside">6-a-side (12 overs, 3 partnerships)</option>
                 <option value="8aside">8-a-side (16 overs, 4 partnerships)</option>
             </select>
-            <br>
+            <button class="update-btn" onclick="setFormat()">Set Format</button>
+        </div>
+        <div class="input-group">
             <label>Enter Team Names:</label>
             <input type="text" id="teamAInput" placeholder="Team A">
             <input type="text" id="teamBInput" placeholder="Team B">
-            <br>
-            <label>Select Who Bats First:</label>
-            <select id="battingFirst">
-                <option value="teamA">Team A</option>
-                <option value="teamB">Team B</option>
-            </select>
-            <br>
-            <label>Set Innings Timer (Minutes):</label>
-            <input type="number" id="inningsTimer" min="1" value="10">
-            <br>
-            <button class="update-btn" onclick="startMatch()">Start Match</button>
+            <button class="update-btn" onclick="updateTeams()">Update Teams</button>
         </div>
-        
-        <div id="scoringControls" style="display:none;">
-            <div class="input-group">
-                <label>Batsman 1:</label>
-                <input type="text" id="batsman1Input" placeholder="Enter Batsman 1">
-                <label>Batsman 2:</label>
-                <input type="text" id="batsman2Input" placeholder="Enter Batsman 2">
-                <button class="update-btn" onclick="updateBatsmen()">Update Batsmen</button>
-            </div>
-            <div class="input-group">
-                <label>Bowler:</label>
-                <input type="text" id="bowlerInput" placeholder="Enter Bowler">
-                <button class="update-btn" onclick="updateBowler()">Update Bowler</button>
-            </div>
-            <div class="input-group">
-                <button class="update-btn" onclick="addRun(1)">+1 Run</button>
-                <button class="update-btn" onclick="addRun(2)">+2 Runs</button>
-                <button class="update-btn" onclick="addRun(3)">+3 Runs</button>
-                <button class="update-btn" onclick="addRun(4)">+4 Runs</button>
-                <button class="update-btn" onclick="addRun(6)">+6 Runs</button>
-                <button class="reset-btn" onclick="wicket()">Wicket (-5)</button>
-            </div>
-            <div class="input-group">
-                <button class="update-btn" onclick="addBall()">Add Ball</button>
-                <button class="update-btn" onclick="changeStrike()">Manual Strike Change</button>
-                <button class="reset-btn" onclick="resetGame()">Reset Game</button>
-            </div>
+        <div class="input-group">
+            <label>Batsman 1:</label>
+            <input type="text" id="batsman1Input" placeholder="Enter Batsman 1">
+            <label>Batsman 2:</label>
+            <input type="text" id="batsman2Input" placeholder="Enter Batsman 2">
+            <button class="update-btn" onclick="updateBatsmen()">Update Batsmen</button>
+        </div>
+        <div class="input-group">
+            <label>Bowler:</label>
+            <input type="text" id="bowlerInput" placeholder="Enter Bowler">
+            <button class="update-btn" onclick="updateBowler()">Update Bowler</button>
+        </div>
+        <div class="input-group">
+            <button class="update-btn" onclick="addRun(1)">+1 Run</button>
+            <button class="update-btn" onclick="addRun(2)">+2 Runs</button>
+            <button class="update-btn" onclick="addRun(3)">+3 Runs</button>
+            <button class="update-btn" onclick="addRun(4)">+4 Runs</button>
+            <button class="update-btn" onclick="addRun(6)">+6 Runs</button>
+            <button class="reset-btn" onclick="wicket()">Wicket (-5)</button>
+        </div>
+        <div class="input-group">
+            <button class="update-btn" onclick="addBall()">Add Ball</button>
+            <button class="update-btn" onclick="changeStrike()">Manual Strike Change</button>
+            <button class="reset-btn" onclick="resetGame()">Reset Game</button>
         </div>
     </div>
     <script>
-        function startMatch() {
-            localStorage.setItem("matchFormat", document.getElementById("matchFormat").value);
-            localStorage.setItem("teamA", document.getElementById("teamAInput").value);
-            localStorage.setItem("teamB", document.getElementById("teamBInput").value);
-            localStorage.setItem("battingFirst", document.getElementById("battingFirst").value);
-            localStorage.setItem("inningsTimer", document.getElementById("inningsTimer").value);
-            document.getElementById("preGameSetup").style.display = "none";
-            document.getElementById("scoringControls").style.display = "block";
-        }
         function resetGame() {
             localStorage.clear();
-            location.reload();
+            updateScoreboard();
+            window.opener.postMessage("reset", "*"); // Send reset command to Scoreboard window
         }
+
+        window.addEventListener("message", function(event) {
+            if (event.data === "reset") {
+                localStorage.clear();
+                updateScoreboard();
+            }
+        });
     </script>
 </body>
 </html>
