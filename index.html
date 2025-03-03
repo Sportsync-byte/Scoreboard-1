@@ -48,6 +48,21 @@
                 updateScoreboard();
             }
         });
+
+        function updateScoreboard() {
+            document.getElementById("teamA").innerText = localStorage.getItem("teamA") || "Team A";
+            document.getElementById("teamB").innerText = localStorage.getItem("teamB") || "Team B";
+            document.getElementById("totalScoreA").innerText = localStorage.getItem("totalScoreA") || "0";
+            document.getElementById("totalScoreB").innerText = localStorage.getItem("totalScoreB") || "0";
+            document.getElementById("wicketsA").innerText = localStorage.getItem("wicketsA") || "0";
+            document.getElementById("wicketsB").innerText = localStorage.getItem("wicketsB") || "0";
+            document.getElementById("overs").innerText = localStorage.getItem("overs") || "0.0";
+            document.getElementById("batsman1").innerText = localStorage.getItem("batsman1") || "---";
+            document.getElementById("batsman2").innerText = localStorage.getItem("batsman2") || "---";
+            document.getElementById("bowler").innerText = localStorage.getItem("bowler") || "---";
+        }
+        
+        setInterval(updateScoreboard, 500); // Update scoreboard every 500ms for real-time sync
     </script>
 </head>
 <body>
@@ -69,19 +84,5 @@
         <p>Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span></p>
         <p>Bowler: <span id="bowler">---</span></p>
     </div>
-    <script>
-        function updateScoreboard() {
-            document.getElementById("teamA").innerText = localStorage.getItem("teamA") || "Team A";
-            document.getElementById("teamB").innerText = localStorage.getItem("teamB") || "Team B";
-            document.getElementById("totalScoreA").innerText = localStorage.getItem("totalScoreA") || "0";
-            document.getElementById("totalScoreB").innerText = localStorage.getItem("totalScoreB") || "0";
-            document.getElementById("wicketsA").innerText = localStorage.getItem("wicketsA") || "0";
-            document.getElementById("wicketsB").innerText = localStorage.getItem("wicketsB") || "0";
-            document.getElementById("overs").innerText = localStorage.getItem("overs") || "0.0";
-            document.getElementById("batsman1").innerText = localStorage.getItem("batsman1") || "---";
-            document.getElementById("batsman2").innerText = localStorage.getItem("batsman2") || "---";
-            document.getElementById("bowler").innerText = localStorage.getItem("bowler") || "---";
-        }
-    </script>
 </body>
 </html>
