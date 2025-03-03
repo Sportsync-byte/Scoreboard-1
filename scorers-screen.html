@@ -119,6 +119,14 @@
             document.getElementById("preGameSetup").style.display = "none";
             document.getElementById("batsmanBowlerSetup").style.display = "block";
         }
+        
+        function confirmBatsmenBowler() {
+            localStorage.setItem("batsman1", document.getElementById("batsman1Input").value);
+            localStorage.setItem("batsman2", document.getElementById("batsman2Input").value);
+            localStorage.setItem("bowler", document.getElementById("bowlerInput").value);
+            document.getElementById("batsmanBowlerSetup").style.display = "none";
+            document.getElementById("scoringControls").style.display = "block";
+        }
     </script>
 </body>
 </html>
