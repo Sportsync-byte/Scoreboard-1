@@ -1,4 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scorers Screen</title>
+    <style>
+        /* ... existing styles ... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color: #FFD700;">Scorers Screen</h1>
+        
+        <div id="preGameSetup">
+            <h2>Pre-Game Setup</h2>
+            <label>Select Match Format:</label>
+            <select id="matchFormat">
+                <option value="6aside">6-a-side (12 overs, 3 partnerships)</option>
+                <option value="8aside">8-a-side (16 overs, 4 partnerships)</option>
+            </select>
+            <br>
+            <label>Enter Team Names:</label>
+            <input type="text" id="teamAInput" placeholder="Team A">
+            <input type="text" id="teamBInput" placeholder="Team B">
+            <br>
+            <label>Select Who Bats First:</label>
+            <select id="battingFirst">
+                <option value="teamA">Team A</option>
+                <option value="teamB">Team B</option>
+            </select>
+            <br>
+            <label>Set Innings Timer (Minutes):</label>
+            <input type="number" id="inningsTimer" min="1" value="20">
+            <br>
+            <button class="update-btn" onclick="startMatch()">Start Match</button>
+        </div>
+    </div>
+
     <script>
+        // Initialize data structure
         let currentInningsData = {
             totalScore: 0,
             wickets: 0,
@@ -14,148 +54,54 @@
             partnershipNumber: 1
         };
 
+        // Check if localStorage is available
+        function isLocalStorageAvailable() {
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                return true;
+            } catch(e) {
+                return false;
+            }
+        }
+
         function startMatch() {
-            localStorage.setItem("matchFormat", document.getElementById("matchFormat").value);
-            localStorage.setItem("teamA", document.getElementById("teamAInput").value);
-            localStorage.setItem("teamB", document.getElementById("teamBInput").value);
-            localStorage.setItem("battingFirst", document.getElementById("battingFirst").value);
-            localStorage.setItem("inningsTimer", document.getElementById("inningsTimer").value);
-            
-            localStorage.setItem("matchData", JSON.stringify(currentInningsData));
-            
-            window.open('scoreboard.html', 'LiveScoreboard', 
-                'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no');
-            
-            document.getElementById("preGameSetup").style.display = "none";
-            document.getElementById("batsmanBowlerSetup").style.display = "block";
-        }
-        
-        function confirmBatsmenBowler() {
-            localStorage.setItem("batsman1", document.getElementById("batsman1Input").value);
-            localStorage.setItem("batsman2", document.getElementById("batsman2Input").value);
-            localStorage.setItem("bowler", document.getElementById("bowlerInput").value);
-            currentInningsData.currentBowler = document.getElementById("bowlerInput").value;
-            
-            document.getElementById("batsmanBowlerSetup").style.display = "none";
-            document.getElementById("scoringControls").style.display = "block";
-            updateDisplay();
-        }
-        
-        function addRun(runs) {
-            currentInningsData.totalScore += runs;
-            if (currentInningsData.onStrike === 'batsman1') {
-                currentInningsData.batsman1Score += runs;
-                currentInningsData.batsman1Balls++;
-                if (runs % 2 === 1) currentInningsData.onStrike = 'batsman2';
-            } else {
-                currentInningsData.batsman2Score += runs;
-                currentInningsData.batsman2Balls++;
-                if (runs % 2 === 1) currentInningsData.onStrike = 'batsman1';
-            }
-            
-            currentInningsData.balls++;
-            currentInningsData.partnershipOvers = currentInningsData.overs + (currentInningsData.balls / 6);
+            try {
+                // Store match data
+                if (isLocalStorageAvailable()) {
+                    localStorage.setItem("matchFormat", document.getElementById("matchFormat").value);
+                    localStorage.setItem("teamA", document.getElementById("teamAInput").value);
+                    localStorage.setItem("teamB", document.getElementById("teamBInput").value);
+                    localStorage.setItem("battingFirst", document.getElementById("battingFirst").value);
+                    localStorage.setItem("inningsTimer", document.getElementById("inningsTimer").value);
+                    localStorage.setItem("matchData", JSON.stringify(currentInningsData));
+                }
 
-            if (currentInningsData.partnershipOvers >= 4) {
-                promptNewBatsmen();
-                currentInningsData.partnershipOvers = 0;
-                currentInningsData.partnershipNumber++;
-            }
+                // Open scoreboard in new window
+                const scoreboardWindow = window.open('scoreboard.html', 'LiveScoreboard', 
+                    'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no');
 
-            if (currentInningsData.balls === 6) {
-                promptNewBowler();
-                currentInningsData.overs++;
-                currentInningsData.balls = 0;
-                currentInningsData.onStrike = (currentInningsData.onStrike === 'batsman1') ? 'batsman2' : 'batsman1';
-            }
-            
-            updateStorage();
-            updateDisplay();
-        }
-
-        function promptNewBowler() {
-            let newBowler = prompt("Enter new bowler's name:");
-            if (newBowler) {
-                currentInningsData.currentBowler = newBowler;
-                localStorage.setItem("bowler", newBowler);
+                if (!scoreboardWindow) {
+                    alert('Please allow popups for this site to open the scoreboard.');
+                    return;
+                }
+            } catch (error) {
+                console.error('Error starting match:', error);
+                alert('An error occurred while starting the match. Please try again.');
             }
         }
 
-        function promptNewBatsmen() {
-            let batsman1 = prompt("Enter new Batsman 1:");
-            let batsman2 = prompt("Enter new Batsman 2:");
-            if (batsman1 && batsman2) {
-                localStorage.setItem("batsman1", batsman1);
-                localStorage.setItem("batsman2", batsman2);
-                currentInningsData.batsman1Score = 0;
-                currentInningsData.batsman1Balls = 0;
-                currentInningsData.batsman2Score = 0;
-                currentInningsData.batsman2Balls = 0;
-                currentInningsData.onStrike = 'batsman1';
-            }
-        }
-
-        function wicket() {
-            currentInningsData.wickets++;
-            currentInningsData.totalScore -= 5;
-            updateStorage();
-            updateDisplay();
-        }
-
-        function addExtra(type) {
-            switch(type) {
-                case 'wide':
-                case 'noBall':
-                    currentInningsData.totalScore += 1;
-                    break;
-                case 'bye':
-                case 'legBye':
-                    // Handle these cases if needed
-                    break;
-            }
-            updateStorage();
-            updateDisplay();
-        }
-
-        function endOver() {
-            promptNewBowler();
-            currentInningsData.overs++;
-            currentInningsData.balls = 0;
-            currentInningsData.onStrike = (currentInningsData.onStrike === 'batsman1') ? 'batsman2' : 'batsman1';
-            updateStorage();
-            updateDisplay();
-        }
-
-        function changeBowler() {
-            promptNewBowler();
-        }
-
-        function updateStorage() {
-            localStorage.setItem("matchData", JSON.stringify(currentInningsData));
-            window.dispatchEvent(new Event('storage'));
-        }
-
-        function updateDisplay() {
-            document.getElementById("currentScoreDisplay").textContent = 
-                `${currentInningsData.totalScore}/${currentInningsData.wickets}`;
-            document.getElementById("oversDisplay").textContent = 
-                `${currentInningsData.overs}.${currentInningsData.balls}`;
-            
-            document.getElementById("batsman1Details").textContent = 
-                `${localStorage.getItem("batsman1")}: ${currentInningsData.batsman1Score} (${currentInningsData.batsman1Balls})` +
-                (currentInningsData.onStrike === 'batsman1' ? ' *' : '') +
-                ` | Partnership ${currentInningsData.partnershipNumber}`;
-            
-            document.getElementById("batsman2Details").textContent = 
-                `${localStorage.getItem("batsman2")}: ${currentInningsData.batsman2Score} (${currentInningsData.batsman2Balls})` +
-                (currentInningsData.onStrike === 'batsman2' ? ' *' : '');
-        }
-
+        // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            const savedMatchData = localStorage.getItem("matchData");
-            if (savedMatchData) {
-                currentInningsData = JSON.parse(savedMatchData);
-                updateDisplay();
+            try {
+                if (isLocalStorageAvailable()) {
+                    const savedMatchData = localStorage.getItem("matchData");
+                    if (savedMatchData) {
+                        currentInningsData = JSON.parse(savedMatchData);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading saved data:', error);
             }
         });
     </script>
