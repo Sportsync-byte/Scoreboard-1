@@ -47,7 +47,42 @@
     <div class="container">
         <h1 style="color: #FFD700;">Scorers Screen</h1>
         
-        <div id="scoringControls">
+        <div id="preGameSetup">
+            <h2>Pre-Game Setup</h2>
+            <label>Select Match Format:</label>
+            <select id="matchFormat">
+                <option value="6aside">6-a-side (12 overs, 3 partnerships)</option>
+                <option value="8aside">8-a-side (16 overs, 4 partnerships)</option>
+            </select>
+            <br>
+            <label>Enter Team Names:</label>
+            <input type="text" id="teamAInput" placeholder="Team A">
+            <input type="text" id="teamBInput" placeholder="Team B">
+            <br>
+            <label>Select Who Bats First:</label>
+            <select id="battingFirst">
+                <option value="teamA">Team A</option>
+                <option value="teamB">Team B</option>
+            </select>
+            <br>
+            <label>Set Innings Timer (Minutes):</label>
+            <input type="number" id="inningsTimer" min="1" value="10">
+            <br>
+            <button class="update-btn" onclick="startMatch()">Start Match</button>
+        </div>
+        
+        <div id="batsmanBowlerSetup" style="display:none;">
+            <h2>Enter First Batsmen & Bowler</h2>
+            <label>Batsman 1:</label>
+            <input type="text" id="batsman1Input" placeholder="Enter Batsman 1">
+            <label>Batsman 2:</label>
+            <input type="text" id="batsman2Input" placeholder="Enter Batsman 2">
+            <label>Bowler:</label>
+            <input type="text" id="bowlerInput" placeholder="Enter Bowler">
+            <button class="update-btn" onclick="confirmBatsmenBowler()">Confirm</button>
+        </div>
+        
+        <div id="scoringControls" style="display:none;">
             <div class="input-group">
                 <button class="update-btn" onclick="addRun(0)">0 Runs</button>
                 <button class="update-btn" onclick="addRun(1)">+1 Run</button>
@@ -71,7 +106,17 @@
                 <button class="update-btn" onclick="addBall()">Add Ball</button>
             </div>
         </div>
-</div>
+
+        <div class="small-scoreboard">
+            <h3>Live Scoreboard Preview</h3>
+            <p><strong><span id="teamA">Team A</span> vs <span id="teamB">Team B</span></strong></p>
+            <p>Score: <span id="totalScoreA">0</span> / <span id="wicketsA">0</span></p>
+            <p>Score: <span id="totalScoreB">0</span> / <span id="wicketsB">0</span></p>
+            <p>Overs: <span id="overs">0.0</span></p>
+            <p>Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span></p>
+            <p>Bowler: <span id="bowler">---</span></p>
+        </div>
+    </div>
     <script>
         function startMatch() {
             localStorage.setItem("matchFormat", document.getElementById("matchFormat").value);
@@ -89,42 +134,6 @@
             localStorage.setItem("bowler", document.getElementById("bowlerInput").value);
             document.getElementById("batsmanBowlerSetup").style.display = "none";
             document.getElementById("scoringControls").style.display = "block";
-        }
-        <div class="small-scoreboard">
-            <h3>Live Scoreboard Preview</h3>
-            <p><strong><span id="teamA">Team A</span> vs <span id="teamB">Team B</span></strong></p>
-            <p>Score: <span id="totalScoreA">0</span> / <span id="wicketsA">0</span></p>
-            <p>Score: <span id="totalScoreB">0</span> / <span id="wicketsB">0</span></p>
-            <p>Overs: <span id="overs">0.0</span></p>
-            <p>Batsmen: <span id="batsman1">---</span> & <span id="batsman2">---</span></p>
-            <p>Bowler: <span id="bowler">---</span></p>
-        </div>
-    </div>
-    <script>
-        function addRun(runs) {
-            let currentScore = parseInt(localStorage.getItem("totalScoreA")) || 0;
-            localStorage.setItem("totalScoreA", currentScore + runs);
-            window.dispatchEvent(new Event('storage'));
-        }
-        
-        function wicket(type) {
-            let currentWickets = parseInt(localStorage.getItem("wicketsA")) || 0;
-            localStorage.setItem("wicketsA", currentWickets + 1);
-            let currentScore = parseInt(localStorage.getItem("totalScoreA")) || 0;
-            localStorage.setItem("totalScoreA", currentScore - 5);
-            window.dispatchEvent(new Event('storage'));
-        }
-        
-        function addExtra(type) {
-            let currentScore = parseInt(localStorage.getItem("totalScoreA")) || 0;
-            localStorage.setItem("totalScoreA", currentScore + 2);
-            window.dispatchEvent(new Event('storage'));
-        }
-        
-        function addBall() {
-            let currentBalls = parseFloat(localStorage.getItem("overs")) || 0;
-            localStorage.setItem("overs", (currentBalls + 0.1).toFixed(1));
-            window.dispatchEvent(new Event('storage'));
         }
     </script>
 </body>
