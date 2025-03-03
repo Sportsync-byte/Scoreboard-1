@@ -109,6 +109,10 @@
         </div>
     </div>
     <script>
+        function clearPreviousData() {
+            localStorage.clear();
+        }
+
         function updateLiveScoreboard() {
             document.getElementById("teamA").innerText = localStorage.getItem("teamA") || "Team A";
             document.getElementById("teamB").innerText = localStorage.getItem("teamB") || "Team B";
@@ -121,6 +125,12 @@
             document.getElementById("batsman2").innerText = localStorage.getItem("batsman2") || "---";
             document.getElementById("bowler").innerText = localStorage.getItem("bowler") || "---";
         }
+        
+        window.onload = function() {
+            clearPreviousData();
+            updateLiveScoreboard();
+        };
+        
         setInterval(updateLiveScoreboard, 1000); // Update every second
     </script>
 </body>
