@@ -189,7 +189,6 @@
             batsman2Balls: 0,
             currentBowler: '',
             onStrike: 'batsman1',
-            partnershipOvers: 0,
             partnershipNumber: 1,
             consecutiveDotBalls: 0
         };
@@ -263,7 +262,6 @@
                 }
                 
                 currentInningsData.balls++;
-                currentInningsData.partnershipOvers = currentInningsData.overs + (currentInningsData.balls / 6);
 
                 // Handle dot balls and 3rd ball prompt
                 if (runs === 0) {
@@ -275,17 +273,19 @@
                     currentInningsData.consecutiveDotBalls = 0;
                 }
 
-                if (currentInningsData.partnershipOvers >= 4) {
-                    promptNewBatsmen();
-                    currentInningsData.partnershipOvers = 0;
-                    currentInningsData.partnershipNumber++;
-                }
-
+                // Check for over completion and partnership changes
                 if (currentInningsData.balls === 6) {
-                    promptNewBowler();
                     currentInningsData.overs++;
                     currentInningsData.balls = 0;
                     currentInningsData.onStrike = (currentInningsData.onStrike === 'batsman1') ? 'batsman2' : 'batsman1';
+                    
+                    // Check for partnership change at the start of each 4-over block
+                    if (currentInningsData.overs % 4 === 0) {
+                        promptNewBatsmen();
+                        currentInningsData.partnershipNumber++;
+                    } else {
+                        promptNewBowler();
+                    }
                 }
                 
                 updateStorage();
