@@ -20,12 +20,16 @@
             border-radius: 10px;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
         }
-        .team-names {
+        .team-container {
             display: flex;
             justify-content: space-between;
             font-size: 28px;
             font-weight: bold;
             color: #FFD700;
+        }
+        .team {
+            text-align: center;
+            width: 45%;
         }
         .score {
             font-size: 60px;
@@ -61,11 +65,16 @@
     <div class="scoreboard">
         <h1 style="color: #FFD700;">Indoor Cricket Scoreboard</h1>
         <div class="match-info">Format: <span id="matchFormat">---</span></div>
-        <div class="team-names">
-            <span id="teamA">Team A</span> vs <span id="teamB">Team B</span>
+        <div class="team-container">
+            <div class="team">
+                <span id="teamA">Team A</span>
+                <div class="score" id="totalScoreA">0</div>
+            </div>
+            <div class="team">
+                <span id="teamB">Team B</span>
+                <div class="score" id="totalScoreB">0</div>
+            </div>
         </div>
-        <div class="score" id="totalScoreA">0</div>
-        <div class="score" id="totalScoreB">0</div>
         <p style="font-size: 22px;">Wickets: <span style="color:#FF3333;" id="wickets">0</span> | Overs: <span id="overs">0.0</span></p>
         <div class="partnerships" id="partnershipSection"></div>
         <div class="player-info">
@@ -74,6 +83,7 @@
         <div class="player-info">
             Bowler: <span id="bowler">---</span>
         </div>
+        <button class="reset-btn" onclick="resetGame()">Reset Game</button>
     </div>
     <script>
         function updateScoreboard() {
@@ -97,6 +107,11 @@
                 partnershipsHTML += `<div class="partnership-box">P${i} Team B: <span id="partnershipB${i}">0</span></div>`;
             }
             document.getElementById("partnershipSection").innerHTML = partnershipsHTML;
+        }
+        
+        function resetGame() {
+            localStorage.clear();
+            updateScoreboard();
         }
 
         window.onload = function() {
