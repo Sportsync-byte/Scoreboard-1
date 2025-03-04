@@ -116,6 +116,20 @@
         .close-btn:hover {
             background: #cc0000;
         }
+
+        .debug-info {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .debug-info.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -146,17 +160,34 @@
                 <button onclick="window.close()" class="close-btn">Cancel</button>
             </div>
         </div>
+        <div class="debug-info" id="debugInfo"></div>
     </div>
 
     <script>
+        // Debug logging function
+        function debugLog(message) {
+            console.log(message);
+            const debugInfo = document.getElementById("debugInfo");
+            debugInfo.classList.add("show");
+            debugInfo.innerHTML += `<div>${message}</div>`;
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+        }
+
         // Update team information from localStorage
         function updateTeamInfo() {
             try {
+                debugLog("Updating team information...");
+                
                 const teamA = localStorage.getItem("teamA");
                 const teamB = localStorage.getItem("teamB");
                 const matchData = JSON.parse(localStorage.getItem("matchData"));
 
+                debugLog(`Team A: ${teamA}`);
+                debugLog(`Team B: ${teamB}`);
+                debugLog(`Match Data: ${JSON.stringify(matchData)}`);
+
                 if (!teamA || !teamB || !matchData) {
+                    debugLog("Missing team information");
                     alert("Missing team information. Please start from the pre-game setup.");
                     window.close();
                     return;
@@ -168,8 +199,10 @@
                 document.getElementById("battingTeam").textContent = `Batting: ${battingTeam}`;
                 document.getElementById("bowlingTeam").textContent = `Bowling: ${bowlingTeam}`;
 
+                debugLog(`Updated display - Batting: ${battingTeam}, Bowling: ${bowlingTeam}`);
+
             } catch (error) {
-                console.error("Error updating team info:", error);
+                debugLog(`Error updating team info: ${error.message}`);
                 alert("Error loading team information");
                 window.close();
             }
@@ -193,14 +226,17 @@
             if (!document.getElementById("batsman1").value.trim()) {
                 document.getElementById("batsman1Error").style.display = "block";
                 isValid = false;
+                debugLog("Batsman 1 name is required");
             }
             if (!document.getElementById("batsman2").value.trim()) {
                 document.getElementById("batsman2Error").style.display = "block";
                 isValid = false;
+                debugLog("Batsman 2 name is required");
             }
             if (!document.getElementById("currentBowler").value.trim()) {
                 document.getElementById("bowlerError").style.display = "block";
                 isValid = false;
+                debugLog("Current bowler name is required");
             }
 
             return isValid;
@@ -209,7 +245,10 @@
         // Confirm batsmen and bowler
         function confirmBatsmenBowler() {
             try {
+                debugLog("Confirming batsmen and bowler...");
+                
                 if (!validateInputs()) {
+                    debugLog("Validation failed");
                     return;
                 }
 
@@ -217,9 +256,12 @@
                 const batsman2 = document.getElementById("batsman2").value.trim();
                 const currentBowler = document.getElementById("currentBowler").value.trim();
 
+                debugLog(`Input values: ${JSON.stringify({ batsman1, batsman2, currentBowler })}`);
+
                 // Get current match data
                 const matchData = JSON.parse(localStorage.getItem("matchData"));
                 if (!matchData) {
+                    debugLog("Match data not found");
                     alert("Match data not found. Please start from the pre-game setup.");
                     window.close();
                     return;
@@ -230,48 +272,41 @@
                 matchData[currentTeam].currentBatsmen = [batsman1, batsman2];
                 matchData.currentBowler = currentBowler;
 
+                debugLog(`Updated match data: ${JSON.stringify(matchData)}`);
+
                 // Store updated match data
                 localStorage.setItem("matchData", JSON.stringify(matchData));
 
                 // Open scoreboard in new window
-                const scoreboardWindow = window.open("scoreboard.html", "Scoreboard", 
-                    "width=800,height=600,menubar=no,toolbar=no,location=no,status=no");
+                try {
+                    debugLog("Opening scoreboard window...");
+                    const scoreboardWindow = window.open("./scoreboard.html", "Scoreboard", 
+                        "width=800,height=600,menubar=no,toolbar=no,location=no,status=no");
 
-                // Check if popup was blocked
-                if (!scoreboardWindow || scoreboardWindow.closed) {
-                    alert("Please allow popups for this site to use the scorer");
-                    return;
+                    if (!scoreboardWindow || scoreboardWindow.closed) {
+                        throw new Error("Failed to open scoreboard window");
+                    }
+
+                    scoreboardWindow.focus();
+                    window.close();
+                } catch (windowError) {
+                    debugLog(`Error opening window: ${windowError.message}`);
+                    throw new Error("Failed to open scoreboard window");
                 }
 
-                // Focus the new window
-                scoreboardWindow.focus();
-
-                // Close this window
-                window.close();
-
             } catch (error) {
-                console.error("Error confirming batsmen and bowler:", error);
+                debugLog(`Error in confirmBatsmenBowler: ${error.message}`);
                 alert("An error occurred. Please try again.");
-            }
-        }
-
-        // Utility function
-        function isLocalStorageAvailable() {
-            try {
-                localStorage.setItem("test", "test");
-                localStorage.removeItem("test");
-                return true;
-            } catch (e) {
-                return false;
             }
         }
 
         // Initialize page
         document.addEventListener("DOMContentLoaded", function() {
-            console.log("Batsman setup window loaded");
+            debugLog("Batsman setup window loaded");
             
-            // Ensure we're in a popup window
+            // Check if we're in a popup window
             if (!window.opener) {
+                debugLog("Window not opened as popup");
                 alert("This window must be opened from the pre-game setup window");
                 window.close();
                 return;
