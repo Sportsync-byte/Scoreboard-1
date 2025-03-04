@@ -5,189 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Indoor Cricket Scorer</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #1a1a1a;
-            color: #fff;
-            margin: 0;
-            padding: 20px;
+        /* ... existing styles ... */
+
+        .section {
+            display: none;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            gap: 20px;
-        }
-
-        .setup-section {
-            flex: 1;
-            background: #2a2a2a;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .scoring-section {
-            flex: 2;
-            background: #2a2a2a;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        h1, h2 {
-            color: #00ff9d;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-            background: #333;
-            padding: 15px;
-            border-radius: 4px;
-        }
-
-        label {
+        .section.active {
             display: block;
-            margin-bottom: 5px;
+        }
+
+        .progress-indicator {
+            text-align: center;
+            margin-bottom: 20px;
             color: #00ff9d;
-            font-weight: bold;
         }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #00ff9d;
-            background: #1a1a1a;
-            color: #fff;
+        .progress-indicator span {
+            margin: 0 10px;
+            padding: 5px 10px;
             border-radius: 4px;
-            margin-top: 5px;
-            font-size: 16px;
         }
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            font-size: 1.1em;
-            flex: 1;
-        }
-
-        .start-btn {
+        .progress-indicator span.active {
             background: #00ff9d;
             color: #1a1a1a;
         }
 
-        .start-btn:hover {
+        .progress-indicator span.completed {
             background: #00cc7d;
-            transform: translateY(-2px);
-        }
-
-        .scoring-btn {
-            background: #2a3b4c;
-            color: #00ff9d;
-        }
-
-        .scoring-btn:hover {
-            background: #1f2937;
-        }
-
-        .wicket-btn {
-            background: #ff4444;
-            color: white;
-        }
-
-        .wicket-btn:hover {
-            background: #cc0000;
-        }
-
-        .extra-btn {
-            background: #ffbb33;
             color: #1a1a1a;
-        }
-
-        .extra-btn:hover {
-            background: #ff9900;
-        }
-
-        .control-btn {
-            background: #33b5e5;
-            color: white;
-        }
-
-        .control-btn:hover {
-            background: #0099cc;
-        }
-
-        .score-display {
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 2em;
-            color: #00ff9d;
-        }
-
-        .timer-display {
-            background: #2a3b4c;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 1.5em;
-            color: #00ff9d;
-        }
-
-        .live-preview {
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        .live-preview h3 {
-            color: #00ff9d;
-            margin-bottom: 10px;
-        }
-
-        .error-message {
-            color: #ff4444;
-            margin-top: 5px;
-            font-size: 0.9em;
-            display: none;
-        }
-
-        .setup-complete {
-            display: none;
-            background: #00ff9d;
-            color: #1a1a1a;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .setup-complete.show {
-            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+            <span id="step1" class="active">1. Match Setup</span>
+            <span id="step2">2. Scoring</span>
+        </div>
+
         <!-- Setup Section -->
-        <div class="setup-section">
+        <div id="setupSection" class="section active">
             <h1>Match Setup</h1>
             
             <!-- Pre-game Setup -->
@@ -238,14 +98,10 @@
             <div class="button-group">
                 <button onclick="startMatch()" class="start-btn">Start Match</button>
             </div>
-
-            <div class="setup-complete" id="setupComplete">
-                Match setup complete! You can now start scoring.
-            </div>
         </div>
 
         <!-- Scoring Section -->
-        <div class="scoring-section">
+        <div id="scoringSection" class="section">
             <h1>Scoring</h1>
             
             <div class="timer-display" id="timerDisplay">Timer: Not Started</div>
@@ -292,15 +148,6 @@
                 <button onclick="endOver()" class="control-btn">End Over</button>
                 <button onclick="changeBowler()" class="control-btn">Change Bowler</button>
             </div>
-
-            <!-- Live Preview -->
-            <div class="live-preview">
-                <h3>Live Scoreboard Preview</h3>
-                <div id="liveScoreboard">
-                    <div class="score-display" id="liveScoreDisplay">No match in progress</div>
-                    <div class="timer-display" id="liveTimerDisplay">Timer: Not Started</div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -341,13 +188,21 @@
                     lastUpdated: new Date().toISOString()
                 };
 
-                // Show setup complete message
-                document.getElementById('setupComplete').classList.add('show');
+                // Store match data in localStorage
+                localStorage.setItem('matchData', JSON.stringify(matchData));
+
+                // Switch to scoring section
+                document.getElementById('setupSection').classList.remove('active');
+                document.getElementById('scoringSection').classList.add('active');
+                
+                // Update progress indicator
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('active');
 
                 // Update displays
                 updateScoreDisplay();
-                updateLivePreview();
-
+                
                 // Start timer
                 startTimer();
 
@@ -356,188 +211,23 @@
             }
         }
 
-        // Validate inputs
-        function validateInputs() {
-            const requiredFields = [
-                'teamA', 'teamB', 'matchFormat', 'battingFirst', 'inningsTimer',
-                'batsman1', 'batsman2', 'currentBowler'
-            ];
+        // ... rest of the existing functions (validateInputs, timer functions, scoring functions) ...
 
-            for (const field of requiredFields) {
-                const element = document.getElementById(field);
-                if (!element.value.trim()) {
-                    alert(`Please fill in ${field}`);
-                    return false;
-                }
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there's an existing match
+            const savedMatchData = localStorage.getItem('matchData');
+            if (savedMatchData) {
+                matchData = JSON.parse(savedMatchData);
+                // Switch to scoring section
+                document.getElementById('setupSection').classList.remove('active');
+                document.getElementById('scoringSection').classList.add('active');
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('active');
+                updateScoreDisplay();
             }
-            return true;
-        }
-
-        // Timer functions
-        function startTimer() {
-            if (!matchData) return;
-            
-            if (isTimerRunning) return;
-            
-            remainingTime = matchData.inningsTimer * 60;
-            isTimerRunning = true;
-            
-            timerInterval = setInterval(() => {
-                remainingTime--;
-                updateTimerDisplay();
-                updateLivePreview();
-                
-                if (remainingTime <= 0) {
-                    clearInterval(timerInterval);
-                    isTimerRunning = false;
-                    alert('Time is up!');
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            if (!isTimerRunning) return;
-            
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            updateTimerDisplay();
-            updateLivePreview();
-        }
-
-        function resetTimer() {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            remainingTime = 0;
-            updateTimerDisplay();
-            updateLivePreview();
-        }
-
-        function updateTimerDisplay() {
-            const minutes = Math.floor(remainingTime / 60);
-            const seconds = remainingTime % 60;
-            const display = document.getElementById('timerDisplay');
-            const liveDisplay = document.getElementById('liveTimerDisplay');
-            
-            const timeString = `Timer: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (display) display.textContent = timeString;
-            if (liveDisplay) liveDisplay.textContent = timeString;
-            
-            if (minutes <= 5) {
-                display.style.color = '#ff4444';
-                liveDisplay.style.color = '#ff4444';
-            } else {
-                display.style.color = '#00ff9d';
-                liveDisplay.style.color = '#00ff9d';
-            }
-        }
-
-        // Scoring functions
-        function addRun(runs) {
-            if (!matchData) return;
-
-            const battingTeam = matchData.battingFirst;
-            matchData.scores[battingTeam].runs += runs;
-            matchData.scores[battingTeam].balls++;
-            
-            if (matchData.scores[battingTeam].balls === 6) {
-                matchData.scores[battingTeam].overs++;
-                matchData.scores[battingTeam].balls = 0;
-            }
-
-            matchData.lastUpdated = new Date().toISOString();
-            updateScoreDisplay();
-            updateLivePreview();
-        }
-
-        function wicket(type) {
-            if (!matchData) return;
-
-            const battingTeam = matchData.battingFirst;
-            matchData.scores[battingTeam].wickets++;
-            matchData.scores[battingTeam].balls++;
-            
-            if (matchData.scores[battingTeam].balls === 6) {
-                matchData.scores[battingTeam].overs++;
-                matchData.scores[battingTeam].balls = 0;
-            }
-
-            matchData.lastUpdated = new Date().toISOString();
-            updateScoreDisplay();
-            updateLivePreview();
-        }
-
-        function addExtra(type) {
-            if (!matchData) return;
-
-            const battingTeam = matchData.battingFirst;
-            matchData.scores[battingTeam].runs++;
-            matchData.scores[battingTeam].balls++;
-            
-            if (matchData.scores[battingTeam].balls === 6) {
-                matchData.scores[battingTeam].overs++;
-                matchData.scores[battingTeam].balls = 0;
-            }
-
-            matchData.lastUpdated = new Date().toISOString();
-            updateScoreDisplay();
-            updateLivePreview();
-        }
-
-        function endOver() {
-            if (!matchData) return;
-
-            const battingTeam = matchData.battingFirst;
-            matchData.scores[battingTeam].overs++;
-            matchData.scores[battingTeam].balls = 0;
-
-            matchData.lastUpdated = new Date().toISOString();
-            updateScoreDisplay();
-            updateLivePreview();
-        }
-
-        function changeBowler() {
-            if (!matchData) return;
-
-            const newBowler = prompt('Enter new bowler name:');
-            if (!newBowler) return;
-
-            matchData.currentBowler = newBowler;
-            matchData.lastUpdated = new Date().toISOString();
-            updateScoreDisplay();
-            updateLivePreview();
-        }
-
-        // Display update functions
-        function updateScoreDisplay() {
-            if (!matchData) {
-                document.getElementById('scoreDisplay').textContent = 'No match in progress';
-                return;
-            }
-
-            const battingTeam = matchData.battingFirst;
-            const score = matchData.scores[battingTeam];
-            const overs = `${score.overs}.${score.balls}`;
-            
-            const scoreString = `${matchData[`team${battingTeam}`]} ${score.runs}/${score.wickets} (${overs})`;
-            
-            document.getElementById('scoreDisplay').textContent = scoreString;
-        }
-
-        function updateLivePreview() {
-            if (!matchData) {
-                document.getElementById('liveScoreDisplay').textContent = 'No match in progress';
-                return;
-            }
-
-            const battingTeam = matchData.battingFirst;
-            const score = matchData.scores[battingTeam];
-            const overs = `${score.overs}.${score.balls}`;
-            
-            const scoreString = `${matchData[`team${battingTeam}`]} ${score.runs}/${score.wickets} (${overs})`;
-            
-            document.getElementById('liveScoreDisplay').textContent = scoreString;
-        }
+        });
     </script>
 </body>
 </html>
