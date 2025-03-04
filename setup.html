@@ -3,203 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Match Setup - Indoor Cricket Scorer</title>
+    <title>Indoor Cricket Scorer - Setup</title>
     <style>
         body {
+            background-color: #1a1a1a;
+            color: #ffffff;
             font-family: Arial, sans-serif;
-            background: #1a1a1a;
-            color: #fff;
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #2a2a2a;
-            padding: 20px;
+            background-color: #2d2d2d;
+            padding: 30px;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 600px;
         }
 
-        h1, h2 {
-            color: #00ff9d;
-            margin-bottom: 20px;
-        }
-
-        .progress-indicator {
+        h1 {
             text-align: center;
-            margin-bottom: 20px;
-            color: #00ff9d;
-        }
-
-        .progress-indicator span {
-            margin: 0 10px;
-            padding: 5px 10px;
-            border-radius: 4px;
-        }
-
-        .progress-indicator span.active {
-            background: #00ff9d;
-            color: #1a1a1a;
+            color: #4CAF50;
+            margin-bottom: 30px;
         }
 
         .form-group {
-            margin-bottom: 15px;
-            background: #333;
-            padding: 15px;
-            border-radius: 4px;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
             margin-bottom: 5px;
-            color: #00ff9d;
-            font-weight: bold;
+            color: #4CAF50;
         }
 
-        input, select {
+        input[type="text"],
+        input[type="number"],
+        select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #00ff9d;
-            background: #1a1a1a;
-            color: #fff;
+            padding: 8px;
+            border: 1px solid #4CAF50;
             border-radius: 4px;
-            margin-top: 5px;
-            font-size: 16px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            box-sizing: border-box;
         }
 
         .button-group {
             display: flex;
+            justify-content: center;
             gap: 10px;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         button {
-            padding: 15px 30px;
+            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            font-size: 1.1em;
-            flex: 1;
+            font-size: 16px;
+            transition: background-color 0.3s;
         }
 
-        .start-btn {
-            background: #00ff9d;
-            color: #1a1a1a;
+        button.primary {
+            background-color: #4CAF50;
+            color: white;
         }
 
-        .start-btn:hover {
-            background: #00cc7d;
-            transform: translateY(-2px);
+        button.primary:hover {
+            background-color: #45a049;
         }
 
-        .error-message {
+        .error {
             color: #ff4444;
+            font-size: 14px;
             margin-top: 5px;
-            font-size: 0.9em;
             display: none;
         }
 
-        .error-container {
-            background: #ff4444;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
+        .error.show {
+            display: block;
+        }
+
+        #errorContainer {
+            color: #ff4444;
+            text-align: center;
             margin-bottom: 20px;
             display: none;
         }
 
-        .error-container.show {
+        #errorContainer.show {
             display: block;
+        }
+
+        #debugInfo {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Indoor Cricket Scorer</h1>
-        <div class="error-container" id="errorContainer"></div>
+        <div id="errorContainer"></div>
 
-        <!-- Progress Indicator -->
-        <div class="progress-indicator">
-            <span id="step1" class="active">1. Match Setup</span>
-            <span id="step2">2. Start Match</span>
+        <div class="form-group">
+            <label for="matchFormat">Match Format:</label>
+            <select id="matchFormat" required>
+                <option value="12">12 Overs</option>
+                <option value="16">16 Overs</option>
+                <option value="20">20 Overs</option>
+            </select>
+            <div id="matchFormatError" class="error">Please select a match format</div>
         </div>
 
-        <!-- Setup Section -->
-        <div id="setupSection">
-            <div class="form-group">
-                <h2>Game Details</h2>
-                <label for="matchFormat">Match Format:</label>
-                <select id="matchFormat" required>
-                    <option value="12">12 Overs</option>
-                    <option value="16">16 Overs</option>
-                    <option value="20">20 Overs</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="teamA">Team A Name:</label>
-                <input type="text" id="teamA" required placeholder="Enter Team A name">
-            </div>
-            <div class="form-group">
-                <label for="teamB">Team B Name:</label>
-                <input type="text" id="teamB" required placeholder="Enter Team B name">
-            </div>
-            <div class="form-group">
-                <label for="battingFirst">Team Batting First:</label>
-                <select id="battingFirst" required>
-                    <option value="A">Team A</option>
-                    <option value="B">Team B</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="inningsTimer">Innings Timer (minutes):</label>
-                <input type="number" id="inningsTimer" value="20" min="1" max="60" required>
-            </div>
-
-            <!-- Batsmen Setup -->
-            <div class="form-group">
-                <h2>Current Batsmen & Bowler</h2>
-                <label for="batsman1">Batsman 1:</label>
-                <input type="text" id="batsman1" required placeholder="Enter first batsman name">
-            </div>
-            <div class="form-group">
-                <label for="batsman2">Batsman 2:</label>
-                <input type="text" id="batsman2" required placeholder="Enter second batsman name">
-            </div>
-            <div class="form-group">
-                <label for="currentBowler">Current Bowler:</label>
-                <input type="text" id="currentBowler" required placeholder="Enter current bowler name">
-            </div>
-
-            <div class="button-group">
-                <button onclick="startMatch()" class="start-btn">Start Match</button>
-            </div>
+        <div class="form-group">
+            <label for="teamA">Team A Name:</label>
+            <input type="text" id="teamA" required>
+            <div id="teamAError" class="error">Please enter Team A name</div>
         </div>
+
+        <div class="form-group">
+            <label for="teamB">Team B Name:</label>
+            <input type="text" id="teamB" required>
+            <div id="teamBError" class="error">Please enter Team B name</div>
+        </div>
+
+        <div class="form-group">
+            <label for="battingFirst">Batting First:</label>
+            <select id="battingFirst" required>
+                <option value="A">Team A</option>
+                <option value="B">Team B</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="inningsTimer">Innings Timer (minutes):</label>
+            <input type="number" id="inningsTimer" min="1" value="20" required>
+            <div id="inningsTimerError" class="error">Please enter a valid innings timer</div>
+        </div>
+
+        <div class="form-group">
+            <label for="batsman1">Opening Batsman 1:</label>
+            <input type="text" id="batsman1" required>
+            <div id="batsman1Error" class="error">Please enter opening batsman 1</div>
+        </div>
+
+        <div class="form-group">
+            <label for="batsman2">Opening Batsman 2:</label>
+            <input type="text" id="batsman2" required>
+            <div id="batsman2Error" class="error">Please enter opening batsman 2</div>
+        </div>
+
+        <div class="form-group">
+            <label for="currentBowler">Opening Bowler:</label>
+            <input type="text" id="currentBowler" required>
+            <div id="currentBowlerError" class="error">Please enter opening bowler</div>
+        </div>
+
+        <div class="button-group">
+            <button class="primary" onclick="startMatch()">Start Match</button>
+        </div>
+
+        <div id="debugInfo"></div>
     </div>
 
     <script>
-        // Validate inputs
-        function validateInputs() {
-            const requiredFields = [
-                'teamA', 'teamB', 'matchFormat', 'battingFirst', 'inningsTimer',
-                'batsman1', 'batsman2', 'currentBowler'
-            ];
-
-            for (const field of requiredFields) {
-                const element = document.getElementById(field);
-                if (!element.value.trim()) {
-                    alert(`Please fill in ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
-                    element.focus();
-                    return false;
-                }
+        function debugLog(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            if (debugInfo) {
+                debugInfo.style.display = 'block';
+                debugInfo.innerHTML += `${new Date().toISOString()}: ${message}<br>`;
+                console.log(message);
             }
-            return true;
         }
 
-        // Start match function
+        function validateInputs() {
+            let isValid = true;
+            const requiredElements = {
+                'teamA': 'Team A name',
+                'teamB': 'Team B name',
+                'matchFormat': 'Match format',
+                'inningsTimer': 'Innings timer',
+                'batsman1': 'Opening batsman 1',
+                'batsman2': 'Opening batsman 2',
+                'currentBowler': 'Opening bowler'
+            };
+
+            // Hide all error messages initially
+            document.querySelectorAll('.error').forEach(error => error.classList.remove('show'));
+
+            // Check each required element
+            for (const [elementId, description] of Object.entries(requiredElements)) {
+                const element = document.getElementById(elementId);
+                const errorElement = document.getElementById(`${elementId}Error`);
+
+                if (!element) {
+                    debugLog(`Missing element: ${elementId}`);
+                    isValid = false;
+                    continue;
+                }
+
+                const value = element.value.trim();
+                if (!value) {
+                    if (errorElement) {
+                        errorElement.classList.add('show');
+                    }
+                    isValid = false;
+                    debugLog(`Validation failed for ${description}: empty value`);
+                }
+            }
+
+            // Additional validation for innings timer
+            const inningsTimer = document.getElementById('inningsTimer');
+            if (inningsTimer && (isNaN(inningsTimer.value) || parseInt(inningsTimer.value) < 1)) {
+                const errorElement = document.getElementById('inningsTimerError');
+                if (errorElement) {
+                    errorElement.classList.add('show');
+                }
+                isValid = false;
+                debugLog('Validation failed: Invalid innings timer value');
+            }
+
+            return isValid;
+        }
+
         function startMatch() {
             try {
                 if (!validateInputs()) {
@@ -232,15 +270,19 @@
                 // Store match data in localStorage
                 localStorage.setItem('matchData', JSON.stringify(matchData));
 
-                // Open scorer in new window
+                // Open scorer window
                 const scorerWindow = window.open('scorer.html', 'Scorer', 
-                    'width=800,height=600,resizable=yes,scrollbars=yes');
+                    'width=800,height=600,left=50,top=50,resizable=yes,scrollbars=yes');
                 
-                if (!scorerWindow) {
-                    throw new Error('Failed to open scorer window. Please allow popups.');
+                // Open scoreboard window
+                const scoreboardWindow = window.open('scoreboard.html', 'Scoreboard', 
+                    'width=800,height=400,left=850,top=50,resizable=yes,scrollbars=yes');
+                
+                if (!scorerWindow || !scoreboardWindow) {
+                    throw new Error('Failed to open windows. Please allow popups.');
                 }
 
-                // Close this window
+                // Close setup window
                 window.close();
 
             } catch (error) {
@@ -249,13 +291,19 @@
                     errorContainer.textContent = `Error: ${error.message}`;
                     errorContainer.classList.add('show');
                 }
+                debugLog(`Error in startMatch: ${error.message}`);
             }
         }
 
         // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            // Clear any existing match data
-            localStorage.removeItem('matchData');
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Clear any existing match data
+                localStorage.removeItem('matchData');
+                debugLog('Initialized setup page');
+            } catch (error) {
+                debugLog(`Error during initialization: ${error.message}`);
+            }
         });
     </script>
 </body>
