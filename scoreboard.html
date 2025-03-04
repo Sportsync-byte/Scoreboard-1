@@ -249,7 +249,7 @@
             Target: 0 runs from 12 overs
         </div>
     </div>
-       <script>
+        <script>
         let matchData = {
             teamA: {
                 totalScore: 0,
@@ -273,20 +273,29 @@
             overs: 0,
             balls: 0,
             currentBowler: { name: '', overs: 0, wickets: 0 },
-            partnershipNumber: 1
+            partnershipNumber: 1,
+            onStrike: 'batsman1'
         };
 
         let timerInterval;
         let remainingTime;
         let isTimerRunning = false;
+        let timerStartTime;
+        let totalTime;
 
         function startTimer(minutes) {
             if (isTimerRunning) return;
             
-            remainingTime = minutes * 60; // Convert minutes to seconds
+            totalTime = minutes * 60; // Convert minutes to seconds
+            timerStartTime = Date.now();
             isTimerRunning = true;
             
             timerInterval = setInterval(() => {
+                if (!isTimerRunning) return;
+
+                const elapsedSeconds = Math.floor((Date.now() - timerStartTime) / 1000);
+                remainingTime = Math.max(0, totalTime - elapsedSeconds);
+
                 if (remainingTime <= 0) {
                     clearInterval(timerInterval);
                     isTimerRunning = false;
@@ -297,11 +306,9 @@
                 const minutes = Math.floor(remainingTime / 60);
                 const seconds = remainingTime % 60;
                 
-                // Format the display
                 const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 document.getElementById('inningsTimer').textContent = display;
 
-                // Add warning effect for last 5 minutes
                 if (remainingTime <= 300) { // 5 minutes = 300 seconds
                     document.getElementById('inningsTimer').classList.add('timer-warning');
                 }
@@ -316,12 +323,23 @@
                     const storedData = JSON.parse(localStorage.getItem("matchData"));
                     if (storedData) {
                         matchData = storedData;
-                        
-                        // Start timer if it's not running and we have the innings time
-                        if (!isTimerRunning) {
-                            const inningsTime = parseInt(localStorage.getItem("inningsTimer")) || 20;
-                            startTimer(inningsTime);
-                        }
+                    }
+
+                    // Handle timer status
+                    const timerStatus = localStorage.getItem("timerStatus");
+                    const timerStartTime = localStorage.getItem("timerStartTime");
+                    const inningsTime = parseInt(localStorage.getItem("inningsTimer")) || 20;
+
+                    if (timerStatus === "running" && !isTimerRunning) {
+                        startTimer(inningsTime);
+                    } else if (timerStatus === "paused") {
+                        isTimerRunning = false;
+                    } else if (timerStatus === "stopped") {
+                        isTimerRunning = false;
+                        clearInterval(timerInterval);
+                        document.getElementById('inningsTimer').textContent = 
+                            `${inningsTime.toString().padStart(2, '0')}:00`;
+                        document.getElementById('inningsTimer').classList.remove('timer-warning');
                     }
 
                     const teamA = localStorage.getItem("teamA");
@@ -421,4 +439,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
