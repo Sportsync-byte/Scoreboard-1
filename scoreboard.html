@@ -27,12 +27,24 @@
             background: #003366;
             border-radius: 8px;
         }
-        .teams {
+        .team-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+        .team-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            align-items: center;
+            margin-bottom: 15px;
             font-size: 24px;
             color: #FFD700;
+        }
+        .team-total {
+            font-size: 36px;
+            color: #00CCFF;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
         }
         .current-score {
             text-align: center;
@@ -54,7 +66,7 @@
             margin: 20px 0;
         }
         .batsman {
-            background: #2a2a2a;
+            background: #333;
             padding: 15px;
             border-radius: 8px;
             border: 1px solid #FFD700;
@@ -64,19 +76,30 @@
             box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
         }
         .batsman-name {
-            font-size: 24px;
+            font-size: 20px;
             color: #FFD700;
             margin-bottom: 10px;
         }
         .batsman-stats {
-            font-size: 20px;
+            font-size: 18px;
             color: #fff;
         }
+        .partnerships {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
         .partnership {
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
             text-align: center;
-            font-size: 20px;
-            color: #FFD700;
-            margin: 10px 0;
+            font-size: 16px;
+        }
+        .partnership.active {
+            background: #003366;
+            border: 1px solid #00CCFF;
         }
         .current-bowler {
             text-align: center;
@@ -87,6 +110,19 @@
             background: #2a2a2a;
             border-radius: 8px;
         }
+        .bowler-stats {
+            font-size: 18px;
+            color: #FFD700;
+        }
+        .target {
+            text-align: center;
+            font-size: 24px;
+            color: #FFD700;
+            margin: 10px 0;
+            padding: 10px;
+            background: #003366;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -94,69 +130,181 @@
         <div class="header">
             <h1>Indoor Cricket Scoreboard</h1>
         </div>
-        
-        <div class="teams">
-            <div id="teamA">Team A</div>
-            <div id="teamB">Team B</div>
+
+        <!-- Team A Section -->
+        <div class="team-section">
+            <div class="team-header">
+                <div id="teamA">Team A</div>
+                <div class="team-total" id="teamATotal">0/0</div>
+            </div>
+            <div class="batting-details">
+                <div class="batsman" id="teamABatsman1">
+                    <div class="batsman-name" id="teamABatsman1Name">Batsman 1</div>
+                    <div class="batsman-stats" id="teamABatsman1Stats">0 (0)</div>
+                </div>
+                <div class="batsman" id="teamABatsman2">
+                    <div class="batsman-name" id="teamABatsman2Name">Batsman 2</div>
+                    <div class="batsman-stats" id="teamABatsman2Stats">0 (0)</div>
+                </div>
+            </div>
+            <div class="partnerships" id="teamAPartnerships">
+                <div class="partnership">Partnership 1: 0</div>
+                <div class="partnership">Partnership 2: 0</div>
+                <div class="partnership">Partnership 3: 0</div>
+                <div class="partnership">Partnership 4: 0</div>
+            </div>
         </div>
 
+        <!-- Current Innings Info -->
         <div class="current-score" id="currentScore">0/0</div>
         <div class="overs" id="overs">Overs: 0.0</div>
+        <div class="current-bowler">
+            <div id="currentBowler">Current Bowler: </div>
+            <div class="bowler-stats" id="bowlerStats">Overs: 0.0 | Wickets: 0</div>
+        </div>
 
-        <div class="batting-details">
-            <div class="batsman" id="batsman1">
-                <div class="batsman-name" id="batsman1Name">Batsman 1</div>
-                <div class="batsman-stats" id="batsman1Stats">0 (0)</div>
+        <!-- Team B Section -->
+        <div class="team-section">
+            <div class="team-header">
+                <div id="teamB">Team B</div>
+                <div class="team-total" id="teamBTotal">0/0</div>
             </div>
-            <div class="batsman" id="batsman2">
-                <div class="batsman-name" id="batsman2Name">Batsman 2</div>
-                <div class="batsman-stats" id="batsman2Stats">0 (0)</div>
+            <div class="batting-details">
+                <div class="batsman" id="teamBBatsman1">
+                    <div class="batsman-name" id="teamBBatsman1Name">Batsman 1</div>
+                    <div class="batsman-stats" id="teamBBatsman1Stats">0 (0)</div>
+                </div>
+                <div class="batsman" id="teamBBatsman2">
+                    <div class="batsman-name" id="teamBBatsman2Name">Batsman 2</div>
+                    <div class="batsman-stats" id="teamBBatsman2Stats">0 (0)</div>
+                </div>
+            </div>
+            <div class="partnerships" id="teamBPartnerships">
+                <div class="partnership">Partnership 1: 0</div>
+                <div class="partnership">Partnership 2: 0</div>
+                <div class="partnership">Partnership 3: 0</div>
+                <div class="partnership">Partnership 4: 0</div>
             </div>
         </div>
 
-        <div class="partnership" id="partnership">Partnership 1</div>
-        <div class="current-bowler" id="currentBowler">Current Bowler: </div>
+        <!-- Target Display (for second innings) -->
+        <div class="target" id="target" style="display: none;">
+            Target: 0 runs from 12 overs
+        </div>
     </div>
 
     <script>
+        let matchData = {
+            teamA: {
+                totalScore: 0,
+                wickets: 0,
+                partnerships: [0, 0, 0, 0],
+                currentBatsmen: {
+                    batsman1: { name: '', score: 0, balls: 0 },
+                    batsman2: { name: '', score: 0, balls: 0 }
+                }
+            },
+            teamB: {
+                totalScore: 0,
+                wickets: 0,
+                partnerships: [0, 0, 0, 0],
+                currentBatsmen: {
+                    batsman1: { name: '', score: 0, balls: 0 },
+                    batsman2: { name: '', score: 0, balls: 0 }
+                }
+            },
+            currentInnings: 'A',
+            overs: 0,
+            balls: 0,
+            currentBowler: { name: '', overs: 0, wickets: 0 },
+            partnershipNumber: 1
+        };
+
         function updateDisplay() {
             try {
                 if (isLocalStorageAvailable()) {
-                    const matchData = JSON.parse(localStorage.getItem("matchData"));
+                    const storedData = JSON.parse(localStorage.getItem("matchData"));
+                    if (storedData) {
+                        matchData = storedData;
+                    }
+
                     const teamA = localStorage.getItem("teamA");
                     const teamB = localStorage.getItem("teamB");
                     const batsman1 = localStorage.getItem("batsman1");
                     const batsman2 = localStorage.getItem("batsman2");
                     const bowler = localStorage.getItem("bowler");
 
+                    // Update team names
                     document.getElementById("teamA").textContent = teamA;
                     document.getElementById("teamB").textContent = teamB;
+
+                    // Update team totals
+                    document.getElementById("teamATotal").textContent = 
+                        `${matchData.teamA.totalScore}/${matchData.teamA.wickets}`;
+                    document.getElementById("teamBTotal").textContent = 
+                        `${matchData.teamB.totalScore}/${matchData.teamB.wickets}`;
+
+                    // Update current score and overs
+                    const currentTeam = matchData.currentInnings === 'A' ? matchData.teamA : matchData.teamB;
                     document.getElementById("currentScore").textContent = 
-                        `${matchData.totalScore}/${matchData.wickets}`;
+                        `${currentTeam.totalScore}/${currentTeam.wickets}`;
                     document.getElementById("overs").textContent = 
                         `Overs: ${matchData.overs}.${matchData.balls}`;
-                    
-                    document.getElementById("batsman1Name").textContent = batsman1;
-                    document.getElementById("batsman1Stats").textContent = 
-                        `${matchData.batsman1Score} (${matchData.batsman1Balls})`;
-                    document.getElementById("batsman2Name").textContent = batsman2;
-                    document.getElementById("batsman2Stats").textContent = 
-                        `${matchData.batsman2Score} (${matchData.batsman2Balls})`;
-                    
-                    document.getElementById("partnership").textContent = 
-                        `Partnership ${matchData.partnershipNumber}`;
-                    document.getElementById("currentBowler").textContent = 
-                        `Current Bowler: ${bowler}`;
 
-                    // Update strike indicator
-                    document.getElementById("batsman1").classList.toggle("on-strike", 
-                        matchData.onStrike === 'batsman1');
-                    document.getElementById("batsman2").classList.toggle("on-strike", 
-                        matchData.onStrike === 'batsman2');
+                    // Update batsmen details
+                    updateBatsmenDisplay('A', matchData.teamA.currentBatsmen);
+                    updateBatsmenDisplay('B', matchData.teamB.currentBatsmen);
+
+                    // Update partnerships
+                    updatePartnerships('A', matchData.teamA.partnerships);
+                    updatePartnerships('B', matchData.teamB.partnerships);
+
+                    // Update current bowler
+                    document.getElementById("currentBowler").textContent = 
+                        `Current Bowler: ${matchData.currentBowler.name}`;
+                    document.getElementById("bowlerStats").textContent = 
+                        `Overs: ${matchData.currentBowler.overs}.${matchData.balls} | Wickets: ${matchData.currentBowler.wickets}`;
+
+                    // Show target if in second innings
+                    const targetDiv = document.getElementById("target");
+                    if (matchData.currentInnings === 'B') {
+                        const target = matchData.teamA.totalScore + 1;
+                        targetDiv.style.display = "block";
+                        targetDiv.textContent = `Target: ${target} runs from 12 overs`;
+                    } else {
+                        targetDiv.style.display = "none";
+                    }
                 }
             } catch (error) {
                 console.error('Error updating display:', error);
             }
+        }
+
+        function updateBatsmenDisplay(team, batsmen) {
+            document.getElementById(`team${team}Batsman1Name`).textContent = batsmen.batsman1.name;
+            document.getElementById(`team${team}Batsman1Stats`).textContent = 
+                `${batsmen.batsman1.score} (${batsmen.batsman1.balls})`;
+            document.getElementById(`team${team}Batsman2Name`).textContent = batsmen.batsman2.name;
+            document.getElementById(`team${team}Batsman2Stats`).textContent = 
+                `${batsmen.batsman2.score} (${batsmen.batsman2.balls})`;
+
+            // Update strike indicator
+            const onStrike = matchData.currentInnings === team ? 
+                (matchData.onStrike === 'batsman1' ? 'Batsman1' : 'Batsman2') : null;
+            
+            document.getElementById(`team${team}Batsman1`).classList.toggle("on-strike", 
+                onStrike === 'Batsman1');
+            document.getElementById(`team${team}Batsman2`).classList.toggle("on-strike", 
+                onStrike === 'Batsman2');
+        }
+
+        function updatePartnerships(team, partnerships) {
+            const container = document.getElementById(`team${team}Partnerships`);
+            partnerships.forEach((score, index) => {
+                container.children[index].textContent = `Partnership ${index + 1}: ${score}`;
+                container.children[index].classList.toggle("active", 
+                    matchData.currentInnings === team && matchData.partnershipNumber === index + 1);
+            });
         }
 
         function isLocalStorageAvailable() {
