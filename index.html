@@ -182,31 +182,37 @@
 
         // Window management functions
         function openPreGameSetup() {
+            // Clear any existing match data first
+            if (isLocalStorageAvailable()) {
+                localStorage.clear();
+            }
+            
+            // Open pre-game setup window
             const preGameWindow = window.open("pregame.html", "Pre-game Setup", 
-                "width=600,height=800,menubar=no,toolbar=no,location=no,status=no");
+                "width=600,height=800,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes");
             
             if (!preGameWindow) {
                 alert("Please allow popups for this site to open the pre-game setup");
                 return;
             }
-        }
 
-        function openBatsmanSetup() {
-            const batsmanWindow = window.open("batsman.html", "Batsman and Bowler Setup", 
-                "width=600,height=600,menubar=no,toolbar=no,location=no,status=no");
-            
-            if (!batsmanWindow) {
-                alert("Please allow popups for this site to open the batsman setup");
-                return;
-            }
+            // Focus the new window
+            preGameWindow.focus();
         }
 
         // Timer functions
-        function startTimer(minutes) {
+        function startTimer() {
             if (isTimerRunning) return;
             
+            const minutes = parseInt(localStorage.getItem("inningsTimer") || "20");
             remainingTime = minutes * 60;
             isTimerRunning = true;
+            
+            // Store initial timer value
+            if (isLocalStorageAvailable()) {
+                localStorage.setItem("timerStartTime", Date.now());
+                localStorage.setItem("timerDuration", minutes * 60);
+            }
             
             timerInterval = setInterval(() => {
                 if (remainingTime > 0) {
@@ -223,6 +229,9 @@
         function pauseTimer() {
             clearInterval(timerInterval);
             isTimerRunning = false;
+            if (isLocalStorageAvailable()) {
+                localStorage.setItem("timerPaused", "true");
+            }
         }
 
         function resetTimer() {
@@ -231,6 +240,9 @@
             const minutes = parseInt(localStorage.getItem("inningsTimer") || "20");
             remainingTime = minutes * 60;
             updateTimerDisplay();
+            if (isLocalStorageAvailable()) {
+                localStorage.setItem("timerPaused", "false");
+            }
         }
 
         function updateTimerDisplay() {
@@ -240,6 +252,7 @@
             
             if (isLocalStorageAvailable()) {
                 localStorage.setItem("timerDisplay", display);
+                localStorage.setItem("timerRemaining", remainingTime);
             }
         }
 
@@ -432,10 +445,16 @@
 
         // Initialize page
         document.addEventListener("DOMContentLoaded", function() {
-            // Check if match is in progress
-            if (isLocalStorageAvailable() && localStorage.getItem("matchData")) {
-                document.getElementById("scoringControls").classList.remove("hidden");
+            // Clear any existing match data
+            if (isLocalStorageAvailable()) {
+                localStorage.clear();
             }
+            
+            // Hide scoring controls initially
+            document.getElementById("scoringControls").classList.add("hidden");
+            
+            // Add debug logging
+            console.log("Main window initialized");
         });
     </script>
 </body>
