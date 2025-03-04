@@ -25,6 +25,9 @@
         .team-name {
             text-align: center;
             margin-bottom: 1rem;
+            font-size: 2.5rem;
+            color: #3498db;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .partnerships-container {
@@ -41,17 +44,7 @@
             border-radius: 8px;
             min-width: 120px;
             text-align: center;
-        }
-
-        .partnership-number {
             font-size: 1.2rem;
-            color: #3498db;
-            font-weight: bold;
-        }
-
-        .partnership-score {
-            font-size: 1.1rem;
-            color: #ecf0f1;
         }
 
         /* Score Container */
@@ -76,21 +69,21 @@
         }
 
         .runs {
-            font-size: 5rem;
+            font-size: 6rem;
             font-weight: bold;
             color: #ffffff;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .overs {
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: #ecf0f1;
         }
 
         /* Timer Display */
         .timer-display {
             text-align: center;
-            font-size: 2rem;
+            font-size: 2.5rem;
             color: #ecf0f1;
             margin: 1rem 0;
             padding: 0.5rem;
@@ -98,24 +91,57 @@
             border-radius: 8px;
         }
 
-        /* Player Info */
-        .player-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            margin: 0.5rem 0;
+        /* Over Stats Popup */
+        .over-stats-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            min-width: 400px;
+            max-width: 90%;
         }
 
-        .player-name {
-            font-weight: bold;
+        .over-stats-popup.show {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .over-stats-content {
+            text-align: center;
+        }
+
+        .over-stats-title {
+            font-size: 1.8rem;
             color: #3498db;
+            margin-bottom: 1.5rem;
         }
 
-        .player-score {
-            color: #ecf0f1;
+        .over-stats-section {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .over-stats-section h3 {
+            color: #3498db;
+            margin-bottom: 0.5rem;
+        }
+
+        .over-stats-section p {
+            margin: 0.5rem 0;
+            font-size: 1.2rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         /* Responsive Design */
@@ -142,6 +168,11 @@
                 width: 100%;
                 max-width: 200px;
             }
+
+            .over-stats-popup {
+                min-width: 90%;
+                padding: 1rem;
+            }
         }
     </style>
 </head>
@@ -154,9 +185,6 @@
             </div>
             <div class="partnerships-container" id="topTeamPartnerships">
                 <!-- Partnerships will be dynamically added here -->
-            </div>
-            <div class="player-info" id="topTeamPlayers">
-                <!-- Player info will be dynamically added here -->
             </div>
         </div>
 
@@ -189,8 +217,23 @@
             <div class="partnerships-container" id="bottomTeamPartnerships">
                 <!-- Partnerships will be dynamically added here -->
             </div>
-            <div class="player-info" id="bottomTeamPlayers">
-                <!-- Player info will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Over Stats Popup -->
+    <div class="over-stats-popup" id="overStatsPopup">
+        <div class="over-stats-content">
+            <h2 class="over-stats-title">Over Complete</h2>
+            <div class="over-stats-section">
+                <h3>Bowler Figures</h3>
+                <p id="bowlerName"></p>
+                <p id="bowlerFigures"></p>
+            </div>
+            <div class="over-stats-section">
+                <h3>Current Partnership</h3>
+                <p id="batsman1"></p>
+                <p id="batsman2"></p>
+                <p id="partnershipTotal"></p>
             </div>
         </div>
     </div>
@@ -221,9 +264,10 @@
             updatePartnerships('topTeamPartnerships', data.topTeamPartnerships);
             updatePartnerships('bottomTeamPartnerships', data.bottomTeamPartnerships);
 
-            // Update player info
-            updatePlayerInfo('topTeamPlayers', data.topTeamPlayers);
-            updatePlayerInfo('bottomTeamPlayers', data.bottomTeamPlayers);
+            // Show over stats popup if over is complete
+            if (data.overComplete) {
+                showOverStats(data.overStats);
+            }
         }
 
         function updatePartnerships(containerId, partnerships) {
@@ -241,19 +285,20 @@
             });
         }
 
-        function updatePlayerInfo(containerId, players) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
+        function showOverStats(stats) {
+            const popup = document.getElementById('overStatsPopup');
+            document.getElementById('bowlerName').textContent = stats.bowlerName;
+            document.getElementById('bowlerFigures').textContent = `${stats.bowlerFigures}`;
+            document.getElementById('batsman1').textContent = `${stats.batsman1.name}: ${stats.batsman1.score}`;
+            document.getElementById('batsman2').textContent = `${stats.batsman2.name}: ${stats.batsman2.score}`;
+            document.getElementById('partnershipTotal').textContent = `Partnership: ${stats.partnershipTotal}`;
             
-            players.forEach(player => {
-                const playerElement = document.createElement('div');
-                playerElement.className = 'player-info';
-                playerElement.innerHTML = `
-                    <span class="player-name">${player.name}</span>
-                    <span class="player-score">${player.score}</span>
-                `;
-                container.appendChild(playerElement);
-            });
+            popup.classList.add('show');
+
+            // Hide popup after 5 seconds
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 5000);
         }
     </script>
 </body>
