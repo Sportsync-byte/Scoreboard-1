@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batsman and Bowler Setup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff9d;
+            margin-bottom: 30px;
+        }
+
+        .setup-section {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ff9d;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #00ff9d;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-size: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .start-btn {
+            background: #00ff9d;
+            color: #1a1a1a;
+            width: 100%;
+        }
+
+        .start-btn:hover {
+            background: #00cc7d;
+            transform: translateY(-2px);
+        }
+
+        .close-btn {
+            background: #ff4444;
+            color: white;
+            width: 100%;
+        }
+
+        .close-btn:hover {
+            background: #cc0000;
+        }
+
+        .team-info {
+            background: #2a3b4c;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            color: #00ff9d;
+        }
+
+        .team-info p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Batsman and Bowler Setup</h1>
+        
+        <!-- Team Information -->
+        <div class="team-info" id="teamInfo">
+            <p>Loading team information...</p>
+        </div>
+
+        <div class="setup-section">
+            <div class="form-group">
+                <label for="batsman1">Batsman 1:</label>
+                <input type="text" id="batsman1" required placeholder="Enter Batsman 1 name">
+            </div>
+            <div class="form-group">
+                <label for="batsman2">Batsman 2:</label>
+                <input type="text" id="batsman2" required placeholder="Enter Batsman 2 name">
+            </div>
+            <div class="form-group">
+                <label for="currentBowler">Current Bowler:</label>
+                <input type="text" id="currentBowler" required placeholder="Enter Bowler name">
+            </div>
+            <div class="button-group">
+                <button onclick="confirmBatsmenBowler()" class="start-btn">Confirm and Start Scoring</button>
+                <button onclick="window.close()" class="close-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize page
+        document.addEventListener("DOMContentLoaded", function() {
+            updateTeamInfo();
+        });
+
+        // Update team information display
+        function updateTeamInfo() {
+            try {
+                if (!isLocalStorageAvailable()) return;
+
+                const teamA = localStorage.getItem("teamA");
+                const teamB = localStorage.getItem("teamB");
+                const matchData = JSON.parse(localStorage.getItem("matchData"));
+
+                if (!teamA || !teamB || !matchData) {
+                    alert("No match data found. Please start a new match.");
+                    window.close();
+                    return;
+                }
+
+                const battingTeam = matchData.currentInnings === "A" ? teamA : teamB;
+                const bowlingTeam = matchData.currentInnings === "A" ? teamB : teamA;
+
+                const teamInfo = document.getElementById("teamInfo");
+                teamInfo.innerHTML = `
+                    <p><strong>Batting Team:</strong> ${battingTeam}</p>
+                    <p><strong>Bowling Team:</strong> ${bowlingTeam}</p>
+                    <p><strong>Match Format:</strong> ${matchData.teamA.partnerships.length * 4} Overs</p>
+                `;
+            } catch (error) {
+                console.error("Error updating team info:", error);
+                alert("Error loading team information. Please try again.");
+            }
+        }
+
+        // Confirm batsmen and bowler
+        function confirmBatsmenBowler() {
+            try {
+                const batsman1 = document.getElementById("batsman1").value.trim();
+                const batsman2 = document.getElementById("batsman2").value.trim();
+                const currentBowler = document.getElementById("currentBowler").value.trim();
+
+                if (!batsman1 || !batsman2 || !currentBowler) {
+                    alert("Please enter all names");
+                    return;
+                }
+
+                if (isLocalStorageAvailable()) {
+                    const matchData = JSON.parse(localStorage.getItem("matchData"));
+                    const currentTeam = matchData.currentInnings === "A" ? "teamA" : "teamB";
+                    
+                    // Update current batsmen
+                    matchData.currentBatsmen = [batsman1, batsman2];
+                    matchData.currentBatsmanIndex = 0;
+                    
+                    // Update current bowler
+                    matchData.currentBowler = currentBowler;
+                    
+                    // Initialize batsmen data
+                    matchData[currentTeam].currentBatsmen = [
+                        { name: batsman1, runs: 0, balls: 0 },
+                        { name: batsman2, runs: 0, balls: 0 }
+                    ];
+
+                    localStorage.setItem("matchData", JSON.stringify(matchData));
+                }
+
+                // Open scoreboard in new window
+                window.open("scoreboard.html", "Scoreboard", 
+                    "width=800,height=600,menubar=no,toolbar=no,location=no,status=no");
+
+                // Show scoring controls in main window
+                if (window.opener) {
+                    window.opener.document.getElementById("scoringControls").classList.remove("hidden");
+                }
+
+                // Close this window
+                window.close();
+
+            } catch (error) {
+                console.error("Error confirming batsmen and bowler:", error);
+                alert("An error occurred. Please try again.");
+            }
+        }
+
+        // Utility function
+        function isLocalStorageAvailable() {
+            try {
+                localStorage.setItem("test", "test");
+                localStorage.removeItem("test");
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>
