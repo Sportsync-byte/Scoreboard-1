@@ -93,6 +93,33 @@
         .dismissal-buttons button:hover {
             background: #EE2222;
         }
+        .bowler-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            z-index: 1000;
+            min-width: 300px;
+        }
+        .bowler-dialog select,
+        .bowler-dialog input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: #444;
+            color: white;
+        }
+        .bowler-dialog button {
+            margin-top: 10px;
+        }
+        .bowler-dialog button + button {
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -177,7 +204,7 @@
             </div>
         </div>
     </div>
-        <script>
+       <script>
         let currentInningsData = {
             totalScore: 0,
             wickets: 0,
@@ -190,7 +217,9 @@
             currentBowler: '',
             onStrike: 'batsman1',
             partnershipNumber: 1,
-            consecutiveDotBalls: 0
+            consecutiveDotBalls: 0,
+            bowlers: [], // Array to track bowlers and their overs
+            maxOversPerBowler: 2 // Maximum overs allowed per bowler
         };
 
         function isLocalStorageAvailable() {
@@ -237,6 +266,12 @@
                     localStorage.setItem("batsman2", document.getElementById("batsman2Input").value);
                     localStorage.setItem("bowler", document.getElementById("bowlerInput").value);
                     currentInningsData.currentBowler = document.getElementById("bowlerInput").value;
+                    
+                    // Add initial bowler to the bowlers array
+                    currentInningsData.bowlers.push({
+                        name: document.getElementById("bowlerInput").value,
+                        overs: 0
+                    });
                 }
                 
                 document.getElementById("batsmanBowlerSetup").style.display = "none";
@@ -279,6 +314,12 @@
                     currentInningsData.balls = 0;
                     currentInningsData.onStrike = (currentInningsData.onStrike === 'batsman1') ? 'batsman2' : 'batsman1';
                     
+                    // Update current bowler's overs
+                    let currentBowlerIndex = currentInningsData.bowlers.findIndex(b => b.name === currentInningsData.currentBowler);
+                    if (currentBowlerIndex !== -1) {
+                        currentInningsData.bowlers[currentBowlerIndex].overs += 1;
+                    }
+                    
                     // Check for partnership change at the start of each 4-over block
                     if (currentInningsData.overs % 4 === 0) {
                         promptNewBatsmen();
@@ -297,13 +338,58 @@
         }
 
         function promptNewBowler() {
-            let newBowler = prompt("Enter new bowler's name:");
-            if (newBowler) {
-                currentInningsData.currentBowler = newBowler;
+            let dialog = document.createElement('div');
+            dialog.className = 'bowler-dialog';
+            dialog.innerHTML = `
+                <h3 style="color: #FFD700;">Select New Bowler</h3>
+                <select id="bowlerSelect">
+                    <option value="new">Enter New Bowler</option>
+                    ${currentInningsData.bowlers
+                        .filter(bowler => bowler.overs < currentInningsData.maxOversPerBowler)
+                        .map(bowler => `<option value="${bowler.name}">${bowler.name} (${bowler.overs}/${currentInningsData.maxOversPerBowler} overs)</option>`)
+                        .join('')}
+                </select>
+                <input type="text" id="newBowlerInput" placeholder="Enter new bowler's name" style="display: none;">
+                <button class="update-btn" onclick="confirmNewBowler()">Confirm</button>
+                <button class="reset-btn" onclick="cancelNewBowler()">Cancel</button>
+            `;
+
+            document.body.appendChild(dialog);
+
+            // Show/hide input field based on selection
+            dialog.querySelector('#bowlerSelect').addEventListener('change', function() {
+                dialog.querySelector('#newBowlerInput').style.display = 
+                    this.value === "new" ? "block" : "none";
+            });
+        }
+
+        function confirmNewBowler() {
+            let dialog = document.querySelector('.bowler-dialog');
+            let select = dialog.querySelector('#bowlerSelect');
+            let input = dialog.querySelector('#newBowlerInput');
+            let selectedBowler = select.value === "new" ? input.value : select.value;
+
+            if (selectedBowler) {
+                let existingBowler = currentInningsData.bowlers.find(b => b.name === selectedBowler);
+                if (existingBowler) {
+                    existingBowler.overs += 1;
+                } else {
+                    currentInningsData.bowlers.push({
+                        name: selectedBowler,
+                        overs: 1
+                    });
+                }
+                currentInningsData.currentBowler = selectedBowler;
                 if (isLocalStorageAvailable()) {
-                    localStorage.setItem("bowler", newBowler);
+                    localStorage.setItem("bowler", selectedBowler);
                 }
             }
+            document.body.removeChild(dialog);
+        }
+
+        function cancelNewBowler() {
+            let dialog = document.querySelector('.bowler-dialog');
+            document.body.removeChild(dialog);
         }
 
         function promptNewBatsmen() {
@@ -319,6 +405,9 @@
                 currentInningsData.batsman2Score = 0;
                 currentInningsData.batsman2Balls = 0;
                 currentInningsData.onStrike = 'batsman1';
+                
+                // Prompt for new bowler after new batsmen
+                promptNewBowler();
             }
         }
 
@@ -434,4 +523,4 @@
         });
     </script>
 </body>
-</html>
+</html> 
