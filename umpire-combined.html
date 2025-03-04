@@ -253,7 +253,6 @@
                                         <div class="btn-group w-100 mb-2">
                                             <button class="btn btn-outline-danger" onclick="handleWicket('hitwicket')">Hit Wicket</button>
                                             <button class="btn btn-outline-danger" onclick="handleWicket('lbw')">LBW</button>
-                                            <button class="btn btn-outline-danger" onclick="handleWicket('handled')">Handled Ball</button>
                                             <button class="btn btn-outline-danger" onclick="handleWicket('obstructing')">Obstructing</button>
                                         </div>
                                     </div>
@@ -539,6 +538,11 @@
             updateDisplay();
             saveGameState();
             updateScoreboard();
+
+            // Show new partnership selection after a short delay
+            setTimeout(() => {
+                showNewPartnershipModal();
+            }, 500);
         }
 
         // Handle Extras
@@ -596,7 +600,9 @@
                     showExtraBallModal();
                 } else {
                     // Normal over complete - show bowler selection
-                    showPlayerSelect('bowler');
+                    setTimeout(() => {
+                        showPlayerSelect('bowler');
+                    }, 500);
                 }
             }
         }
@@ -778,6 +784,27 @@
             players: []
         };
 
+        // Get available players based on type
+        function getAvailablePlayers(type) {
+            if (type === 'batsmen') {
+                return gameState.batsmen.filter(batsman => 
+                    !gameState.currentBatsmen.striker || batsman.id !== gameState.currentBatsmen.striker.id
+                );
+            } else if (type === 'bowlers') {
+                return gameState.bowlers.filter(bowler => 
+                    !gameState.currentBowler || bowler.id !== gameState.currentBowler.id
+                );
+            }
+            return [];
+        }
+
+        // Get player by ID
+        function getPlayerById(id) {
+            const batsman = gameState.batsmen.find(b => b.id === parseInt(id));
+            if (batsman) return batsman;
+            return gameState.bowlers.find(b => b.id === parseInt(id));
+        }
+
         function showPlayerSelect(type) {
             currentSelection.type = type;
             const modal = document.getElementById('playerSelectModal');
@@ -846,8 +873,15 @@
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
             initializeGame();
-            // Open scoreboard in new window
-            window.open('scoreboard-combined.html', 'Scoreboard', 'width=800,height=600');
+            // Open scoreboard in new window with a slight delay
+            setTimeout(() => {
+                const scoreboardWindow = window.open('scoreboard-combined.html', 'Scoreboard', 'width=800,height=600');
+                if (scoreboardWindow) {
+                    console.log('Scoreboard opened successfully');
+                } else {
+                    console.log('Failed to open scoreboard - popup might be blocked');
+                }
+            }, 1000);
         });
     </script>
 </body>
