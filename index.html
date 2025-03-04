@@ -5,15 +5,129 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Indoor Cricket Scorer</title>
     <style>
-        /* ... existing styles ... */
-        
-        /* Add styles for the 7 runs button */
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            color: #00ff9d;
+            margin-bottom: 30px;
+        }
+
+        .start-btn {
+            background: #00ff9d;
+            color: #1a1a1a;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            background: #00cc7d;
+            transform: translateY(-2px);
+        }
+
+        .timer-controls, .runs-section, .extras-section, .wickets-section, .over-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .timer-btn, .run-btn, .extra-btn, .wicket-btn, .over-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .timer-btn {
+            background: #2a3b4c;
+            color: #00ff9d;
+        }
+
+        .timer-btn:hover {
+            background: #1f2937;
+        }
+
+        .run-btn {
+            background: #00ff9d;
+            color: #1a1a1a;
+        }
+
+        .run-btn:hover {
+            background: #00cc7d;
+        }
+
         .run-btn.seven {
             background: #ff6b6b;
         }
-        
+
         .run-btn.seven:hover {
             background: #ff5252;
+        }
+
+        .extra-btn {
+            background: #ffd700;
+            color: #1a1a1a;
+        }
+
+        .extra-btn:hover {
+            background: #ffc107;
+        }
+
+        .wicket-btn {
+            background: #ff4444;
+            color: white;
+        }
+
+        .wicket-btn:hover {
+            background: #cc0000;
+        }
+
+        .over-btn {
+            background: #4a90e2;
+            color: white;
+        }
+
+        .over-btn:hover {
+            background: #357abd;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .timer-controls, .runs-section, .extras-section, .wickets-section, .over-controls {
+                flex-direction: column;
+            }
+
+            .timer-btn, .run-btn, .extra-btn, .wicket-btn, .over-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -73,25 +187,27 @@
         // Open pre-game setup window
         function openPreGameSetup() {
             try {
+                console.log("Opening pre-game setup");
+                
                 // Clear any existing match data
                 localStorage.clear();
                 
                 // Open pre-game setup window
-                const preGameWindow = window.open("pregame.html", "Pre-game Setup", 
+                const preGameWindow = window.open("./pregame.html", "Pre-game Setup", 
                     "width=600,height=600,menubar=no,toolbar=no,location=no,status=no");
                 
-                // Check if popup was blocked
                 if (!preGameWindow || preGameWindow.closed) {
+                    console.error("Popup blocked or failed to open");
                     alert("Please allow popups for this site to use the scorer");
                     return;
                 }
                 
-                // Focus the new window
+                console.log("Pre-game setup window opened successfully");
                 preGameWindow.focus();
                 
             } catch (error) {
-                console.error("Error opening pre-game setup:", error);
-                alert("Error opening pre-game setup window");
+                console.error("Error in openPreGameSetup:", error);
+                alert("Error opening pre-game setup window: " + error.message);
             }
         }
 
