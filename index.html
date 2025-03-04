@@ -28,31 +28,42 @@
             margin-bottom: 30px;
         }
 
+        h2 {
+            color: #00ff9d;
+            margin-bottom: 20px;
+        }
+
         .setup-section {
             background: #333;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+            display: block;
         }
 
         .form-group {
             margin-bottom: 15px;
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
         }
 
         label {
             display: block;
             margin-bottom: 5px;
             color: #00ff9d;
+            font-weight: bold;
         }
 
         input, select {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #00ff9d;
-            background: #2a2a2a;
+            background: #1a1a1a;
             color: #fff;
             border-radius: 4px;
-            margin-bottom: 10px;
+            margin-top: 5px;
+            font-size: 16px;
         }
 
         select:disabled, input:disabled {
@@ -101,7 +112,7 @@
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         .scoring-controls {
@@ -189,7 +200,7 @@
         <h1>Indoor Cricket Scorer</h1>
         
         <!-- Pre-game Setup -->
-        <div class="setup-section">
+        <div class="setup-section" id="preGameSetup">
             <h2>Pre-game Setup</h2>
             <div class="form-group">
                 <label for="gamePreset">Select Game:</label>
@@ -259,7 +270,40 @@
             </div>
         </div>
 
-        <!-- Scoring Controls -->    <script>
+        <!-- Scoring Controls -->
+        <div id="scoringControls" class="setup-section hidden">
+            <h2>Scoring Controls</h2>
+            <div class="scoring-controls">
+                <div class="button-group">
+                    <button onclick="addRun(1)" class="runs-btn">1 Run</button>
+                    <button onclick="addRun(2)" class="runs-btn">2 Runs</button>
+                    <button onclick="addRun(3)" class="runs-btn">3 Runs</button>
+                    <button onclick="addRun(4)" class="runs-btn">4 Runs</button>
+                    <button onclick="addRun(5)" class="runs-btn">5 Runs</button>
+                    <button onclick="addRun(6)" class="runs-btn">6 Runs</button>
+                </div>
+                <div class="button-group">
+                    <button onclick="addExtra('wide')" class="extras-btn">Wide</button>
+                    <button onclick="addExtra('noBall')" class="extras-btn">No Ball</button>
+                    <button onclick="addExtra('bye')" class="extras-btn">Bye</button>
+                    <button onclick="addExtra('legBye')" class="extras-btn">Leg Bye</button>
+                </div>
+                <div class="button-group">
+                    <button onclick="wicket('bowled')" class="wicket-btn">Bowled</button>
+                    <button onclick="wicket('caught')" class="wicket-btn">Caught</button>
+                    <button onclick="wicket('runOut')" class="wicket-btn">Run Out</button>
+                    <button onclick="wicket('stumped')" class="wicket-btn">Stumped</button>
+                    <button onclick="wicket('hitWicket')" class="wicket-btn">Hit Wicket</button>
+                    <button onclick="wicket('obstructing')" class="wicket-btn">Obstructing Field</button>
+                </div>
+                <div class="button-group">
+                    <button onclick="endOver()" class="extras-btn">End Over</button>
+                    <button onclick="changeBowler()" class="extras-btn">Change Bowler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+        <script>
         // Game presets configuration
         const gamePresets = {
             preset1: {
@@ -284,6 +328,11 @@
                 inningsTimer: "30"
             }
         };
+
+        // Timer variables
+        let timerInterval;
+        let remainingTime;
+        let isTimerRunning = false;
 
         // Handle preset game selection
         function handlePresetChange() {
@@ -321,11 +370,6 @@
                 document.getElementById("inningsTimer").disabled = true;
             }
         }
-
-        // Timer variables
-        let timerInterval;
-        let remainingTime;
-        let isTimerRunning = false;
 
         // Start match function
         function startMatch() {
@@ -409,7 +453,7 @@
                 }
 
                 // Show batsman setup section
-                document.querySelector(".setup-section").classList.add("hidden");
+                document.getElementById("preGameSetup").classList.add("hidden");
                 document.getElementById("batsmanSetup").classList.remove("hidden");
                 document.getElementById("scoringControls").classList.remove("hidden");
 
@@ -679,9 +723,12 @@
 
         // Initialize page
         document.addEventListener("DOMContentLoaded", function() {
+            // Show pre-game setup by default
+            document.getElementById("preGameSetup").classList.remove("hidden");
+            
             // Check if match is in progress
             if (isLocalStorageAvailable() && localStorage.getItem("matchData")) {
-                document.querySelector(".setup-section").classList.add("hidden");
+                document.getElementById("preGameSetup").classList.add("hidden");
                 document.getElementById("batsmanSetup").classList.remove("hidden");
                 document.getElementById("scoringControls").classList.remove("hidden");
             }
@@ -689,36 +736,3 @@
     </script>
 </body>
 </html>
-        <div id="scoringControls" class="setup-section hidden">
-            <h2>Scoring Controls</h2>
-            <div class="scoring-controls">
-                <div class="button-group">
-                    <button onclick="addRun(1)" class="runs-btn">1 Run</button>
-                    <button onclick="addRun(2)" class="runs-btn">2 Runs</button>
-                    <button onclick="addRun(3)" class="runs-btn">3 Runs</button>
-                    <button onclick="addRun(4)" class="runs-btn">4 Runs</button>
-                    <button onclick="addRun(5)" class="runs-btn">5 Runs</button>
-                    <button onclick="addRun(6)" class="runs-btn">6 Runs</button>
-                </div>
-                <div class="button-group">
-                    <button onclick="addExtra('wide')" class="extras-btn">Wide</button>
-                    <button onclick="addExtra('noBall')" class="extras-btn">No Ball</button>
-                    <button onclick="addExtra('bye')" class="extras-btn">Bye</button>
-                    <button onclick="addExtra('legBye')" class="extras-btn">Leg Bye</button>
-                </div>
-                <div class="button-group">
-                    <button onclick="wicket('bowled')" class="wicket-btn">Bowled</button>
-                    <button onclick="wicket('caught')" class="wicket-btn">Caught</button>
-                    <button onclick="wicket('runOut')" class="wicket-btn">Run Out</button>
-                    <button onclick="wicket('stumped')" class="wicket-btn">Stumped</button>
-                    <button onclick="wicket('hitWicket')" class="wicket-btn">Hit Wicket</button>
-                    <button onclick="wicket('obstructing')" class="wicket-btn">Obstructing Field</button>
-                </div>
-                <div class="button-group">
-                    <button onclick="endOver()" class="extras-btn">End Over</button>
-                    <button onclick="changeBowler()" class="extras-btn">Change Bowler</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
