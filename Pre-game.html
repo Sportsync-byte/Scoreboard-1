@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-game Setup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff9d;
+            margin-bottom: 30px;
+        }
+
+        .setup-section {
+            background: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ff9d;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #00ff9d;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-size: 16px;
+        }
+
+        select:disabled, input:disabled {
+            background: #1f2937;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        #gamePreset {
+            background: #2a3b4c;
+            color: #00ff9d;
+            font-weight: bold;
+            border: 1px solid #00ff9d;
+        }
+
+        #gamePreset option {
+            background: #2a3b4c;
+            color: #fff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .start-btn {
+            background: #00ff9d;
+            color: #1a1a1a;
+            width: 100%;
+        }
+
+        .start-btn:hover {
+            background: #00cc7d;
+            transform: translateY(-2px);
+        }
+
+        .close-btn {
+            background: #ff4444;
+            color: white;
+            width: 100%;
+        }
+
+        .close-btn:hover {
+            background: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pre-game Setup</h1>
+        <div class="setup-section">
+            <div class="form-group">
+                <label for="gamePreset">Select Game:</label>
+                <select id="gamePreset" onchange="handlePresetChange()">
+                    <option value="custom">Custom Game</option>
+                    <option value="preset1">Game 1: Team A vs Team B (12 Overs)</option>
+                    <option value="preset2">Game 2: Team C vs Team D (16 Overs)</option>
+                    <option value="preset3">Game 3: Team E vs Team F (20 Overs)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="matchFormat">Match Format:</label>
+                <select id="matchFormat" required>
+                    <option value="12">12 Overs</option>
+                    <option value="16">16 Overs</option>
+                    <option value="20">20 Overs</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="teamA">Team A Name:</label>
+                <input type="text" id="teamA" required placeholder="Enter Team A name">
+            </div>
+            <div class="form-group">
+                <label for="teamB">Team B Name:</label>
+                <input type="text" id="teamB" required placeholder="Enter Team B name">
+            </div>
+            <div class="form-group">
+                <label for="battingFirst">Team Batting First:</label>
+                <select id="battingFirst" required>
+                    <option value="A">Team A</option>
+                    <option value="B">Team B</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="inningsTimer">Innings Timer (minutes):</label>
+                <input type="number" id="inningsTimer" value="20" min="1" max="60" required>
+            </div>
+            <div class="button-group">
+                <button onclick="startMatch()" class="start-btn">Start Match</button>
+                <button onclick="window.close()" class="close-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game presets configuration
+        const gamePresets = {
+            preset1: {
+                teamA: "Team A",
+                teamB: "Team B",
+                matchFormat: "12",
+                battingFirst: "A",
+                inningsTimer: "20"
+            },
+            preset2: {
+                teamA: "Team C",
+                teamB: "Team D",
+                matchFormat: "16",
+                battingFirst: "B",
+                inningsTimer: "25"
+            },
+            preset3: {
+                teamA: "Team E",
+                teamB: "Team F",
+                matchFormat: "20",
+                battingFirst: "A",
+                inningsTimer: "30"
+            }
+        };
+
+        // Handle preset game selection
+        function handlePresetChange() {
+            const presetSelect = document.getElementById("gamePreset");
+            const selectedPreset = presetSelect.value;
+            
+            if (selectedPreset === "custom") {
+                // Clear all fields
+                document.getElementById("matchFormat").value = "12";
+                document.getElementById("teamA").value = "";
+                document.getElementById("teamB").value = "";
+                document.getElementById("battingFirst").value = "A";
+                document.getElementById("inningsTimer").value = "20";
+                
+                // Enable all fields
+                document.getElementById("matchFormat").disabled = false;
+                document.getElementById("teamA").disabled = false;
+                document.getElementById("teamB").disabled = false;
+                document.getElementById("battingFirst").disabled = false;
+                document.getElementById("inningsTimer").disabled = false;
+            } else {
+                // Fill in preset values
+                const preset = gamePresets[selectedPreset];
+                document.getElementById("matchFormat").value = preset.matchFormat;
+                document.getElementById("teamA").value = preset.teamA;
+                document.getElementById("teamB").value = preset.teamB;
+                document.getElementById("battingFirst").value = preset.battingFirst;
+                document.getElementById("inningsTimer").value = preset.inningsTimer;
+                
+                // Disable fields when preset is selected
+                document.getElementById("matchFormat").disabled = true;
+                document.getElementById("teamA").disabled = true;
+                document.getElementById("teamB").disabled = true;
+                document.getElementById("battingFirst").disabled = true;
+                document.getElementById("inningsTimer").disabled = true;
+            }
+        }
+
+        // Start match function
+        function startMatch() {
+            try {
+                // Get input values
+                const teamA = document.getElementById("teamA").value.trim();
+                const teamB = document.getElementById("teamB").value.trim();
+                const matchFormat = document.getElementById("matchFormat").value;
+                const battingFirst = document.getElementById("battingFirst").value;
+                const inningsTimer = document.getElementById("inningsTimer").value;
+
+                // Validate inputs
+                if (!teamA || !teamB) {
+                    alert("Please enter both team names");
+                    return;
+                }
+
+                if (!matchFormat) {
+                    alert("Please select match format");
+                    return;
+                }
+
+                if (!inningsTimer) {
+                    alert("Please enter innings timer");
+                    return;
+                }
+
+                // Calculate total partnerships based on match format
+                const totalPartnerships = Math.ceil(parseInt(matchFormat) / 4);
+
+                // Initialize match data
+                const matchData = {
+                    teamA: {
+                        totalScore: 0,
+                        wickets: 0,
+                        partnerships: Array(totalPartnerships).fill(0),
+                        currentBatsmen: [],
+                        extras: {
+                            wides: 0,
+                            noBalls: 0,
+                            byes: 0,
+                            legByes: 0
+                        }
+                    },
+                    teamB: {
+                        totalScore: 0,
+                        wickets: 0,
+                        partnerships: Array(totalPartnerships).fill(0),
+                        currentBatsmen: [],
+                        extras: {
+                            wides: 0,
+                            noBalls: 0,
+                            byes: 0,
+                            legByes: 0
+                        }
+                    },
+                    currentInnings: battingFirst,
+                    currentOver: 0,
+                    currentBall: 0,
+                    currentPartnership: 0,
+                    currentBatsmanIndex: 0,
+                    currentBowler: "",
+                    consecutiveDotBalls: 0
+                };
+
+                // Store match data
+                if (isLocalStorageAvailable()) {
+                    localStorage.setItem("matchData", JSON.stringify(matchData));
+                    localStorage.setItem("teamA", teamA);
+                    localStorage.setItem("teamB", teamB);
+                    localStorage.setItem("inningsTimer", inningsTimer);
+                }
+
+                // Open batsman setup in new window
+                window.open("batsman.html", "Batsman Setup", 
+                    "width=600,height=600,menubar=no,toolbar=no,location=no,status=no");
+
+                // Close this window
+                window.close();
+
+            } catch (error) {
+                console.error("Error starting match:", error);
+                alert("An error occurred while starting the match. Please try again.");
+            }
+        }
+
+        // Utility function
+        function isLocalStorageAvailable() {
+            try {
+                localStorage.setItem("test", "test");
+                localStorage.removeItem("test");
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>
