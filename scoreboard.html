@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #000;
+            background: #1a1a2e;
             color: #fff;
             margin: 0;
             padding: 20px;
@@ -15,23 +15,25 @@
         .scoreboard {
             max-width: 1200px;
             margin: auto;
-            background: #1a1a1a;
+            background: #16213e;
             border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
         }
         .header {
             text-align: center;
             margin-bottom: 30px;
             padding: 20px;
-            background: #003366;
+            background: #0f3460;
             border-radius: 8px;
+            border-bottom: 2px solid #e94560;
         }
         .team-section {
             margin: 20px 0;
             padding: 20px;
-            background: #2a2a2a;
+            background: #1f2937;
             border-radius: 8px;
+            border: 1px solid #e94560;
         }
         .team-header {
             display: flex;
@@ -39,24 +41,24 @@
             align-items: center;
             margin-bottom: 15px;
             font-size: 24px;
-            color: #FFD700;
+            color: #e94560;
         }
         .team-total {
             font-size: 36px;
-            color: #00CCFF;
-            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+            color: #00ff9d;
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
         }
         .current-score {
             text-align: center;
             font-size: 48px;
             margin: 20px 0;
-            color: #00CCFF;
-            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+            color: #00ff9d;
+            text-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
         }
         .overs {
             text-align: center;
             font-size: 36px;
-            color: #FFD700;
+            color: #ffd700;
             margin: 10px 0;
         }
         .batting-details {
@@ -66,18 +68,18 @@
             margin: 20px 0;
         }
         .batsman {
-            background: #333;
+            background: #2a3b4c;
             padding: 15px;
             border-radius: 8px;
-            border: 1px solid #FFD700;
+            border: 1px solid #e94560;
         }
         .batsman.on-strike {
-            border-color: #00CCFF;
-            box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
+            border-color: #00ff9d;
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
         }
         .batsman-name {
             font-size: 20px;
-            color: #FFD700;
+            color: #e94560;
             margin-bottom: 10px;
         }
         .batsman-stats {
@@ -91,37 +93,44 @@
             margin: 15px 0;
         }
         .partnership {
-            background: #333;
+            background: #2a3b4c;
             padding: 10px;
             border-radius: 5px;
             text-align: center;
             font-size: 16px;
+            border: 1px solid #e94560;
         }
         .partnership.active {
-            background: #003366;
-            border: 1px solid #00CCFF;
+            background: #0f3460;
+            border: 1px solid #00ff9d;
         }
         .current-bowler {
             text-align: center;
             font-size: 24px;
-            color: #00CCFF;
+            color: #ffd700;
             margin: 20px 0;
             padding: 10px;
-            background: #2a2a2a;
+            background: #1f2937;
             border-radius: 8px;
+            border: 1px solid #e94560;
         }
         .bowler-stats {
             font-size: 18px;
-            color: #FFD700;
+            color: #00ff9d;
         }
         .target {
             text-align: center;
             font-size: 24px;
-            color: #FFD700;
+            color: #e94560;
             margin: 10px 0;
             padding: 10px;
-            background: #003366;
+            background: #0f3460;
             border-radius: 8px;
+            border: 1px solid #00ff9d;
+        }
+        h1 {
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
     </style>
 </head>
@@ -192,8 +201,7 @@
             Target: 0 runs from 12 overs
         </div>
     </div>
-
-    <script>
+        <script>
         let matchData = {
             teamA: {
                 totalScore: 0,
