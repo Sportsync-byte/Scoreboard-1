@@ -3,149 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indoor Cricket Umpire's Scoring Interface</title>
+    <title>Indoor Cricket Umpire's Interface</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Main Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
         }
-
-        /* Card Styles */
         .card {
             border: none;
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             margin-bottom: 1rem;
         }
-
         .card-header {
+            background: #007bff;
+            color: white;
             border-radius: 10px 10px 0 0 !important;
+        }
+        .preview-scoreboard {
+            background: #1a1a1a;
+            color: white;
             padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
         }
-
-        .card-header h4 {
-            margin: 0;
-            font-size: 1.2rem;
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
         }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        /* Form Controls */
-        .form-control, .form-select {
-            border-radius: 5px;
-            border: 1px solid #ced4da;
-            padding: 0.5rem;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: #80bdff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-        }
-
-        /* Button Styles */
         .btn-group {
             gap: 0.5rem;
         }
-
         .btn {
             border-radius: 5px;
             padding: 0.5rem 1rem;
             font-weight: 500;
             transition: all 0.2s ease;
         }
-
         .btn-outline-primary {
             color: #007bff;
             border-color: #007bff;
         }
-
         .btn-outline-primary:hover {
             background-color: #007bff;
             color: white;
         }
-
         .btn-outline-danger {
             color: #dc3545;
             border-color: #dc3545;
         }
-
         .btn-outline-danger:hover {
             background-color: #dc3545;
             color: white;
         }
-
         .btn-outline-secondary {
             color: #6c757d;
             border-color: #6c757d;
         }
-
         .btn-outline-secondary:hover {
             background-color: #6c757d;
             color: white;
         }
-
         .btn-outline-success {
             color: #28a745;
             border-color: #28a745;
         }
-
         .btn-outline-success:hover {
             background-color: #28a745;
             color: white;
         }
-
         .btn-outline-info {
             color: #17a2b8;
             border-color: #17a2b8;
         }
-
         .btn-outline-info:hover {
             background-color: #17a2b8;
             color: white;
         }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .card-body {
-                padding: 1rem;
-            }
-
-            .btn {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.9rem;
-            }
-
-            .card-header h4 {
-                font-size: 1.1rem;
-            }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+        .custom-runs-input {
+            width: 100px;
+            margin: 0 0.5rem;
         }
     </style>
 </head>
 <body class="bg-light">
     <div class="container-fluid">
         <div class="row">
-            <!-- Team Information -->
-            <div class="col-md-4">
+            <!-- Preview Scoreboard -->
+            <div class="col-12 preview-scoreboard">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <h3 id="previewBattingTeam">Team A</h3>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h3 id="previewScore">0/0</h3>
+                        <div id="previewOvers">0.0/16.0</div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h3 id="previewFieldingTeam">Team B</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timer -->
+            <div class="col-12">
                 <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h4>Team Information</h4>
+                    <div class="card-header">
+                        <h4 class="mb-0">Match Timer</h4>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label>Batting Team:</label>
-                            <input type="text" id="battingTeam" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label>Fielding Team:</label>
-                            <input type="text" id="fieldingTeam" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label>Target Score:</label>
-                            <input type="number" id="targetScore" class="form-control">
+                        <div class="timer" id="matchTimer">00:00</div>
+                        <div class="text-center">
+                            <button class="btn btn-success" onclick="startTimer()">Start</button>
+                            <button class="btn btn-danger" onclick="stopTimer()">Stop</button>
+                            <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
                         </div>
                     </div>
                 </div>
@@ -154,53 +146,31 @@
             <!-- Current Batsmen -->
             <div class="col-md-4">
                 <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h4>Current Batsmen</h4>
+                    <div class="card-header">
+                        <h4 class="mb-0">Current Batsmen</h4>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
                             <label>Striker:</label>
-                            <select id="striker" class="form-select">
-                                <option value="">Select Batsman</option>
-                            </select>
+                            <select id="striker" class="form-select"></select>
                         </div>
                         <div class="mb-3">
                             <label>Non-Striker:</label>
-                            <select id="nonStriker" class="form-select">
-                                <option value="">Select Batsman</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-primary" onclick="addNewBatsman()">Add New Batsman</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Current Bowler -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h4>Current Bowler</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label>Bowler:</label>
-                            <select id="currentBowler" class="form-select">
-                                <option value="">Select Bowler</option>
-                            </select>
+                            <select id="nonStriker" class="form-select"></select>
                         </div>
                         <div class="mb-3">
-                            <label>Over:</label>
-                            <input type="text" id="currentOver" class="form-control" readonly>
+                            <label>Current Bowler:</label>
+                            <select id="currentBowler" class="form-select"></select>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Scoring Buttons -->
-            <div class="col-12 mt-3">
+            <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header bg-warning">
-                        <h4>Scoring</h4>
+                    <div class="card-header">
+                        <h4 class="mb-0">Scoring</h4>
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -215,17 +185,317 @@
                                     <button class="btn btn-outline-primary" onclick="handleBall(4)">4</button>
                                     <button class="btn btn-outline-primary" onclick="handleBall(5)">5</button>
                                     <button class="btn btn-outline-primary" onclick="handleBall(6)">6</button>
-                                    <button class="btn btn-outline-danger" onclick="handleBall(0, true)">W</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(7)">7</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(8)">8</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(9)">9</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(10)">10</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(11)">11</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(12)">12</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(13)">13</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(14)">14</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(15)">15</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(16)">16</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(17)">17</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(18)">18</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(19)">19</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(20)">20</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(21)">21</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(22)">22</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(23)">23</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(24)">24</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(25)">25</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(26)">26</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(27)">27</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(28)">28</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(29)">29</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(30)">30</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(31)">31</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(32)">32</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(33)">33</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(34)">34</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(35)">35</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(36)">36</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(37)">37</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(38)">38</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(39)">39</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(40)">40</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(41)">41</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(42)">42</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(43)">43</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(44)">44</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(45)">45</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(46)">46</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(47)">47</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(48)">48</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(49)">49</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(50)">50</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(51)">51</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(52)">52</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(53)">53</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(54)">54</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(55)">55</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(56)">56</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(57)">57</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(58)">58</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(59)">59</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(60)">60</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(61)">61</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(62)">62</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(63)">63</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(64)">64</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(65)">65</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(66)">66</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(67)">67</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(68)">68</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(69)">69</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(70)">70</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(71)">71</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(72)">72</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(73)">73</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(74)">74</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(75)">75</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(76)">76</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(77)">77</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(78)">78</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(79)">79</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(80)">80</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(81)">81</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(82)">82</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(83)">83</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(84)">84</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(85)">85</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(86)">86</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(87)">87</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(88)">88</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(89)">89</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(90)">90</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(91)">91</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(92)">92</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(93)">93</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(94)">94</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(95)">95</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(96)">96</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(97)">97</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(98)">98</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(99)">99</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(100)">100</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(101)">101</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(102)">102</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(103)">103</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(104)">104</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(105)">105</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(106)">106</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(107)">107</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(108)">108</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(109)">109</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(110)">110</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(111)">111</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(112)">112</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(113)">113</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(114)">114</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(115)">115</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(116)">116</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(117)">117</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(118)">118</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(119)">119</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(120)">120</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(121)">121</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(122)">122</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(123)">123</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(124)">124</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(125)">125</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(126)">126</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(127)">127</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(128)">128</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(129)">129</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(130)">130</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(131)">131</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(132)">132</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(133)">133</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(134)">134</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(135)">135</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(136)">136</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(137)">137</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(138)">138</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(139)">139</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(140)">140</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(141)">141</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(142)">142</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(143)">143</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(144)">144</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(145)">145</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(146)">146</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(147)">147</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(148)">148</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(149)">149</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(150)">150</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(151)">151</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(152)">152</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(153)">153</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(154)">154</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(155)">155</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(156)">156</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(157)">157</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(158)">158</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(159)">159</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(160)">160</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(161)">161</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(162)">162</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(163)">163</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(164)">164</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(165)">165</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(166)">166</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(167)">167</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(168)">168</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(169)">169</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(170)">170</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(171)">171</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(172)">172</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(173)">173</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(174)">174</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(175)">175</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(176)">176</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(177)">177</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(178)">178</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(179)">179</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(180)">180</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(181)">181</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(182)">182</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(183)">183</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(184)">184</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(185)">185</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(186)">186</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(187)">187</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(188)">188</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(189)">189</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(190)">191</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(192)">192</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(193)">193</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(194)">194</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(195)">195</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(196)">196</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="handleBall(197)">197</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(198)">198</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(199)">199</button>
+                                    <button class="btn btn-outline-primary" onclick="handleBall(200)">200</button>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="btn-group w-100 mb-2">
                                     <button class="btn btn-outline-secondary" onclick="handleWide()">Wide</button>
                                     <button class="btn btn-outline-secondary" onclick="handleNoBall()">No Ball</button>
-                                    <button class="btn btn-outline-secondary" onclick="handleBye()">Bye</button>
-                                    <button class="btn btn-outline-secondary" onclick="handleLegBye()">Leg Bye</button>
+                                    <button class="btn btn-outline-secondary" onclick="handleLegsideWide()">Legside Wide</button>
                                 </div>
-                                <div class="btn-group w-100">
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-danger" onclick="handleWicket('bowled')">Bowled</button>
+                                    <button class="btn btn-outline-danger" onclick="handleWicket('caught')">Caught</button>
+                                    <button class="btn btn-outline-danger" onclick="handleWicket('runout')">Run Out</button>
+                                    <button class="btn btn-outline-danger" onclick="handleWicket('stumped')">Stumped</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-danger" onclick="handleWicket('hitwicket')">Hit Wicket</button>
+                                    <button class="btn btn-outline-danger" onclick="handleWicket('lbw')">LBW</button>
+                                    <button class="btn btn-outline-danger" onclick="handleWicket('handled')">Handled Ball</button>
+                                    <button class="btn btn-outline-danger" onclick="handleWicket('obstructing')">Obstructing</button>
+                                </div>
+                                <div class="btn-group w-100 mb-2">
+                                    <button class="btn btn-outline-primary" onclick="showCustomRunsInput()">Custom Runs</button>
                                     <button class="btn btn-outline-danger" onclick="undoLastBall()">Undo</button>
                                     <button class="btn btn-outline-success" onclick="saveMatch()">Save</button>
                                     <button class="btn btn-outline-info" onclick="openScoreboard()">Open Scoreboard</button>
@@ -238,17 +508,64 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Runs Modal -->
+    <div id="customRunsModal" class="modal">
+        <div class="modal-content">
+            <h3>Enter Custom Runs</h3>
+            <div class="input-group">
+                <input type="number" id="customRuns" class="form-control" min="0">
+                <button class="btn btn-primary" onclick="handleCustomRuns()">Submit</button>
+                <button class="btn btn-secondary" onclick="closeCustomRunsModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extra Ball Modal -->
+    <div id="extraBallModal" class="modal">
+        <div class="modal-content">
+            <h3>Extra Ball Available</h3>
+            <p>Would you like to add an extra ball to this over?</p>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="handleExtraBall(true)">Yes</button>
+                <button class="btn btn-danger" onclick="handleExtraBall(false)">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Partnership Modal -->
+    <div id="newPartnershipModal" class="modal">
+        <div class="modal-content">
+            <h3>New Partnership</h3>
+            <p>Select new batsmen for the next partnership:</p>
+            <div class="mb-3">
+                <label>Striker:</label>
+                <select id="newStriker" class="form-select"></select>
+            </div>
+            <div class="mb-3">
+                <label>Non-Striker:</label>
+                <select id="newNonStriker" class="form-select"></select>
+            </div>
+            <div class="mb-3">
+                <label>Bowler:</label>
+                <select id="newBowler" class="form-select"></select>
+            </div>
+            <button class="btn btn-primary" onclick="startNewPartnership()">Start Partnership</button>
+        </div>
+    </div>
+
     <script>
         // Game State
         let gameState = {
+            format: '',
             battingTeam: '',
             fieldingTeam: '',
             target: 0,
+            matchDuration: 0,
             currentScore: 0,
             wickets: 0,
             currentOver: 0,
-            totalOvers: 16,
+            totalOvers: 0,
+            partnershipOvers: 0,
             batsmen: [],
             bowlers: [],
             currentBatsmen: {
@@ -260,37 +577,56 @@
             extras: {
                 wides: 0,
                 noBalls: 0,
-                byes: 0,
-                legByes: 0
+                legsideWides: 0
+            },
+            partnership: {
+                runs: 0,
+                balls: 0,
+                overs: 0
+            },
+            timer: {
+                startTime: null,
+                elapsed: 0,
+                isRunning: false
             }
         };
 
         // DOM Elements
         const elements = {
-            battingTeam: document.getElementById('battingTeam'),
-            fieldingTeam: document.getElementById('fieldingTeam'),
-            targetScore: document.getElementById('targetScore'),
+            previewBattingTeam: document.getElementById('previewBattingTeam'),
+            previewFieldingTeam: document.getElementById('previewFieldingTeam'),
+            previewScore: document.getElementById('previewScore'),
+            previewOvers: document.getElementById('previewOvers'),
+            matchTimer: document.getElementById('matchTimer'),
             striker: document.getElementById('striker'),
             nonStriker: document.getElementById('nonStriker'),
             currentBowler: document.getElementById('currentBowler'),
-            currentOver: document.getElementById('currentOver')
+            customRunsModal: document.getElementById('customRunsModal'),
+            extraBallModal: document.getElementById('extraBallModal'),
+            newPartnershipModal: document.getElementById('newPartnershipModal')
         };
 
         // Initialize Game
         function initializeGame() {
-            // Load saved game state if exists
             const savedState = localStorage.getItem('indoorCricketGame');
             if (savedState) {
                 gameState = JSON.parse(savedState);
                 updateDisplay();
+            } else {
+                window.location.href = 'setup.html';
             }
         }
 
         // Update Display
         function updateDisplay() {
-            elements.currentOver.value = gameState.currentOver.toFixed(1);
+            elements.previewBattingTeam.textContent = gameState.battingTeam;
+            elements.previewFieldingTeam.textContent = gameState.fieldingTeam;
+            elements.previewScore.textContent = `${gameState.currentScore}/${gameState.wickets}`;
+            elements.previewOvers.textContent = `${gameState.currentOver.toFixed(1)}/${gameState.totalOvers}`;
+            
             updateBatsmenSelects();
             updateBowlerSelect();
+            updateTimer();
         }
 
         // Update Batsmen Selects
@@ -298,66 +634,64 @@
             const strikerSelect = elements.striker;
             const nonStrikerSelect = elements.nonStriker;
             
-            // Clear existing options
-            strikerSelect.innerHTML = '<option value="">Select Batsman</option>';
-            nonStrikerSelect.innerHTML = '<option value="">Select Batsman</option>';
+            strikerSelect.innerHTML = gameState.batsmen.map(batsman => `
+                <option value="${batsman.id}" ${gameState.currentBatsmen.striker?.id === batsman.id ? 'selected' : ''}>
+                    ${batsman.name} (${batsman.score})
+                </option>
+            `).join('');
             
-            // Add batsmen options
-            gameState.batsmen.forEach(batsman => {
-                const option = document.createElement('option');
-                option.value = batsman.id;
-                option.textContent = `${batsman.name} (${batsman.score})`;
-                
-                strikerSelect.appendChild(option.cloneNode(true));
-                nonStrikerSelect.appendChild(option);
-            });
-            
-            // Set selected values
-            if (gameState.currentBatsmen.striker) {
-                strikerSelect.value = gameState.currentBatsmen.striker.id;
-            }
-            if (gameState.currentBatsmen.nonStriker) {
-                nonStrikerSelect.value = gameState.currentBatsmen.nonStriker.id;
-            }
+            nonStrikerSelect.innerHTML = gameState.batsmen.map(batsman => `
+                <option value="${batsman.id}" ${gameState.currentBatsmen.nonStriker?.id === batsman.id ? 'selected' : ''}>
+                    ${batsman.name} (${batsman.score})
+                </option>
+            `).join('');
         }
 
         // Update Bowler Select
         function updateBowlerSelect() {
             const bowlerSelect = elements.currentBowler;
-            bowlerSelect.innerHTML = '<option value="">Select Bowler</option>';
-            
-            gameState.bowlers.forEach(bowler => {
-                const option = document.createElement('option');
-                option.value = bowler.id;
-                option.textContent = `${bowler.name} (${bowler.overs.toFixed(1)}/${bowler.wickets})`;
-                bowlerSelect.appendChild(option);
-            });
-            
-            if (gameState.currentBowler) {
-                bowlerSelect.value = gameState.currentBowler.id;
+            bowlerSelect.innerHTML = gameState.bowlers.map(bowler => `
+                <option value="${bowler.id}" ${gameState.currentBowler?.id === bowler.id ? 'selected' : ''}>
+                    ${bowler.name} (${bowler.overs.toFixed(1)}/${bowler.wickets})
+                </option>
+            `).join('');
+        }
+
+        // Timer Functions
+        function startTimer() {
+            if (!gameState.timer.isRunning) {
+                gameState.timer.startTime = Date.now() - gameState.timer.elapsed;
+                gameState.timer.isRunning = true;
+                updateTimer();
             }
         }
 
-        // Add New Batsman
-        function addNewBatsman() {
-            const name = prompt('Enter batsman name:');
-            if (name) {
-                const newBatsman = {
-                    id: Date.now(),
-                    name: name,
-                    score: 0,
-                    balls: 0,
-                    fours: 0,
-                    sixes: 0
-                };
-                gameState.batsmen.push(newBatsman);
-                updateBatsmenSelects();
-                saveGameState();
+        function stopTimer() {
+            gameState.timer.isRunning = false;
+        }
+
+        function resetTimer() {
+            gameState.timer.elapsed = 0;
+            gameState.timer.isRunning = false;
+            updateTimer();
+        }
+
+        function updateTimer() {
+            if (gameState.timer.isRunning) {
+                gameState.timer.elapsed = Date.now() - gameState.timer.startTime;
+            }
+            
+            const minutes = Math.floor(gameState.timer.elapsed / 60000);
+            const seconds = Math.floor((gameState.timer.elapsed % 60000) / 1000);
+            elements.matchTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (gameState.timer.isRunning) {
+                requestAnimationFrame(updateTimer);
             }
         }
 
         // Handle Ball
-        function handleBall(runs, isWicket = false) {
+        function handleBall(runs) {
             if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
                 alert('Please select batsmen and bowler first');
                 return;
@@ -365,39 +699,68 @@
 
             const ball = {
                 runs: runs,
-                isWicket: isWicket,
                 batsman: gameState.currentBatsmen.striker,
                 bowler: gameState.currentBowler,
                 timestamp: new Date()
             };
 
-            if (isWicket) {
-                gameState.wickets++;
-                gameState.currentBatsmen.striker.score = 0;
-                // Swap batsmen
+            gameState.currentScore += runs;
+            gameState.currentBatsmen.striker.score += runs;
+            gameState.currentBatsmen.striker.balls++;
+            gameState.partnership.runs += runs;
+            gameState.partnership.balls++;
+            gameState.currentOver += 0.1;
+            gameState.currentBowler.overs += 0.1;
+            gameState.currentBowler.runs += runs;
+            
+            if (runs === 4) gameState.currentBatsmen.striker.fours++;
+            if (runs === 6) gameState.currentBatsmen.striker.sixes++;
+            
+            if (runs % 2 === 1) {
+                // Swap batsmen on odd runs
                 const temp = gameState.currentBatsmen.striker;
                 gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
                 gameState.currentBatsmen.nonStriker = temp;
-            } else {
-                gameState.currentScore += runs;
-                gameState.currentBatsmen.striker.score += runs;
-                gameState.currentBatsmen.striker.balls++;
-                
-                if (runs === 4) gameState.currentBatsmen.striker.fours++;
-                if (runs === 6) gameState.currentBatsmen.striker.sixes++;
-                
-                if (runs % 2 === 1) {
-                    // Swap batsmen on odd runs
-                    const temp = gameState.currentBatsmen.striker;
-                    gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
-                    gameState.currentBatsmen.nonStriker = temp;
-                }
             }
 
+            checkOverComplete();
+            gameState.ballHistory.push(ball);
+            updateDisplay();
+            saveGameState();
+            updateScoreboard();
+        }
+
+        // Handle Wicket
+        function handleWicket(type) {
+            if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
+                alert('Please select batsmen and bowler first');
+                return;
+            }
+
+            const ball = {
+                type: type,
+                batsman: gameState.currentBatsmen.striker,
+                bowler: gameState.currentBowler,
+                timestamp: new Date()
+            };
+
+            gameState.wickets++;
+            gameState.currentBatsmen.striker.score -= 5; // Penalty runs
+            gameState.currentScore -= 5; // Penalty runs
+            gameState.partnership.runs -= 5; // Penalty runs
+            gameState.currentBatsmen.striker.balls++;
+            gameState.partnership.balls++;
             gameState.currentOver += 0.1;
             gameState.currentBowler.overs += 0.1;
-            if (isWicket) gameState.currentBowler.wickets++;
-            
+            gameState.currentBowler.wickets++;
+            gameState.currentBowler.runs += 5; // Penalty runs added to bowler's figures
+
+            // Swap batsmen
+            const temp = gameState.currentBatsmen.striker;
+            gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
+            gameState.currentBatsmen.nonStriker = temp;
+
+            checkOverComplete();
             gameState.ballHistory.push(ball);
             updateDisplay();
             saveGameState();
@@ -406,39 +769,123 @@
 
         // Handle Extras
         function handleWide() {
-            gameState.currentScore++;
-            gameState.extras.wides++;
-            gameState.currentOver += 0.1;
-            updateDisplay();
-            saveGameState();
-            updateScoreboard();
+            handleExtra(2, 'wides');
         }
 
         function handleNoBall() {
-            gameState.currentScore++;
-            gameState.extras.noBalls++;
+            handleExtra(2, 'noBalls');
+        }
+
+        function handleLegsideWide() {
+            handleExtra(2, 'legsideWides');
+        }
+
+        function handleExtra(runs, type) {
+            if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
+                alert('Please select batsmen and bowler first');
+                return;
+            }
+
+            const ball = {
+                type: type,
+                runs: runs,
+                batsman: gameState.currentBatsmen.striker,
+                bowler: gameState.currentBowler,
+                timestamp: new Date()
+            };
+
+            gameState.currentScore += runs;
+            gameState.currentBatsmen.striker.score += runs;
+            gameState.partnership.runs += runs;
+            gameState.extras[type]++;
             gameState.currentOver += 0.1;
+            gameState.currentBowler.overs += 0.1;
+            gameState.currentBowler.runs += runs;
+
+            checkOverComplete();
+            gameState.ballHistory.push(ball);
             updateDisplay();
             saveGameState();
             updateScoreboard();
         }
 
-        function handleBye() {
-            gameState.currentScore++;
-            gameState.extras.byes++;
-            gameState.currentOver += 0.1;
+        // Check Over Complete
+        function checkOverComplete() {
+            const currentOver = Math.floor(gameState.currentOver);
+            const currentBall = Math.round((gameState.currentOver % 1) * 10);
+            
+            if (currentBall === 6) {
+                // Over complete
+                if (currentOver === gameState.partnership.overs + gameState.partnershipOvers - 1 && 
+                    currentBall === 6) {
+                    // Last ball of partnership
+                    showExtraBallModal();
+                } else {
+                    // Normal over complete
+                    selectNewBowler();
+                }
+            }
+        }
+
+        // Extra Ball Modal
+        function showExtraBallModal() {
+            elements.extraBallModal.style.display = 'block';
+        }
+
+        function handleExtraBall(addBall) {
+            elements.extraBallModal.style.display = 'none';
+            if (addBall) {
+                gameState.currentOver += 0.1;
+                gameState.currentBowler.overs += 0.1;
+            }
+            startNewPartnership();
+        }
+
+        // New Partnership
+        function showNewPartnershipModal() {
+            elements.newPartnershipModal.style.display = 'block';
+        }
+
+        function startNewPartnership() {
+            const newStriker = document.getElementById('newStriker').value;
+            const newNonStriker = document.getElementById('newNonStriker').value;
+            const newBowler = document.getElementById('newBowler').value;
+
+            if (!newStriker || !newNonStriker || !newBowler) {
+                alert('Please select all players');
+                return;
+            }
+
+            gameState.currentBatsmen.striker = gameState.batsmen.find(b => b.id === parseInt(newStriker));
+            gameState.currentBatsmen.nonStriker = gameState.batsmen.find(b => b.id === parseInt(newNonStriker));
+            gameState.currentBowler = gameState.bowlers.find(b => b.id === parseInt(newBowler));
+            gameState.partnership = {
+                runs: 0,
+                balls: 0,
+                overs: Math.floor(gameState.currentOver)
+            };
+
+            elements.newPartnershipModal.style.display = 'none';
             updateDisplay();
             saveGameState();
             updateScoreboard();
         }
 
-        function handleLegBye() {
-            gameState.currentScore++;
-            gameState.extras.legByes++;
-            gameState.currentOver += 0.1;
-            updateDisplay();
-            saveGameState();
-            updateScoreboard();
+        // Custom Runs
+        function showCustomRunsInput() {
+            elements.customRunsModal.style.display = 'block';
+        }
+
+        function closeCustomRunsModal() {
+            elements.customRunsModal.style.display = 'none';
+        }
+
+        function handleCustomRuns() {
+            const runs = parseInt(document.getElementById('customRuns').value);
+            if (runs >= 0) {
+                handleBall(runs);
+            }
+            closeCustomRunsModal();
         }
 
         // Undo Last Ball
@@ -449,16 +896,23 @@
             gameState.currentOver -= 0.1;
             gameState.currentBowler.overs -= 0.1;
             
-            if (lastBall.isWicket) {
+            if (lastBall.type && lastBall.type.includes('wicket')) {
                 gameState.wickets--;
                 gameState.currentBowler.wickets--;
+                gameState.currentScore += 5; // Restore penalty runs
+                gameState.currentBatsmen.striker.score += 5;
+                gameState.partnership.runs += 5;
             } else {
                 gameState.currentScore -= lastBall.runs;
                 gameState.currentBatsmen.striker.score -= lastBall.runs;
                 gameState.currentBatsmen.striker.balls--;
+                gameState.partnership.runs -= lastBall.runs;
+                gameState.partnership.balls--;
+                gameState.currentBowler.runs -= lastBall.runs;
                 
-                if (lastBall.runs === 4) gameState.currentBatsmen.striker.fours--;
-                if (lastBall.runs === 6) gameState.currentBatsmen.striker.sixes--;
+                if (lastBall.type) {
+                    gameState.extras[lastBall.type]--;
+                }
             }
             
             updateDisplay();
