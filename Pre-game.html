@@ -322,6 +322,18 @@
                 return false;
             }
         }
+
+        // Initialize page
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("Pre-game setup window loaded");
+            
+            // Ensure we're in a popup window
+            if (!window.opener) {
+                alert("This window must be opened from the main scorer window");
+                window.close();
+                return;
+            }
+        });
     </script>
 </body>
 </html>
