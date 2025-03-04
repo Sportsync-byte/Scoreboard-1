@@ -73,6 +73,13 @@
             font-size: 16px;
         }
 
+        .error-message {
+            color: #ff4444;
+            margin-top: 5px;
+            font-size: 0.9em;
+            display: none;
+        }
+
         .button-group {
             display: flex;
             gap: 10px;
@@ -122,14 +129,17 @@
             <div class="form-group">
                 <label for="batsman1">Batsman 1:</label>
                 <input type="text" id="batsman1" required placeholder="Enter first batsman's name">
+                <div class="error-message" id="batsman1Error">Please enter first batsman's name</div>
             </div>
             <div class="form-group">
                 <label for="batsman2">Batsman 2:</label>
                 <input type="text" id="batsman2" required placeholder="Enter second batsman's name">
+                <div class="error-message" id="batsman2Error">Please enter second batsman's name</div>
             </div>
             <div class="form-group">
                 <label for="currentBowler">Current Bowler:</label>
                 <input type="text" id="currentBowler" required placeholder="Enter current bowler's name">
+                <div class="error-message" id="bowlerError">Please enter current bowler's name</div>
             </div>
             <div class="button-group">
                 <button onclick="confirmBatsmenBowler()" class="confirm-btn">Confirm and Start Scoring</button>
@@ -165,18 +175,47 @@
             }
         }
 
+        // Validate inputs
+        function validateInputs() {
+            let isValid = true;
+            const errors = {
+                batsman1: "Please enter first batsman's name",
+                batsman2: "Please enter second batsman's name",
+                currentBowler: "Please enter current bowler's name"
+            };
+
+            // Clear previous errors
+            Object.keys(errors).forEach(key => {
+                document.getElementById(`${key}Error`).style.display = "none";
+            });
+
+            // Validate inputs
+            if (!document.getElementById("batsman1").value.trim()) {
+                document.getElementById("batsman1Error").style.display = "block";
+                isValid = false;
+            }
+            if (!document.getElementById("batsman2").value.trim()) {
+                document.getElementById("batsman2Error").style.display = "block";
+                isValid = false;
+            }
+            if (!document.getElementById("currentBowler").value.trim()) {
+                document.getElementById("bowlerError").style.display = "block";
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
         // Confirm batsmen and bowler
         function confirmBatsmenBowler() {
             try {
+                if (!validateInputs()) {
+                    return;
+                }
+
                 const batsman1 = document.getElementById("batsman1").value.trim();
                 const batsman2 = document.getElementById("batsman2").value.trim();
                 const currentBowler = document.getElementById("currentBowler").value.trim();
-
-                // Validate inputs
-                if (!batsman1 || !batsman2 || !currentBowler) {
-                    alert("Please enter all required names");
-                    return;
-                }
 
                 // Get current match data
                 const matchData = JSON.parse(localStorage.getItem("matchData"));
@@ -195,8 +234,17 @@
                 localStorage.setItem("matchData", JSON.stringify(matchData));
 
                 // Open scoreboard in new window
-                window.open("scoreboard.html", "Scoreboard", 
+                const scoreboardWindow = window.open("scoreboard.html", "Scoreboard", 
                     "width=800,height=600,menubar=no,toolbar=no,location=no,status=no");
+
+                // Check if popup was blocked
+                if (!scoreboardWindow || scoreboardWindow.closed) {
+                    alert("Please allow popups for this site to use the scorer");
+                    return;
+                }
+
+                // Focus the new window
+                scoreboardWindow.focus();
 
                 // Close this window
                 window.close();
