@@ -122,6 +122,20 @@
             font-size: 0.9em;
             display: none;
         }
+
+        .debug-info {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .debug-info.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -173,6 +187,7 @@
                 <button onclick="window.close()" class="close-btn">Cancel</button>
             </div>
         </div>
+        <div class="debug-info" id="debugInfo"></div>
     </div>
 
     <script>
@@ -201,10 +216,21 @@
             }
         };
 
+        // Debug logging function
+        function debugLog(message) {
+            console.log(message);
+            const debugInfo = document.getElementById("debugInfo");
+            debugInfo.classList.add("show");
+            debugInfo.innerHTML += `<div>${message}</div>`;
+            debugInfo.scrollTop = debugInfo.scrollHeight;
+        }
+
         // Handle preset game selection
         function handlePresetChange() {
             const presetSelect = document.getElementById("gamePreset");
             const selectedPreset = presetSelect.value;
+            
+            debugLog(`Selected preset: ${selectedPreset}`);
             
             if (selectedPreset === "custom") {
                 // Clear all fields
@@ -220,6 +246,8 @@
                 document.getElementById("teamB").disabled = false;
                 document.getElementById("battingFirst").disabled = false;
                 document.getElementById("inningsTimer").disabled = false;
+                
+                debugLog("Switched to custom game mode");
             } else {
                 // Fill in preset values
                 const preset = gamePresets[selectedPreset];
@@ -235,6 +263,8 @@
                 document.getElementById("teamB").disabled = true;
                 document.getElementById("battingFirst").disabled = true;
                 document.getElementById("inningsTimer").disabled = true;
+                
+                debugLog(`Loaded preset: ${JSON.stringify(preset)}`);
             }
         }
 
@@ -257,16 +287,19 @@
             if (!document.getElementById("teamA").value.trim()) {
                 document.getElementById("teamAError").style.display = "block";
                 isValid = false;
+                debugLog("Team A name is required");
             }
             if (!document.getElementById("teamB").value.trim()) {
                 document.getElementById("teamBError").style.display = "block";
                 isValid = false;
+                debugLog("Team B name is required");
             }
 
             // Validate match format
             if (!document.getElementById("matchFormat").value) {
                 document.getElementById("formatError").style.display = "block";
                 isValid = false;
+                debugLog("Match format is required");
             }
 
             // Validate innings timer
@@ -274,6 +307,7 @@
             if (isNaN(timer) || timer < 1 || timer > 60) {
                 document.getElementById("timerError").style.display = "block";
                 isValid = false;
+                debugLog("Invalid timer value");
             }
 
             return isValid;
@@ -282,7 +316,10 @@
         // Start match function
         function startMatch() {
             try {
+                debugLog("Starting match setup...");
+                
                 if (!validateInputs()) {
+                    debugLog("Validation failed");
                     return;
                 }
 
@@ -293,8 +330,11 @@
                 const battingFirst = document.getElementById("battingFirst").value;
                 const inningsTimer = document.getElementById("inningsTimer").value;
 
+                debugLog(`Input values: ${JSON.stringify({ teamA, teamB, matchFormat, battingFirst, inningsTimer })}`);
+
                 // Calculate total partnerships based on match format
                 const totalPartnerships = Math.ceil(parseInt(matchFormat) / 4);
+                debugLog(`Total partnerships: ${totalPartnerships}`);
 
                 // Initialize match data
                 const matchData = {
@@ -331,58 +371,90 @@
                     consecutiveDotBalls: 0
                 };
 
+                debugLog(`Match data initialized: ${JSON.stringify(matchData)}`);
+
+                // Check localStorage availability
+                if (!isLocalStorageAvailable()) {
+                    throw new Error("LocalStorage is not available");
+                }
+
                 // Store match data
-                if (isLocalStorageAvailable()) {
+                try {
                     localStorage.setItem("matchData", JSON.stringify(matchData));
                     localStorage.setItem("teamA", teamA);
                     localStorage.setItem("teamB", teamB);
                     localStorage.setItem("matchFormat", matchFormat);
                     localStorage.setItem("inningsTimer", inningsTimer);
+                    debugLog("Data stored in localStorage successfully");
+                } catch (storageError) {
+                    debugLog(`Error storing data: ${storageError.message}`);
+                    throw new Error("Failed to store match data");
                 }
 
-                // Open batsman setup in new window
-                const batsmanWindow = window.open("batsman.html", "Batsman Setup", 
-                    "width=600,height=600,menubar=no,toolbar=no,location=no,status=no");
+                // Open batsman setup window
+                try {
+                    debugLog("Opening batsman setup window...");
+                    const batsmanWindow = window.open("./batsman.html", "Batsman Setup", 
+                        "width=600,height=600,menubar=no,toolbar=no,location=no,status=no");
 
-                // Check if popup was blocked
-                if (!batsmanWindow || batsmanWindow.closed) {
-                    alert("Please allow popups for this site to use the scorer");
-                    return;
+                    if (!batsmanWindow || batsmanWindow.closed) {
+                        throw new Error("Failed to open batsman setup window");
+                    }
+
+                    batsmanWindow.focus();
+                    window.close();
+                } catch (windowError) {
+                    debugLog(`Error opening window: ${windowError.message}`);
+                    throw new Error("Failed to open batsman setup window");
                 }
-
-                // Focus the new window
-                batsmanWindow.focus();
-
-                // Close this window
-                window.close();
 
             } catch (error) {
-                console.error("Error starting match:", error);
-                alert("An error occurred while starting the match. Please try again.");
+                debugLog(`Error in startMatch: ${error.message}`);
+                alert(`Error starting match: ${error.message}`);
             }
         }
 
         // Utility function
         function isLocalStorageAvailable() {
             try {
-                localStorage.setItem("test", "test");
-                localStorage.removeItem("test");
+                const test = 'test';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
                 return true;
             } catch (e) {
+                debugLog(`LocalStorage check failed: ${e.message}`);
                 return false;
             }
         }
 
         // Initialize page
         document.addEventListener("DOMContentLoaded", function() {
-            console.log("Pre-game setup window loaded");
+            debugLog("Pre-game setup window loaded");
             
-            // Ensure we're in a popup window
+            // Check if we're in a popup window
             if (!window.opener) {
+                debugLog("Window not opened as popup");
                 alert("This window must be opened from the main scorer window");
                 window.close();
                 return;
             }
+
+            // Check localStorage availability
+            if (!isLocalStorageAvailable()) {
+                debugLog("LocalStorage not available");
+                alert("Your browser's localStorage is not available. Please enable it or try a different browser.");
+                window.close();
+                return;
+            }
+
+            // Log initial state
+            debugLog("Initial localStorage state: " + JSON.stringify({
+                matchData: localStorage.getItem("matchData"),
+                teamA: localStorage.getItem("teamA"),
+                teamB: localStorage.getItem("teamB"),
+                matchFormat: localStorage.getItem("matchFormat"),
+                inningsTimer: localStorage.getItem("inningsTimer")
+            }));
         });
     </script>
 </body>
