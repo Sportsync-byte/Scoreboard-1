@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indoor Cricket - Game Setup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+        .card-header {
+            background: #007bff;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .player-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .player-item:last-child {
+            border-bottom: none;
+        }
+        .remove-player {
+            color: #dc3545;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Game Setup</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="setupForm">
+                            <!-- Team Information -->
+                            <div class="mb-4">
+                                <h5>Team Information</h5>
+                                <div class="mb-3">
+                                    <label>Batting Team Name:</label>
+                                    <input type="text" id="battingTeam" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Fielding Team Name:</label>
+                                    <input type="text" id="fieldingTeam" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <!-- Game Settings -->
+                            <div class="mb-4">
+                                <h5>Game Settings</h5>
+                                <div class="mb-3">
+                                    <label>Match Duration (minutes):</label>
+                                    <input type="number" id="matchDuration" class="form-control" value="40" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label>Target Score:</label>
+                                    <input type="number" id="targetScore" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <!-- Batting Team Players -->
+                            <div class="mb-4">
+                                <h5>Batting Team Players</h5>
+                                <div class="input-group mb-2">
+                                    <input type="text" id="newBatsman" class="form-control" placeholder="Enter batsman name">
+                                    <button type="button" class="btn btn-primary" onclick="addBatsman()">Add</button>
+                                </div>
+                                <div id="batsmenList" class="player-list"></div>
+                            </div>
+
+                            <!-- Fielding Team Players -->
+                            <div class="mb-4">
+                                <h5>Fielding Team Players</h5>
+                                <div class="input-group mb-2">
+                                    <input type="text" id="newBowler" class="form-control" placeholder="Enter bowler name">
+                                    <button type="button" class="btn btn-primary" onclick="addBowler()">Add</button>
+                                </div>
+                                <div id="bowlersList" class="player-list"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100">Start Match</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let batsmen = [];
+        let bowlers = [];
+
+        function addBatsman() {
+            const input = document.getElementById('newBatsman');
+            const name = input.value.trim();
+            if (name) {
+                batsmen.push({
+                    id: Date.now(),
+                    name: name,
+                    score: 0,
+                    balls: 0,
+                    fours: 0,
+                    sixes: 0
+                });
+                updateBatsmenList();
+                input.value = '';
+            }
+        }
+
+        function addBowler() {
+            const input = document.getElementById('newBowler');
+            const name = input.value.trim();
+            if (name) {
+                bowlers.push({
+                    id: Date.now(),
+                    name: name,
+                    overs: 0,
+                    wickets: 0,
+                    runs: 0
+                });
+                updateBowlersList();
+                input.value = '';
+            }
+        }
+
+        function removeBatsman(id) {
+            batsmen = batsmen.filter(b => b.id !== id);
+            updateBatsmenList();
+        }
+
+        function removeBowler(id) {
+            bowlers = bowlers.filter(b => b.id !== id);
+            updateBowlersList();
+        }
+
+        function updateBatsmenList() {
+            const list = document.getElementById('batsmenList');
+            list.innerHTML = batsmen.map(batsman => `
+                <div class="player-item">
+                    <span>${batsman.name}</span>
+                    <span class="remove-player" onclick="removeBatsman(${batsman.id})">×</span>
+                </div>
+            `).join('');
+        }
+
+        function updateBowlersList() {
+            const list = document.getElementById('bowlersList');
+            list.innerHTML = bowlers.map(bowler => `
+                <div class="player-item">
+                    <span>${bowler.name}</span>
+                    <span class="remove-player" onclick="removeBowler(${bowler.id})">×</span>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('setupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (batsmen.length < 2) {
+                alert('Please add at least 2 batsmen');
+                return;
+            }
+            
+            if (bowlers.length < 1) {
+                alert('Please add at least 1 bowler');
+                return;
+            }
+
+            const gameSetup = {
+                battingTeam: document.getElementById('battingTeam').value,
+                fieldingTeam: document.getElementById('fieldingTeam').value,
+                target: parseInt(document.getElementById('targetScore').value),
+                matchDuration: parseInt(document.getElementById('matchDuration').value),
+                batsmen: batsmen,
+                bowlers: bowlers,
+                currentBatsmen: {
+                    striker: batsmen[0],
+                    nonStriker: batsmen[1]
+                },
+                currentBowler: null,
+                currentScore: 0,
+                wickets: 0,
+                currentOver: 0,
+                totalOvers: 16,
+                extras: {
+                    wides: 0,
+                    noBalls: 0,
+                    legsideWides: 0
+                },
+                partnership: {
+                    runs: 0,
+                    balls: 0,
+                    overs: 0
+                },
+                ballHistory: [],
+                timestamp: new Date()
+            };
+
+            localStorage.setItem('indoorCricketGame', JSON.stringify(gameSetup));
+            window.location.href = 'umpire-combined.html';
+        });
+    </script>
+</body>
+</html>
