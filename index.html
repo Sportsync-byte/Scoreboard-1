@@ -14,25 +14,62 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
+            display: flex;
+            gap: 20px;
+        }
+
+        .setup-section {
+            flex: 1;
             background: #2a2a2a;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
-        h1 {
-            text-align: center;
+        .scoring-section {
+            flex: 2;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1, h2 {
             color: #00ff9d;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            background: #333;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00ff9d;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #00ff9d;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-size: 16px;
         }
 
         .button-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            margin-top: 20px;
         }
 
         button {
@@ -44,7 +81,6 @@
             transition: all 0.3s ease;
             font-size: 1.1em;
             flex: 1;
-            min-width: 150px;
         }
 
         .start-btn {
@@ -55,15 +91,6 @@
         .start-btn:hover {
             background: #00cc7d;
             transform: translateY(-2px);
-        }
-
-        .timer-btn {
-            background: #2a3b4c;
-            color: #00ff9d;
-        }
-
-        .timer-btn:hover {
-            background: #1f2937;
         }
 
         .scoring-btn {
@@ -108,77 +135,129 @@
             border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
-            font-size: 1.5em;
+            font-size: 2em;
+            color: #00ff9d;
         }
 
         .timer-display {
             background: #2a3b4c;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+            color: #00ff9d;
+        }
+
+        .live-preview {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .live-preview h3 {
+            color: #00ff9d;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            color: #ff4444;
+            margin-top: 5px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .setup-complete {
+            display: none;
+            background: #00ff9d;
+            color: #1a1a1a;
             padding: 10px;
             border-radius: 4px;
             margin-bottom: 20px;
             text-align: center;
-            font-size: 1.2em;
-            color: #00ff9d;
         }
 
-        .debug-info {
-            background: #1a1a1a;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 20px;
-            font-family: monospace;
-            font-size: 0.9em;
-            display: none;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .debug-info.show {
-            display: block;
-        }
-
-        .debug-info div {
-            margin: 5px 0;
-            padding: 5px;
-            border-bottom: 1px solid #333;
-        }
-
-        .error-container {
-            background: #ff4444;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .error-container.show {
+        .setup-complete.show {
             display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Indoor Cricket Scorer</h1>
-        <div class="error-container" id="errorContainer"></div>
-        
-        <!-- Start New Match Button -->
-        <div class="button-group">
-            <button onclick="openPreGameSetup()" class="start-btn">Start New Match</button>
+        <!-- Setup Section -->
+        <div class="setup-section">
+            <h1>Match Setup</h1>
+            
+            <!-- Pre-game Setup -->
+            <div class="form-group">
+                <h2>Game Details</h2>
+                <label for="matchFormat">Match Format:</label>
+                <select id="matchFormat" required>
+                    <option value="12">12 Overs</option>
+                    <option value="16">16 Overs</option>
+                    <option value="20">20 Overs</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="teamA">Team A Name:</label>
+                <input type="text" id="teamA" required placeholder="Enter Team A name">
+            </div>
+            <div class="form-group">
+                <label for="teamB">Team B Name:</label>
+                <input type="text" id="teamB" required placeholder="Enter Team B name">
+            </div>
+            <div class="form-group">
+                <label for="battingFirst">Team Batting First:</label>
+                <select id="battingFirst" required>
+                    <option value="A">Team A</option>
+                    <option value="B">Team B</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="inningsTimer">Innings Timer (minutes):</label>
+                <input type="number" id="inningsTimer" value="20" min="1" max="60" required>
+            </div>
+
+            <!-- Batsmen Setup -->
+            <div class="form-group">
+                <h2>Current Batsmen & Bowler</h2>
+                <label for="batsman1">Batsman 1:</label>
+                <input type="text" id="batsman1" required placeholder="Enter first batsman name">
+            </div>
+            <div class="form-group">
+                <label for="batsman2">Batsman 2:</label>
+                <input type="text" id="batsman2" required placeholder="Enter second batsman name">
+            </div>
+            <div class="form-group">
+                <label for="currentBowler">Current Bowler:</label>
+                <input type="text" id="currentBowler" required placeholder="Enter current bowler name">
+            </div>
+
+            <div class="button-group">
+                <button onclick="startMatch()" class="start-btn">Start Match</button>
+            </div>
+
+            <div class="setup-complete" id="setupComplete">
+                Match setup complete! You can now start scoring.
+            </div>
         </div>
 
-        <!-- Timer Controls -->
-        <div class="button-group" id="timerControls" style="display: none;">
-            <button onclick="startTimer(parseInt(document.getElementById('inningsTimer').value))" class="timer-btn">Start Timer</button>
-            <button onclick="pauseTimer()" class="timer-btn">Pause Timer</button>
-            <button onclick="resetTimer()" class="timer-btn">Reset Timer</button>
-        </div>
+        <!-- Scoring Section -->
+        <div class="scoring-section">
+            <h1>Scoring</h1>
+            
+            <div class="timer-display" id="timerDisplay">Timer: Not Started</div>
+            <div class="score-display" id="scoreDisplay">No match in progress</div>
 
-        <!-- Timer Display -->
-        <div class="timer-display" id="timerDisplay">Timer: Not Started</div>
+            <!-- Timer Controls -->
+            <div class="button-group">
+                <button onclick="startTimer()" class="control-btn">Start Timer</button>
+                <button onclick="pauseTimer()" class="control-btn">Pause Timer</button>
+                <button onclick="resetTimer()" class="control-btn">Reset Timer</button>
+            </div>
 
-        <!-- Scoring Controls -->
-        <div id="scoringControls" style="display: none;">
             <!-- Runs -->
             <div class="button-group">
                 <button onclick="addRun(1)" class="scoring-btn">1 Run</button>
@@ -213,68 +292,100 @@
                 <button onclick="endOver()" class="control-btn">End Over</button>
                 <button onclick="changeBowler()" class="control-btn">Change Bowler</button>
             </div>
-        </div>
 
-        <!-- Score Display -->
-        <div class="score-display" id="scoreDisplay">
-            No match in progress
+            <!-- Live Preview -->
+            <div class="live-preview">
+                <h3>Live Scoreboard Preview</h3>
+                <div id="liveScoreboard">
+                    <div class="score-display" id="liveScoreDisplay">No match in progress</div>
+                    <div class="timer-display" id="liveTimerDisplay">Timer: Not Started</div>
+                </div>
+            </div>
         </div>
-
-        <div class="debug-info" id="debugInfo"></div>
     </div>
 
     <script>
         let timerInterval;
         let remainingTime = 0;
         let isTimerRunning = false;
+        let matchData = null;
 
-        // Debug logging function
-        function debugLog(message) {
-            console.log(message);
-            const debugInfo = document.getElementById('debugInfo');
-            if (debugInfo) {
-                const logEntry = document.createElement('div');
-                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-                debugInfo.appendChild(logEntry);
-                debugInfo.scrollTop = debugInfo.scrollHeight;
-            }
-        }
-
-        // Function to open pre-game setup
-        function openPreGameSetup() {
+        // Start match function
+        function startMatch() {
             try {
-                // Clear any existing match data
-                localStorage.removeItem('matchData');
-                
-                // Open pre-game setup window
-                const pregameWindow = window.open('pregame.html', 'PreGameSetup', 
-                    'width=600,height=800,resizable=yes,scrollbars=yes,menubar=no,toolbar=no,location=no,status=no');
-                
-                if (!pregameWindow) {
-                    alert('Please allow popups for this site to use the scorer.');
+                // Validate inputs
+                if (!validateInputs()) {
                     return;
                 }
 
-                // Focus on the new window
-                pregameWindow.focus();
-                
-                debugLog('Pre-game setup window opened');
+                // Initialize match data
+                matchData = {
+                    teamA: document.getElementById('teamA').value.trim(),
+                    teamB: document.getElementById('teamB').value.trim(),
+                    matchFormat: document.getElementById('matchFormat').value,
+                    battingFirst: document.getElementById('battingFirst').value,
+                    inningsTimer: parseInt(document.getElementById('inningsTimer').value),
+                    currentInnings: 1,
+                    scores: {
+                        A: { runs: 0, wickets: 0, overs: 0, balls: 0 },
+                        B: { runs: 0, wickets: 0, overs: 0, balls: 0 }
+                    },
+                    currentBatsmen: {
+                        A: [
+                            document.getElementById('batsman1').value.trim(),
+                            document.getElementById('batsman2').value.trim()
+                        ],
+                        B: []
+                    },
+                    currentBowler: document.getElementById('currentBowler').value.trim(),
+                    lastUpdated: new Date().toISOString()
+                };
+
+                // Show setup complete message
+                document.getElementById('setupComplete').classList.add('show');
+
+                // Update displays
+                updateScoreDisplay();
+                updateLivePreview();
+
+                // Start timer
+                startTimer();
+
             } catch (error) {
-                debugLog(`Error opening pre-game setup: ${error.message}`);
-                alert('Error opening pre-game setup. Please try again.');
+                alert('Error starting match: ' + error.message);
             }
         }
 
+        // Validate inputs
+        function validateInputs() {
+            const requiredFields = [
+                'teamA', 'teamB', 'matchFormat', 'battingFirst', 'inningsTimer',
+                'batsman1', 'batsman2', 'currentBowler'
+            ];
+
+            for (const field of requiredFields) {
+                const element = document.getElementById(field);
+                if (!element.value.trim()) {
+                    alert(`Please fill in ${field}`);
+                    return false;
+                }
+            }
+            return true;
+        }
+
         // Timer functions
-        function startTimer(minutes) {
+        function startTimer() {
+            if (!matchData) return;
+            
             if (isTimerRunning) return;
             
-            remainingTime = minutes * 60;
+            remainingTime = matchData.inningsTimer * 60;
             isTimerRunning = true;
             
             timerInterval = setInterval(() => {
                 remainingTime--;
                 updateTimerDisplay();
+                updateLivePreview();
                 
                 if (remainingTime <= 0) {
                     clearInterval(timerInterval);
@@ -282,8 +393,6 @@
                     alert('Time is up!');
                 }
             }, 1000);
-            
-            debugLog(`Timer started for ${minutes} minutes`);
         }
 
         function pauseTimer() {
@@ -291,7 +400,8 @@
             
             clearInterval(timerInterval);
             isTimerRunning = false;
-            debugLog('Timer paused');
+            updateTimerDisplay();
+            updateLivePreview();
         }
 
         function resetTimer() {
@@ -299,177 +409,135 @@
             isTimerRunning = false;
             remainingTime = 0;
             updateTimerDisplay();
-            debugLog('Timer reset');
+            updateLivePreview();
         }
 
         function updateTimerDisplay() {
             const minutes = Math.floor(remainingTime / 60);
             const seconds = remainingTime % 60;
             const display = document.getElementById('timerDisplay');
+            const liveDisplay = document.getElementById('liveTimerDisplay');
             
-            if (display) {
-                display.textContent = `Timer: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                
-                // Add warning effect when time is running low
-                if (minutes <= 5) {
-                    display.style.color = '#ff4444';
-                    display.style.animation = 'pulse 1s infinite';
-                } else {
-                    display.style.color = '#00ff9d';
-                    display.style.animation = 'none';
-                }
+            const timeString = `Timer: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (display) display.textContent = timeString;
+            if (liveDisplay) liveDisplay.textContent = timeString;
+            
+            if (minutes <= 5) {
+                display.style.color = '#ff4444';
+                liveDisplay.style.color = '#ff4444';
+            } else {
+                display.style.color = '#00ff9d';
+                liveDisplay.style.color = '#00ff9d';
             }
         }
 
         // Scoring functions
         function addRun(runs) {
-            try {
-                const matchData = JSON.parse(localStorage.getItem('matchData'));
-                if (!matchData) throw new Error('No match data found');
+            if (!matchData) return;
 
-                const battingTeam = matchData.battingFirst;
-                matchData.scores[battingTeam].runs += runs;
-                matchData.scores[battingTeam].balls++;
-                
-                if (matchData.scores[battingTeam].balls === 6) {
-                    matchData.scores[battingTeam].overs++;
-                    matchData.scores[battingTeam].balls = 0;
-                }
-
-                matchData.lastUpdated = new Date().toISOString();
-                localStorage.setItem('matchData', JSON.stringify(matchData));
-                
-                updateScoreDisplay();
-                debugLog(`Added ${runs} runs`);
-            } catch (error) {
-                debugLog(`Error adding runs: ${error.message}`);
-                alert('Error adding runs. Please try again.');
+            const battingTeam = matchData.battingFirst;
+            matchData.scores[battingTeam].runs += runs;
+            matchData.scores[battingTeam].balls++;
+            
+            if (matchData.scores[battingTeam].balls === 6) {
+                matchData.scores[battingTeam].overs++;
+                matchData.scores[battingTeam].balls = 0;
             }
+
+            matchData.lastUpdated = new Date().toISOString();
+            updateScoreDisplay();
+            updateLivePreview();
         }
 
         function wicket(type) {
-            try {
-                const matchData = JSON.parse(localStorage.getItem('matchData'));
-                if (!matchData) throw new Error('No match data found');
+            if (!matchData) return;
 
-                const battingTeam = matchData.battingFirst;
-                matchData.scores[battingTeam].wickets++;
-                matchData.scores[battingTeam].balls++;
-                
-                if (matchData.scores[battingTeam].balls === 6) {
-                    matchData.scores[battingTeam].overs++;
-                    matchData.scores[battingTeam].balls = 0;
-                }
-
-                matchData.lastUpdated = new Date().toISOString();
-                localStorage.setItem('matchData', JSON.stringify(matchData));
-                
-                updateScoreDisplay();
-                debugLog(`Wicket: ${type}`);
-            } catch (error) {
-                debugLog(`Error recording wicket: ${error.message}`);
-                alert('Error recording wicket. Please try again.');
+            const battingTeam = matchData.battingFirst;
+            matchData.scores[battingTeam].wickets++;
+            matchData.scores[battingTeam].balls++;
+            
+            if (matchData.scores[battingTeam].balls === 6) {
+                matchData.scores[battingTeam].overs++;
+                matchData.scores[battingTeam].balls = 0;
             }
+
+            matchData.lastUpdated = new Date().toISOString();
+            updateScoreDisplay();
+            updateLivePreview();
         }
 
         function addExtra(type) {
-            try {
-                const matchData = JSON.parse(localStorage.getItem('matchData'));
-                if (!matchData) throw new Error('No match data found');
+            if (!matchData) return;
 
-                const battingTeam = matchData.battingFirst;
-                matchData.scores[battingTeam].runs++;
-                matchData.scores[battingTeam].balls++;
-                
-                if (matchData.scores[battingTeam].balls === 6) {
-                    matchData.scores[battingTeam].overs++;
-                    matchData.scores[battingTeam].balls = 0;
-                }
-
-                matchData.lastUpdated = new Date().toISOString();
-                localStorage.setItem('matchData', JSON.stringify(matchData));
-                
-                updateScoreDisplay();
-                debugLog(`Added extra: ${type}`);
-            } catch (error) {
-                debugLog(`Error adding extra: ${error.message}`);
-                alert('Error adding extra. Please try again.');
+            const battingTeam = matchData.battingFirst;
+            matchData.scores[battingTeam].runs++;
+            matchData.scores[battingTeam].balls++;
+            
+            if (matchData.scores[battingTeam].balls === 6) {
+                matchData.scores[battingTeam].overs++;
+                matchData.scores[battingTeam].balls = 0;
             }
+
+            matchData.lastUpdated = new Date().toISOString();
+            updateScoreDisplay();
+            updateLivePreview();
         }
 
         function endOver() {
-            try {
-                const matchData = JSON.parse(localStorage.getItem('matchData'));
-                if (!matchData) throw new Error('No match data found');
+            if (!matchData) return;
 
-                const battingTeam = matchData.battingFirst;
-                matchData.scores[battingTeam].overs++;
-                matchData.scores[battingTeam].balls = 0;
+            const battingTeam = matchData.battingFirst;
+            matchData.scores[battingTeam].overs++;
+            matchData.scores[battingTeam].balls = 0;
 
-                matchData.lastUpdated = new Date().toISOString();
-                localStorage.setItem('matchData', JSON.stringify(matchData));
-                
-                updateScoreDisplay();
-                debugLog('Over ended');
-            } catch (error) {
-                debugLog(`Error ending over: ${error.message}`);
-                alert('Error ending over. Please try again.');
-            }
+            matchData.lastUpdated = new Date().toISOString();
+            updateScoreDisplay();
+            updateLivePreview();
         }
 
         function changeBowler() {
+            if (!matchData) return;
+
             const newBowler = prompt('Enter new bowler name:');
             if (!newBowler) return;
 
-            try {
-                const matchData = JSON.parse(localStorage.getItem('matchData'));
-                if (!matchData) throw new Error('No match data found');
-
-                matchData.currentBowler = newBowler;
-                matchData.lastUpdated = new Date().toISOString();
-                localStorage.setItem('matchData', JSON.stringify(matchData));
-                
-                debugLog(`Bowler changed to: ${newBowler}`);
-            } catch (error) {
-                debugLog(`Error changing bowler: ${error.message}`);
-                alert('Error changing bowler. Please try again.');
-            }
+            matchData.currentBowler = newBowler;
+            matchData.lastUpdated = new Date().toISOString();
+            updateScoreDisplay();
+            updateLivePreview();
         }
 
+        // Display update functions
         function updateScoreDisplay() {
-            try {
-                const matchData = JSON.parse(localStorage.getItem('matchData'));
-                if (!matchData) {
-                    document.getElementById('scoreDisplay').textContent = 'No match in progress';
-                    return;
-                }
-
-                const battingTeam = matchData.battingFirst;
-                const score = matchData.scores[battingTeam];
-                const overs = `${score.overs}.${score.balls}`;
-                
-                document.getElementById('scoreDisplay').textContent = 
-                    `${matchData[`team${battingTeam}`]} ${score.runs}/${score.wickets} (${overs})`;
-            } catch (error) {
-                debugLog(`Error updating score display: ${error.message}`);
+            if (!matchData) {
+                document.getElementById('scoreDisplay').textContent = 'No match in progress';
+                return;
             }
+
+            const battingTeam = matchData.battingFirst;
+            const score = matchData.scores[battingTeam];
+            const overs = `${score.overs}.${score.balls}`;
+            
+            const scoreString = `${matchData[`team${battingTeam}`]} ${score.runs}/${score.wickets} (${overs})`;
+            
+            document.getElementById('scoreDisplay').textContent = scoreString;
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
-            debugLog('Page loaded');
-
-            // Check if match is in progress
-            const matchData = localStorage.getItem('matchData');
-            if (matchData) {
-                document.getElementById('scoringControls').style.display = 'block';
-                document.getElementById('timerControls').style.display = 'block';
-                updateScoreDisplay();
-                debugLog('Match in progress');
-            } else {
-                debugLog('No match in progress');
+        function updateLivePreview() {
+            if (!matchData) {
+                document.getElementById('liveScoreDisplay').textContent = 'No match in progress';
+                return;
             }
-        });
+
+            const battingTeam = matchData.battingFirst;
+            const score = matchData.scores[battingTeam];
+            const overs = `${score.overs}.${score.balls}`;
+            
+            const scoreString = `${matchData[`team${battingTeam}`]} ${score.runs}/${score.wickets} (${overs})`;
+            
+            document.getElementById('liveScoreDisplay').textContent = scoreString;
+        }
     </script>
 </body>
 </html>
