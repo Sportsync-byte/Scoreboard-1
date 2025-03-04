@@ -144,11 +144,25 @@
             padding: 5px;
             border-bottom: 1px solid #333;
         }
+
+        .error-container {
+            background: #ff4444;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-container.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Pre-game Setup</h1>
+        <div class="error-container" id="errorContainer"></div>
         <div class="setup-section">
             <div class="form-group">
                 <label for="gamePreset">Select Game:</label>
@@ -197,7 +211,7 @@
         </div>
         <div class="debug-info" id="debugInfo"></div>
     </div>
-     <script>
+        <script>
         // Game presets configuration
         const gamePresets = {
             preset1: {
@@ -211,7 +225,7 @@
                 teamA: "Team C",
                 teamB: "Team D",
                 matchFormat: "16",
-                battingFirst: "B",
+                battingFirst: "A",
                 inningsTimer: "25"
             },
             preset3: {
@@ -226,312 +240,239 @@
         // Debug logging function
         function debugLog(message) {
             console.log(message);
-            const debugInfo = document.getElementById("debugInfo");
+            const debugInfo = document.getElementById('debugInfo');
             if (debugInfo) {
-                debugInfo.classList.add("show");
-                const messageDiv = document.createElement("div");
-                messageDiv.textContent = message;
-                debugInfo.appendChild(messageDiv);
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                debugInfo.appendChild(logEntry);
                 debugInfo.scrollTop = debugInfo.scrollHeight;
             }
         }
 
-        // Handle preset game selection
+        // Handle preset selection
         function handlePresetChange() {
-            try {
-                const presetSelect = document.getElementById("gamePreset");
-                if (!presetSelect) {
-                    debugLog("Error: gamePreset select element not found");
-                    return;
+            const presetSelect = document.getElementById('gamePreset');
+            const teamAInput = document.getElementById('teamA');
+            const teamBInput = document.getElementById('teamB');
+            const matchFormatSelect = document.getElementById('matchFormat');
+            const battingFirstSelect = document.getElementById('battingFirst');
+            const inningsTimerInput = document.getElementById('inningsTimer');
+
+            if (!presetSelect || !teamAInput || !teamBInput || !matchFormatSelect || 
+                !battingFirstSelect || !inningsTimerInput) {
+                debugLog('Error: Required elements not found in handlePresetChange');
+                return;
+            }
+
+            const selectedPreset = presetSelect.value;
+            debugLog(`Selected preset: ${selectedPreset}`);
+
+            if (selectedPreset === 'custom') {
+                teamAInput.disabled = false;
+                teamBInput.disabled = false;
+                matchFormatSelect.disabled = false;
+                battingFirstSelect.disabled = false;
+                inningsTimerInput.disabled = false;
+                debugLog('Switched to custom mode');
+            } else {
+                const preset = gamePresets[selectedPreset];
+                if (preset) {
+                    teamAInput.value = preset.teamA;
+                    teamBInput.value = preset.teamB;
+                    matchFormatSelect.value = preset.matchFormat;
+                    battingFirstSelect.value = preset.battingFirst;
+                    inningsTimerInput.value = preset.inningsTimer;
+                    
+                    teamAInput.disabled = true;
+                    teamBInput.disabled = true;
+                    matchFormatSelect.disabled = true;
+                    battingFirstSelect.disabled = true;
+                    inningsTimerInput.disabled = true;
+                    debugLog(`Loaded preset: ${selectedPreset}`);
                 }
-
-                const selectedPreset = presetSelect.value;
-                debugLog(`Selected preset: ${selectedPreset}`);
-                
-                if (selectedPreset === "custom") {
-                    // Clear all fields
-                    const matchFormat = document.getElementById("matchFormat");
-                    const teamA = document.getElementById("teamA");
-                    const teamB = document.getElementById("teamB");
-                    const battingFirst = document.getElementById("battingFirst");
-                    const inningsTimer = document.getElementById("inningsTimer");
-
-                    if (matchFormat) matchFormat.value = "12";
-                    if (teamA) teamA.value = "";
-                    if (teamB) teamB.value = "";
-                    if (battingFirst) battingFirst.value = "A";
-                    if (inningsTimer) inningsTimer.value = "20";
-                    
-                    // Enable all fields
-                    if (matchFormat) matchFormat.disabled = false;
-                    if (teamA) teamA.disabled = false;
-                    if (teamB) teamB.disabled = false;
-                    if (battingFirst) battingFirst.disabled = false;
-                    if (inningsTimer) inningsTimer.disabled = false;
-                    
-                    debugLog("Switched to custom game mode");
-                } else {
-                    // Fill in preset values
-                    const preset = gamePresets[selectedPreset];
-                    if (!preset) {
-                        debugLog(`Error: Preset ${selectedPreset} not found`);
-                        return;
-                    }
-
-                    const matchFormat = document.getElementById("matchFormat");
-                    const teamA = document.getElementById("teamA");
-                    const teamB = document.getElementById("teamB");
-                    const battingFirst = document.getElementById("battingFirst");
-                    const inningsTimer = document.getElementById("inningsTimer");
-
-                    if (matchFormat) matchFormat.value = preset.matchFormat;
-                    if (teamA) teamA.value = preset.teamA;
-                    if (teamB) teamB.value = preset.teamB;
-                    if (battingFirst) battingFirst.value = preset.battingFirst;
-                    if (inningsTimer) inningsTimer.value = preset.inningsTimer;
-                    
-                    // Disable fields when preset is selected
-                    if (matchFormat) matchFormat.disabled = true;
-                    if (teamA) teamA.disabled = true;
-                    if (teamB) teamB.disabled = true;
-                    if (battingFirst) battingFirst.disabled = true;
-                    if (inningsTimer) inningsTimer.disabled = true;
-                    
-                    debugLog(`Loaded preset: ${JSON.stringify(preset)}`);
-                }
-            } catch (error) {
-                debugLog(`Error in handlePresetChange: ${error.message}`);
             }
         }
 
         // Validate inputs
         function validateInputs() {
-            try {
-                let isValid = true;
-                const errors = {
-                    teamA: "Please enter Team A name",
-                    teamB: "Please enter Team B name",
-                    matchFormat: "Please select match format",
-                    inningsTimer: "Please enter a valid timer value (1-60 minutes)"
-                };
+            const requiredElements = {
+                teamA: document.getElementById('teamA'),
+                teamB: document.getElementById('teamB'),
+                matchFormat: document.getElementById('matchFormat'),
+                inningsTimer: document.getElementById('inningsTimer'),
+                teamAError: document.getElementById('teamAError'),
+                teamBError: document.getElementById('teamBError'),
+                formatError: document.getElementById('formatError'),
+                timerError: document.getElementById('timerError')
+            };
 
-                // Clear previous errors
-                Object.keys(errors).forEach(key => {
-                    const errorElement = document.getElementById(`${key}Error`);
-                    if (errorElement) {
-                        errorElement.style.display = "none";
-                    }
-                });
+            // Check if all required elements exist
+            const missingElements = Object.entries(requiredElements)
+                .filter(([key, element]) => !element)
+                .map(([key]) => key);
 
-                // Validate team names
-                const teamAInput = document.getElementById("teamA");
-                const teamBInput = document.getElementById("teamB");
-                const matchFormatInput = document.getElementById("matchFormat");
-                const inningsTimerInput = document.getElementById("inningsTimer");
-
-                if (!teamAInput || !teamAInput.value.trim()) {
-                    const teamAError = document.getElementById("teamAError");
-                    if (teamAError) {
-                        teamAError.style.display = "block";
-                    }
-                    isValid = false;
-                    debugLog("Team A name is required");
-                }
-
-                if (!teamBInput || !teamBInput.value.trim()) {
-                    const teamBError = document.getElementById("teamBError");
-                    if (teamBError) {
-                        teamBError.style.display = "block";
-                    }
-                    isValid = false;
-                    debugLog("Team B name is required");
-                }
-
-                // Validate match format
-                if (!matchFormatInput || !matchFormatInput.value) {
-                    const formatError = document.getElementById("formatError");
-                    if (formatError) {
-                        formatError.style.display = "block";
-                    }
-                    isValid = false;
-                    debugLog("Match format is required");
-                }
-
-                // Validate innings timer
-                if (!inningsTimerInput) {
-                    isValid = false;
-                    debugLog("Innings timer input not found");
-                } else {
-                    const timer = parseInt(inningsTimerInput.value);
-                    if (isNaN(timer) || timer < 1 || timer > 60) {
-                        const timerError = document.getElementById("timerError");
-                        if (timerError) {
-                            timerError.style.display = "block";
-                        }
-                        isValid = false;
-                        debugLog("Invalid timer value");
-                    }
-                }
-
-                return isValid;
-            } catch (error) {
-                debugLog(`Error in validateInputs: ${error.message}`);
-                return false;
+            if (missingElements.length > 0) {
+                debugLog(`Missing elements: ${missingElements.join(', ')}`);
+                throw new Error(`Required elements not found: ${missingElements.join(', ')}`);
             }
+
+            // Hide all error messages initially
+            Object.values(requiredElements)
+                .filter(el => el.id.endsWith('Error'))
+                .forEach(el => el.style.display = 'none');
+
+            let isValid = true;
+            let errorMessage = '';
+
+            // Validate team names
+            if (!requiredElements.teamA.value.trim()) {
+                requiredElements.teamAError.style.display = 'block';
+                isValid = false;
+                errorMessage += 'Team A name is required\n';
+            }
+
+            if (!requiredElements.teamB.value.trim()) {
+                requiredElements.teamBError.style.display = 'block';
+                isValid = false;
+                errorMessage += 'Team B name is required\n';
+            }
+
+            // Validate match format
+            if (!requiredElements.matchFormat.value) {
+                requiredElements.formatError.style.display = 'block';
+                isValid = false;
+                errorMessage += 'Match format is required\n';
+            }
+
+            // Validate innings timer
+            const timerValue = parseInt(requiredElements.inningsTimer.value);
+            if (isNaN(timerValue) || timerValue < 1 || timerValue > 60) {
+                requiredElements.timerError.style.display = 'block';
+                isValid = false;
+                errorMessage += 'Please enter a valid timer value (1-60 minutes)\n';
+            }
+
+            if (!isValid) {
+                debugLog(`Validation failed: ${errorMessage}`);
+            }
+
+            return isValid;
         }
 
         // Start match function
         function startMatch() {
             try {
-                debugLog("Starting match setup...");
-                
+                debugLog('Starting match setup...');
+
+                // Check if all required elements exist
+                const requiredElements = [
+                    'teamA', 'teamB', 'matchFormat', 'battingFirst', 'inningsTimer'
+                ].map(id => document.getElementById(id));
+
+                const missingElements = requiredElements
+                    .map((el, index) => ({ id: ['teamA', 'teamB', 'matchFormat', 'battingFirst', 'inningsTimer'][index], element: el }))
+                    .filter(({ element }) => !element)
+                    .map(({ id }) => id);
+
+                if (missingElements.length > 0) {
+                    debugLog(`Missing elements: ${missingElements.join(', ')}`);
+                    throw new Error(`Required elements not found: ${missingElements.join(', ')}`);
+                }
+
+                // Validate inputs
                 if (!validateInputs()) {
-                    debugLog("Validation failed");
-                    return;
+                    throw new Error('Invalid inputs');
                 }
-
-                // Get input values
-                const teamAInput = document.getElementById("teamA");
-                const teamBInput = document.getElementById("teamB");
-                const matchFormatInput = document.getElementById("matchFormat");
-                const battingFirstInput = document.getElementById("battingFirst");
-                const inningsTimerInput = document.getElementById("inningsTimer");
-
-                if (!teamAInput || !teamBInput || !matchFormatInput || !battingFirstInput || !inningsTimerInput) {
-                    throw new Error("Required input elements not found");
-                }
-
-                const teamA = teamAInput.value.trim();
-                const teamB = teamBInput.value.trim();
-                const matchFormat = matchFormatInput.value;
-                const battingFirst = battingFirstInput.value;
-                const inningsTimer = inningsTimerInput.value;
-
-                debugLog(`Input values: ${JSON.stringify({ teamA, teamB, matchFormat, battingFirst, inningsTimer })}`);
-
-                // Calculate total partnerships based on match format
-                const totalPartnerships = Math.ceil(parseInt(matchFormat) / 4);
-                debugLog(`Total partnerships: ${totalPartnerships}`);
 
                 // Initialize match data
                 const matchData = {
-                    teamA: {
-                        totalScore: 0,
-                        wickets: 0,
-                        partnerships: Array(totalPartnerships).fill(0),
-                        currentBatsmen: [],
-                        extras: {
-                            wides: 0,
-                            noBalls: 0,
-                            byes: 0,
-                            legByes: 0
-                        }
+                    teamA: document.getElementById('teamA').value.trim(),
+                    teamB: document.getElementById('teamB').value.trim(),
+                    matchFormat: document.getElementById('matchFormat').value,
+                    battingFirst: document.getElementById('battingFirst').value,
+                    inningsTimer: parseInt(document.getElementById('inningsTimer').value),
+                    currentInnings: 1,
+                    scores: {
+                        A: { runs: 0, wickets: 0, overs: 0, balls: 0 },
+                        B: { runs: 0, wickets: 0, overs: 0, balls: 0 }
                     },
-                    teamB: {
-                        totalScore: 0,
-                        wickets: 0,
-                        partnerships: Array(totalPartnerships).fill(0),
-                        currentBatsmen: [],
-                        extras: {
-                            wides: 0,
-                            noBalls: 0,
-                            byes: 0,
-                            legByes: 0
-                        }
+                    partnerships: {
+                        A: [],
+                        B: []
                     },
-                    currentInnings: battingFirst,
-                    currentOver: 0,
-                    currentBall: 0,
-                    currentPartnership: 0,
-                    currentBatsmanIndex: 0,
-                    currentBowler: "",
-                    consecutiveDotBalls: 0
+                    currentBatsmen: {
+                        A: [],
+                        B: []
+                    },
+                    currentBowler: null,
+                    lastUpdated: new Date().toISOString()
                 };
 
-                debugLog(`Match data initialized: ${JSON.stringify(matchData)}`);
-
-                // Check localStorage availability
-                if (!isLocalStorageAvailable()) {
-                    throw new Error("LocalStorage is not available");
-                }
-
                 // Store match data
-                try {
-                    localStorage.setItem("matchData", JSON.stringify(matchData));
-                    localStorage.setItem("teamA", teamA);
-                    localStorage.setItem("teamB", teamB);
-                    localStorage.setItem("matchFormat", matchFormat);
-                    localStorage.setItem("inningsTimer", inningsTimer);
-                    debugLog("Data stored in localStorage successfully");
-                } catch (storageError) {
-                    debugLog(`Error storing data: ${storageError.message}`);
-                    throw new Error("Failed to store match data");
+                if (!isLocalStorageAvailable()) {
+                    throw new Error('Local storage is not available');
                 }
+
+                localStorage.setItem('matchData', JSON.stringify(matchData));
+                debugLog('Match data stored successfully');
 
                 // Open batsman setup window
-                try {
-                    debugLog("Opening batsman setup window...");
-                    const batsmanWindow = window.open("batsman.html", "Batsman Setup", 
-                        "width=600,height=600,menubar=no,toolbar=no,location=no,status=no");
-
-                    if (!batsmanWindow || batsmanWindow.closed) {
-                        throw new Error("Failed to open batsman setup window");
-                    }
-
-                    batsmanWindow.focus();
-                    window.close();
-                } catch (windowError) {
-                    debugLog(`Error opening window: ${windowError.message}`);
-                    throw new Error("Failed to open batsman setup window");
+                const batsmanWindow = window.open('batsman.html', 'BatsmanSetup', 
+                    'width=400,height=500,resizable=yes,scrollbars=yes');
+                
+                if (!batsmanWindow) {
+                    throw new Error('Failed to open batsman setup window. Please allow popups.');
                 }
 
+                // Close this window
+                window.close();
             } catch (error) {
                 debugLog(`Error in startMatch: ${error.message}`);
-                alert(`Error starting match: ${error.message}`);
+                const errorContainer = document.getElementById('errorContainer');
+                if (errorContainer) {
+                    errorContainer.textContent = `Error: ${error.message}`;
+                    errorContainer.classList.add('show');
+                }
             }
         }
 
-        // Utility function
+        // Check if localStorage is available
         function isLocalStorageAvailable() {
             try {
-                const test = 'test';
-                localStorage.setItem(test, test);
-                localStorage.removeItem(test);
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
                 return true;
             } catch (e) {
-                debugLog(`LocalStorage check failed: ${e.message}`);
                 return false;
             }
         }
 
         // Initialize page
-        document.addEventListener("DOMContentLoaded", function() {
-            debugLog("Pre-game setup window loaded");
-            
-            // Check if we're in a popup window
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('Page loaded');
+
+            // Check if page is opened as a popup
             if (!window.opener) {
-                debugLog("Window not opened as popup");
-                alert("This window must be opened from the main scorer window");
+                debugLog('Warning: Page not opened as a popup');
+                alert('This page must be opened from the main scorer window.');
                 window.close();
                 return;
             }
 
-            // Check localStorage availability
+            // Check if localStorage is available
             if (!isLocalStorageAvailable()) {
-                debugLog("LocalStorage not available");
-                alert("Your browser's localStorage is not available. Please enable it or try a different browser.");
+                debugLog('Error: Local storage not available');
+                alert('Local storage is not available. Please enable it to use this application.');
                 window.close();
                 return;
             }
 
             // Log initial state
-            debugLog("Initial localStorage state: " + JSON.stringify({
-                matchData: localStorage.getItem("matchData"),
-                teamA: localStorage.getItem("teamA"),
-                teamB: localStorage.getItem("teamB"),
-                matchFormat: localStorage.getItem("matchFormat"),
-                inningsTimer: localStorage.getItem("inningsTimer")
-            }));
+            debugLog('Initial localStorage state:');
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                debugLog(`${key}: ${localStorage.getItem(key)}`);
+            }
         });
     </script>
 </body>
