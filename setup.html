@@ -46,6 +46,25 @@
             margin-top: 0.5rem;
             font-size: 0.9rem;
         }
+        .game-type-section {
+            margin-bottom: 2rem;
+        }
+        .preconfigured-game {
+            cursor: pointer;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .preconfigured-game:hover {
+            background-color: #e9ecef;
+            border-color: #007bff;
+        }
+        .preconfigured-game.selected {
+            background-color: #e3f2fd;
+            border-color: #007bff;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -58,68 +77,94 @@
                     </div>
                     <div class="card-body">
                         <form id="setupForm">
-                            <!-- Game Format -->
-                            <div class="mb-4">
-                                <h5>Game Format</h5>
+                            <!-- Game Type Selection -->
+                            <div class="game-type-section">
+                                <h5>Game Type</h5>
                                 <div class="mb-3">
-                                    <label>Select Format:</label>
-                                    <select id="gameFormat" class="form-select" required onchange="updateFormatInfo()">
-                                        <option value="8aside">8-a-side</option>
-                                        <option value="6aside">6-a-side</option>
-                                    </select>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="gameType" id="customGame" value="custom" checked>
+                                        <label class="form-check-label" for="customGame">
+                                            Custom Game
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="gameType" id="preconfiguredGame" value="preconfigured">
+                                        <label class="form-check-label" for="preconfiguredGame">
+                                            Preconfigured Game
+                                        </label>
+                                    </div>
                                 </div>
-                                <div id="formatInfo" class="format-info">
-                                    <strong>8-a-side Format:</strong><br>
-                                    - 16 overs per innings<br>
-                                    - 4 overs per partnership<br>
-                                    - 2 overs per bowler
+
+                                <!-- Preconfigured Games Section -->
+                                <div id="preconfiguredGames" style="display: none;">
+                                    <h6>Available Games</h6>
+                                    <div id="preconfiguredGamesList">
+                                        <!-- Preconfigured games will be loaded here -->
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Team Information -->
-                            <div class="mb-4">
-                                <h5>Team Information</h5>
-                                <div class="mb-3">
-                                    <label>Batting Team Name:</label>
-                                    <input type="text" id="battingTeam" class="form-control" required>
+                            <!-- Custom Game Setup -->
+                            <div id="customGameSetup">
+                                <!-- Game Format -->
+                                <div class="mb-4">
+                                    <h5>Game Format</h5>
+                                    <div class="mb-3">
+                                        <label>Select Format:</label>
+                                        <select id="gameFormat" class="form-select" required onchange="updateFormatInfo()">
+                                            <option value="8aside">8-a-side</option>
+                                            <option value="6aside">6-a-side</option>
+                                        </select>
+                                    </div>
+                                    <div id="formatInfo" class="format-info">
+                                        <strong>8-a-side Format:</strong><br>
+                                        - 16 overs per innings<br>
+                                        - 4 overs per partnership<br>
+                                        - 2 overs per bowler
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label>Fielding Team Name:</label>
-                                    <input type="text" id="fieldingTeam" class="form-control" required>
-                                </div>
-                            </div>
 
-                            <!-- Game Settings -->
-                            <div class="mb-4">
-                                <h5>Game Settings</h5>
-                                <div class="mb-3">
-                                    <label>Match Duration (minutes):</label>
-                                    <input type="number" id="matchDuration" class="form-control" value="40" required>
+                                <!-- Team Information -->
+                                <div class="mb-4">
+                                    <h5>Team Information</h5>
+                                    <div class="mb-3">
+                                        <label>Batting Team Name:</label>
+                                        <input type="text" id="battingTeam" class="form-control" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label>Fielding Team Name:</label>
+                                        <input type="text" id="fieldingTeam" class="form-control" required>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label>Target Score:</label>
-                                    <input type="number" id="targetScore" class="form-control" required>
-                                </div>
-                            </div>
 
-                            <!-- Batting Team Players -->
-                            <div class="mb-4">
-                                <h5>Batting Team Players</h5>
-                                <div class="input-group mb-2">
-                                    <input type="text" id="newBatsman" class="form-control" placeholder="Enter batsman name">
-                                    <button type="button" class="btn btn-primary" onclick="addBatsman()">Add</button>
+                                <!-- Game Settings -->
+                                <div class="mb-4">
+                                    <h5>Game Settings</h5>
+                                    <div class="mb-3">
+                                        <label>Match Duration (minutes):</label>
+                                        <input type="number" id="matchDuration" class="form-control" value="40" required>
+                                    </div>
                                 </div>
-                                <div id="batsmenList" class="player-list"></div>
-                            </div>
 
-                            <!-- Fielding Team Players -->
-                            <div class="mb-4">
-                                <h5>Fielding Team Players</h5>
-                                <div class="input-group mb-2">
-                                    <input type="text" id="newBowler" class="form-control" placeholder="Enter bowler name">
-                                    <button type="button" class="btn btn-primary" onclick="addBowler()">Add</button>
+                                <!-- Batting Team Players -->
+                                <div class="mb-4">
+                                    <h5>Batting Team Players</h5>
+                                    <div class="input-group mb-2">
+                                        <input type="text" id="newBatsman" class="form-control" placeholder="Enter batsman name">
+                                        <button type="button" class="btn btn-primary" onclick="addBatsman()">Add</button>
+                                    </div>
+                                    <div id="batsmenList" class="player-list"></div>
                                 </div>
-                                <div id="bowlersList" class="player-list"></div>
+
+                                <!-- Fielding Team Players -->
+                                <div class="mb-4">
+                                    <h5>Fielding Team Players</h5>
+                                    <div class="input-group mb-2">
+                                        <input type="text" id="newBowler" class="form-control" placeholder="Enter bowler name">
+                                        <button type="button" class="btn btn-primary" onclick="addBowler()">Add</button>
+                                    </div>
+                                    <div id="bowlersList" class="player-list"></div>
+                                </div>
                             </div>
 
                             <button type="submit" class="btn btn-success w-100">Start Match</button>
@@ -133,6 +178,57 @@
     <script>
         let batsmen = [];
         let bowlers = [];
+        let selectedPreconfiguredGame = null;
+
+        // Game type selection handler
+        document.querySelectorAll('input[name="gameType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const preconfiguredSection = document.getElementById('preconfiguredGames');
+                const customSection = document.getElementById('customGameSetup');
+                
+                if (this.value === 'preconfigured') {
+                    preconfiguredSection.style.display = 'block';
+                    customSection.style.display = 'none';
+                    loadPreconfiguredGames();
+                } else {
+                    preconfiguredSection.style.display = 'none';
+                    customSection.style.display = 'block';
+                }
+            });
+        });
+
+        // Load preconfigured games (placeholder for future server integration)
+        function loadPreconfiguredGames() {
+            const gamesList = document.getElementById('preconfiguredGamesList');
+            // This would be replaced with actual server data
+            const sampleGames = [
+                { id: 1, name: 'Team A vs Team B', date: '2024-03-04' },
+                { id: 2, name: 'Team C vs Team D', date: '2024-03-05' }
+            ];
+
+            gamesList.innerHTML = sampleGames.map(game => `
+                <div class="preconfigured-game" onclick="selectPreconfiguredGame(${game.id})">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">${game.name}</h6>
+                            <small class="text-muted">${game.date}</small>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="preconfiguredGame" 
+                                   id="game${game.id}" value="${game.id}">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectPreconfiguredGame(gameId) {
+            selectedPreconfiguredGame = gameId;
+            document.querySelectorAll('.preconfigured-game').forEach(game => {
+                game.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
 
         function updateFormatInfo() {
             const format = document.getElementById('gameFormat').value;
@@ -248,60 +344,53 @@
             `;
         }
 
+        // Form submission handler
         document.getElementById('setupForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const format = document.getElementById('gameFormat').value;
-            const minPlayers = format === '6aside' ? 3 : 4;
-            
-            if (batsmen.length < minPlayers) {
-                alert(`Please add at least ${minPlayers} batsmen for ${format} format`);
-                return;
-            }
-            
-            if (bowlers.length < minPlayers) {
-                alert(`Please add at least ${minPlayers} bowlers for ${format} format`);
-                return;
+            const gameType = document.querySelector('input[name="gameType"]:checked').value;
+            let gameData;
+
+            if (gameType === 'preconfigured') {
+                if (!selectedPreconfiguredGame) {
+                    alert('Please select a preconfigured game');
+                    return;
+                }
+                // This would be replaced with actual server data fetching
+                gameData = {
+                    type: 'preconfigured',
+                    gameId: selectedPreconfiguredGame
+                };
+            } else {
+                // Validate custom game setup
+                if (batsmen.length === 0 || bowlers.length === 0) {
+                    alert('Please add players to both teams');
+                    return;
+                }
+
+                const format = document.getElementById('gameFormat').value;
+                const maxPlayers = format === '6aside' ? 6 : 8;
+
+                if (batsmen.length !== maxPlayers || bowlers.length !== maxPlayers) {
+                    alert(`Please add exactly ${maxPlayers} players to each team for ${format} format`);
+                    return;
+                }
+
+                gameData = {
+                    type: 'custom',
+                    format: format,
+                    battingTeam: document.getElementById('battingTeam').value,
+                    fieldingTeam: document.getElementById('fieldingTeam').value,
+                    matchDuration: document.getElementById('matchDuration').value,
+                    batsmen: batsmen,
+                    bowlers: bowlers
+                };
             }
 
-            const gameSetup = {
-                format: format,
-                battingTeam: document.getElementById('battingTeam').value,
-                fieldingTeam: document.getElementById('fieldingTeam').value,
-                target: parseInt(document.getElementById('targetScore').value),
-                matchDuration: parseInt(document.getElementById('matchDuration').value),
-                batsmen: batsmen,
-                bowlers: bowlers,
-                currentBatsmen: {
-                    striker: batsmen[0],
-                    nonStriker: batsmen[1]
-                },
-                currentBowler: null,
-                currentScore: 0,
-                wickets: 0,
-                currentOver: 0,
-                totalOvers: format === '6aside' ? 12 : 16,
-                partnershipOvers: format === '6aside' ? 3 : 4,
-                extras: {
-                    wides: 0,
-                    noBalls: 0,
-                    legsideWides: 0
-                },
-                partnership: {
-                    runs: 0,
-                    balls: 0,
-                    overs: 0
-                },
-                ballHistory: [],
-                timestamp: new Date()
-            };
-
-            localStorage.setItem('indoorCricketGame', JSON.stringify(gameSetup));
+            // Store game data and redirect to umpire interface
+            localStorage.setItem('indoorCricketGame', JSON.stringify(gameData));
             window.location.href = 'umpire-combined.html';
         });
-
-        // Initialize format info
-        updateFormatInfo();
     </script>
 </body>
 </html>
