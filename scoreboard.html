@@ -10,27 +10,62 @@
             background: #1a1a2e;
             color: #fff;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .scoreboard {
-            max-width: 1200px;
+            width: 100%;
+            max-width: 1920px;
             margin: auto;
             background: #16213e;
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
+            margin-bottom: 15px;
+            padding: 10px;
             background: #0f3460;
             border-radius: 8px;
             border-bottom: 2px solid #e94560;
         }
+        .header h1 {
+            margin: 0;
+            font-size: clamp(24px, 4vw, 36px);
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        .timer-section {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #0f3460;
+            border-radius: 8px;
+            border: 1px solid #e94560;
+        }
+        .timer-display {
+            font-size: clamp(32px, 5vw, 48px);
+            color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            font-weight: bold;
+            font-family: 'Digital', monospace;
+        }
+        .timer-warning {
+            color: #e94560;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
         .team-section {
-            margin: 20px 0;
-            padding: 20px;
+            margin: 10px 0;
+            padding: 15px;
             background: #1f2937;
             border-radius: 8px;
             border: 1px solid #e94560;
@@ -39,37 +74,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            font-size: 24px;
+            margin-bottom: 10px;
+            font-size: clamp(20px, 3vw, 28px);
             color: #e94560;
         }
         .team-total {
-            font-size: 36px;
+            font-size: clamp(28px, 4vw, 40px);
             color: #00ff9d;
             text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
-        }
-        .current-score {
-            text-align: center;
-            font-size: 48px;
-            margin: 20px 0;
-            color: #00ff9d;
-            text-shadow: 0 0 15px rgba(0, 255, 157, 0.3);
-        }
-        .overs {
-            text-align: center;
-            font-size: 36px;
-            color: #ffd700;
-            margin: 10px 0;
         }
         .batting-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
+            gap: 15px;
+            margin: 10px 0;
         }
         .batsman {
             background: #2a3b4c;
-            padding: 15px;
+            padding: 10px;
             border-radius: 8px;
             border: 1px solid #e94560;
         }
@@ -78,26 +100,26 @@
             box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
         }
         .batsman-name {
-            font-size: 20px;
+            font-size: clamp(16px, 2.5vw, 22px);
             color: #e94560;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .batsman-stats {
-            font-size: 18px;
+            font-size: clamp(14px, 2vw, 18px);
             color: #fff;
         }
         .partnerships {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin: 15px 0;
+            gap: 8px;
+            margin: 10px 0;
         }
         .partnership {
             background: #2a3b4c;
-            padding: 10px;
+            padding: 8px;
             border-radius: 5px;
             text-align: center;
-            font-size: 16px;
+            font-size: clamp(14px, 1.8vw, 16px);
             border: 1px solid #e94560;
         }
         .partnership.active {
@@ -106,31 +128,55 @@
         }
         .current-bowler {
             text-align: center;
-            font-size: 24px;
+            font-size: clamp(18px, 2.5vw, 24px);
             color: #ffd700;
-            margin: 20px 0;
-            padding: 10px;
+            margin: 10px 0;
+            padding: 8px;
             background: #1f2937;
             border-radius: 8px;
             border: 1px solid #e94560;
         }
         .bowler-stats {
-            font-size: 18px;
+            font-size: clamp(14px, 2vw, 18px);
             color: #00ff9d;
         }
         .target {
             text-align: center;
-            font-size: 24px;
+            font-size: clamp(18px, 2.5vw, 24px);
             color: #e94560;
             margin: 10px 0;
-            padding: 10px;
+            padding: 8px;
             background: #0f3460;
             border-radius: 8px;
             border: 1px solid #00ff9d;
         }
-        h1 {
-            color: #ffd700;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        @media (max-width: 768px) {
+            .scoreboard {
+                padding: 10px;
+            }
+            
+            .team-section {
+                padding: 10px;
+            }
+            
+            .partnerships {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .batting-details {
+                gap: 10px;
+            }
+        }
+        @media (max-width: 480px) {
+            .partnerships {
+                grid-template-columns: 1fr;
+            }
+            
+            .team-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
         }
     </style>
 </head>
@@ -138,6 +184,10 @@
     <div class="scoreboard">
         <div class="header">
             <h1>Indoor Cricket Scoreboard</h1>
+        </div>
+
+        <div class="timer-section">
+            <div class="timer-display" id="inningsTimer">00:00</div>
         </div>
 
         <!-- Team A Section -->
@@ -164,14 +214,6 @@
             </div>
         </div>
 
-        <!-- Current Innings Info -->
-        <div class="current-score" id="currentScore">0/0</div>
-        <div class="overs" id="overs">Overs: 0.0</div>
-        <div class="current-bowler">
-            <div id="currentBowler">Current Bowler: </div>
-            <div class="bowler-stats" id="bowlerStats">Overs: 0.0 | Wickets: 0</div>
-        </div>
-
         <!-- Team B Section -->
         <div class="team-section">
             <div class="team-header">
@@ -196,12 +238,18 @@
             </div>
         </div>
 
+        <!-- Bottom Info Bar -->
+        <div class="current-bowler">
+            <div id="currentBowler">Current Bowler: </div>
+            <div class="bowler-stats" id="bowlerStats">Overs: 0.0 | Wickets: 0</div>
+        </div>
+
         <!-- Target Display (for second innings) -->
         <div class="target" id="target" style="display: none;">
             Target: 0 runs from 12 overs
         </div>
     </div>
-        <script>
+       <script>
         let matchData = {
             teamA: {
                 totalScore: 0,
@@ -228,12 +276,52 @@
             partnershipNumber: 1
         };
 
+        let timerInterval;
+        let remainingTime;
+        let isTimerRunning = false;
+
+        function startTimer(minutes) {
+            if (isTimerRunning) return;
+            
+            remainingTime = minutes * 60; // Convert minutes to seconds
+            isTimerRunning = true;
+            
+            timerInterval = setInterval(() => {
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    document.getElementById('inningsTimer').textContent = '00:00';
+                    return;
+                }
+
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+                
+                // Format the display
+                const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('inningsTimer').textContent = display;
+
+                // Add warning effect for last 5 minutes
+                if (remainingTime <= 300) { // 5 minutes = 300 seconds
+                    document.getElementById('inningsTimer').classList.add('timer-warning');
+                }
+
+                remainingTime--;
+            }, 1000);
+        }
+
         function updateDisplay() {
             try {
                 if (isLocalStorageAvailable()) {
                     const storedData = JSON.parse(localStorage.getItem("matchData"));
                     if (storedData) {
                         matchData = storedData;
+                        
+                        // Start timer if it's not running and we have the innings time
+                        if (!isTimerRunning) {
+                            const inningsTime = parseInt(localStorage.getItem("inningsTimer")) || 20;
+                            startTimer(inningsTime);
+                        }
                     }
 
                     const teamA = localStorage.getItem("teamA");
@@ -251,13 +339,6 @@
                         `${matchData.teamA.totalScore}/${matchData.teamA.wickets}`;
                     document.getElementById("teamBTotal").textContent = 
                         `${matchData.teamB.totalScore}/${matchData.teamB.wickets}`;
-
-                    // Update current score and overs
-                    const currentTeam = matchData.currentInnings === 'A' ? matchData.teamA : matchData.teamB;
-                    document.getElementById("currentScore").textContent = 
-                        `${currentTeam.totalScore}/${currentTeam.wickets}`;
-                    document.getElementById("overs").textContent = 
-                        `Overs: ${matchData.overs}.${matchData.balls}`;
 
                     // Update batsmen details
                     updateBatsmenDisplay('A', matchData.teamA.currentBatsmen);
@@ -333,6 +414,11 @@
         
         // Update every second
         setInterval(updateDisplay, 1000);
+
+        // Cleanup when page is closed
+        window.addEventListener('beforeunload', () => {
+            clearInterval(timerInterval);
+        });
     </script>
 </body>
-</html>
+</html> 
