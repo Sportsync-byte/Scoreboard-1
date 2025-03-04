@@ -39,6 +39,13 @@
             color: #dc3545;
             cursor: pointer;
         }
+        .format-info {
+            background-color: #e9ecef;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -51,6 +58,24 @@
                     </div>
                     <div class="card-body">
                         <form id="setupForm">
+                            <!-- Game Format -->
+                            <div class="mb-4">
+                                <h5>Game Format</h5>
+                                <div class="mb-3">
+                                    <label>Select Format:</label>
+                                    <select id="gameFormat" class="form-select" required onchange="updateFormatInfo()">
+                                        <option value="8aside">8-a-side</option>
+                                        <option value="6aside">6-a-side</option>
+                                    </select>
+                                </div>
+                                <div id="formatInfo" class="format-info">
+                                    <strong>8-a-side Format:</strong><br>
+                                    - 16 overs per innings<br>
+                                    - 4 overs per partnership<br>
+                                    - 2 overs per bowler
+                                </div>
+                            </div>
+
                             <!-- Team Information -->
                             <div class="mb-4">
                                 <h5>Team Information</h5>
@@ -109,9 +134,38 @@
         let batsmen = [];
         let bowlers = [];
 
+        function updateFormatInfo() {
+            const format = document.getElementById('gameFormat').value;
+            const infoDiv = document.getElementById('formatInfo');
+            
+            if (format === '6aside') {
+                infoDiv.innerHTML = `
+                    <strong>6-a-side Format:</strong><br>
+                    - 12 overs per innings<br>
+                    - 3 overs per partnership<br>
+                    - 2 overs per bowler
+                `;
+            } else {
+                infoDiv.innerHTML = `
+                    <strong>8-a-side Format:</strong><br>
+                    - 16 overs per innings<br>
+                    - 4 overs per partnership<br>
+                    - 2 overs per bowler
+                `;
+            }
+        }
+
         function addBatsman() {
             const input = document.getElementById('newBatsman');
             const name = input.value.trim();
+            const format = document.getElementById('gameFormat').value;
+            const maxPlayers = format === '6aside' ? 6 : 8;
+
+            if (batsmen.length >= maxPlayers) {
+                alert(`Maximum ${maxPlayers} players allowed for ${format} format`);
+                return;
+            }
+
             if (name) {
                 batsmen.push({
                     id: Date.now(),
@@ -129,6 +183,14 @@
         function addBowler() {
             const input = document.getElementById('newBowler');
             const name = input.value.trim();
+            const format = document.getElementById('gameFormat').value;
+            const maxPlayers = format === '6aside' ? 6 : 8;
+
+            if (bowlers.length >= maxPlayers) {
+                alert(`Maximum ${maxPlayers} players allowed for ${format} format`);
+                return;
+            }
+
             if (name) {
                 bowlers.push({
                     id: Date.now(),
@@ -154,38 +216,56 @@
 
         function updateBatsmenList() {
             const list = document.getElementById('batsmenList');
+            const format = document.getElementById('gameFormat').value;
+            const maxPlayers = format === '6aside' ? 6 : 8;
+            
             list.innerHTML = batsmen.map(batsman => `
                 <div class="player-item">
                     <span>${batsman.name}</span>
                     <span class="remove-player" onclick="removeBatsman(${batsman.id})">×</span>
                 </div>
-            `).join('');
+            `).join('') + `
+                <div class="text-muted mt-2">
+                    ${batsmen.length}/${maxPlayers} players added
+                </div>
+            `;
         }
 
         function updateBowlersList() {
             const list = document.getElementById('bowlersList');
+            const format = document.getElementById('gameFormat').value;
+            const maxPlayers = format === '6aside' ? 6 : 8;
+            
             list.innerHTML = bowlers.map(bowler => `
                 <div class="player-item">
                     <span>${bowler.name}</span>
                     <span class="remove-player" onclick="removeBowler(${bowler.id})">×</span>
                 </div>
-            `).join('');
+            `).join('') + `
+                <div class="text-muted mt-2">
+                    ${bowlers.length}/${maxPlayers} players added
+                </div>
+            `;
         }
 
         document.getElementById('setupForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            if (batsmen.length < 2) {
-                alert('Please add at least 2 batsmen');
+            const format = document.getElementById('gameFormat').value;
+            const minPlayers = format === '6aside' ? 3 : 4;
+            
+            if (batsmen.length < minPlayers) {
+                alert(`Please add at least ${minPlayers} batsmen for ${format} format`);
                 return;
             }
             
-            if (bowlers.length < 1) {
-                alert('Please add at least 1 bowler');
+            if (bowlers.length < minPlayers) {
+                alert(`Please add at least ${minPlayers} bowlers for ${format} format`);
                 return;
             }
 
             const gameSetup = {
+                format: format,
                 battingTeam: document.getElementById('battingTeam').value,
                 fieldingTeam: document.getElementById('fieldingTeam').value,
                 target: parseInt(document.getElementById('targetScore').value),
@@ -200,7 +280,8 @@
                 currentScore: 0,
                 wickets: 0,
                 currentOver: 0,
-                totalOvers: 16,
+                totalOvers: format === '6aside' ? 12 : 16,
+                partnershipOvers: format === '6aside' ? 3 : 4,
                 extras: {
                     wides: 0,
                     noBalls: 0,
@@ -218,6 +299,9 @@
             localStorage.setItem('indoorCricketGame', JSON.stringify(gameSetup));
             window.location.href = 'umpire-combined.html';
         });
+
+        // Initialize format info
+        updateFormatInfo();
     </script>
 </body>
 </html>
