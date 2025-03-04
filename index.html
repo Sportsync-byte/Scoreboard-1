@@ -284,7 +284,7 @@
             teamA: {
                 totalScore: 0,
                 wickets: 0,
-                partnerships: [0, 0, 0, 0],
+                partnerships: [],
                 currentBatsmen: {
                     batsman1: { name: '', score: 0, balls: 0 },
                     batsman2: { name: '', score: 0, balls: 0 }
@@ -293,7 +293,7 @@
             teamB: {
                 totalScore: 0,
                 wickets: 0,
-                partnerships: [0, 0, 0, 0],
+                partnerships: [],
                 currentBatsmen: {
                     batsman1: { name: '', score: 0, balls: 0 },
                     batsman2: { name: '', score: 0, balls: 0 }
@@ -305,6 +305,8 @@
             currentBowler: { name: '', overs: 0, wickets: 0 },
             partnershipNumber: 1,
             onStrike: 'batsman1',
+            matchFormat: 12,
+            totalPartnerships: 3,
             consecutiveDotBalls: 0
         };
 
@@ -321,13 +323,22 @@
         function startMatch() {
             if (isLocalStorageAvailable()) {
                 try {
-                    const inningsTimer = document.getElementById("inningsTimer").value;
-                    localStorage.setItem("inningsTimer", inningsTimer);
+                    const matchFormat = document.getElementById("matchFormat").value;
+                    const totalPartnerships = Math.ceil(matchFormat / 4); // One partnership per 4 overs
+                    
+                    localStorage.setItem("matchFormat", matchFormat);
+                    localStorage.setItem("totalPartnerships", totalPartnerships);
+                    localStorage.setItem("inningsTimer", document.getElementById("inningsTimer").value);
                     localStorage.setItem("teamA", document.getElementById("teamA").value);
                     localStorage.setItem("teamB", document.getElementById("teamB").value);
                     localStorage.setItem("battingFirst", document.getElementById("battingFirst").value);
                     localStorage.setItem("timerStatus", "stopped");
                     localStorage.setItem("timerStartTime", "");
+                    
+                    // Initialize partnerships arrays
+                    matchData.teamA.partnerships = new Array(totalPartnerships).fill(0);
+                    matchData.teamB.partnerships = new Array(totalPartnerships).fill(0);
+                    localStorage.setItem("matchData", JSON.stringify(matchData));
                     
                     const scoreboardWindow = window.open("scoreboard.html", "Scoreboard", 
                         "width=800,height=600,resizable=yes,scrollbars=yes");
