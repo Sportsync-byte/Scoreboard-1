@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Scoreboard</title>
+    <audio id="buzzerSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -191,10 +192,10 @@
         </div>
 
         <!-- Team A Section -->
-        <div class="team-section">
+        <div class="team-section" id="teamASection">
             <div class="team-header">
                 <div id="teamA">Team A</div>
-                <div class="team-total" id="teamATotal">0/0</div>
+                <div class="team-total" id="teamATotal">0</div>
             </div>
             <div class="batting-details">
                 <div class="batsman" id="teamABatsman1">
@@ -207,18 +208,15 @@
                 </div>
             </div>
             <div class="partnerships" id="teamAPartnerships">
-                <div class="partnership">Partnership 1: 0</div>
-                <div class="partnership">Partnership 2: 0</div>
-                <div class="partnership">Partnership 3: 0</div>
-                <div class="partnership">Partnership 4: 0</div>
+                <!-- Partnerships will be dynamically added here -->
             </div>
         </div>
 
         <!-- Team B Section -->
-        <div class="team-section">
+        <div class="team-section" id="teamBSection">
             <div class="team-header">
                 <div id="teamB">Team B</div>
-                <div class="team-total" id="teamBTotal">0/0</div>
+                <div class="team-total" id="teamBTotal">0</div>
             </div>
             <div class="batting-details">
                 <div class="batsman" id="teamBBatsman1">
@@ -231,10 +229,7 @@
                 </div>
             </div>
             <div class="partnerships" id="teamBPartnerships">
-                <div class="partnership">Partnership 1: 0</div>
-                <div class="partnership">Partnership 2: 0</div>
-                <div class="partnership">Partnership 3: 0</div>
-                <div class="partnership">Partnership 4: 0</div>
+                <!-- Partnerships will be dynamically added here -->
             </div>
         </div>
 
@@ -254,7 +249,7 @@
             teamA: {
                 totalScore: 0,
                 wickets: 0,
-                partnerships: [0, 0, 0, 0],
+                partnerships: [],
                 currentBatsmen: {
                     batsman1: { name: '', score: 0, balls: 0 },
                     batsman2: { name: '', score: 0, balls: 0 }
@@ -263,7 +258,7 @@
             teamB: {
                 totalScore: 0,
                 wickets: 0,
-                partnerships: [0, 0, 0, 0],
+                partnerships: [],
                 currentBatsmen: {
                     batsman1: { name: '', score: 0, balls: 0 },
                     batsman2: { name: '', score: 0, balls: 0 }
@@ -274,7 +269,9 @@
             balls: 0,
             currentBowler: { name: '', overs: 0, wickets: 0 },
             partnershipNumber: 1,
-            onStrike: 'batsman1'
+            onStrike: 'batsman1',
+            matchFormat: 12,
+            totalPartnerships: 3
         };
 
         let timerInterval;
@@ -282,11 +279,12 @@
         let isTimerRunning = false;
         let timerStartTime;
         let totalTime;
+        const buzzerSound = document.getElementById('buzzerSound');
 
         function startTimer(minutes) {
             if (isTimerRunning) return;
             
-            totalTime = minutes * 60; // Convert minutes to seconds
+            totalTime = minutes * 60;
             timerStartTime = Date.now();
             isTimerRunning = true;
             
@@ -300,6 +298,7 @@
                     clearInterval(timerInterval);
                     isTimerRunning = false;
                     document.getElementById('inningsTimer').textContent = '00:00';
+                    buzzerSound.play().catch(error => console.log('Error playing sound:', error));
                     return;
                 }
 
@@ -309,7 +308,7 @@
                 const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 document.getElementById('inningsTimer').textContent = display;
 
-                if (remainingTime <= 300) { // 5 minutes = 300 seconds
+                if (remainingTime <= 300) {
                     document.getElementById('inningsTimer').classList.add('timer-warning');
                 }
 
@@ -323,6 +322,35 @@
                     const storedData = JSON.parse(localStorage.getItem("matchData"));
                     if (storedData) {
                         matchData = storedData;
+                    }
+
+                    // Get match format and total partnerships
+                    const matchFormat = parseInt(localStorage.getItem("matchFormat")) || 12;
+                    const totalPartnerships = parseInt(localStorage.getItem("totalPartnerships")) || 3;
+                    
+                    // Update matchData with these values
+                    matchData.matchFormat = matchFormat;
+                    matchData.totalPartnerships = totalPartnerships;
+
+                    // Initialize partnerships array if needed
+                    if (matchData.teamA.partnerships.length !== totalPartnerships) {
+                        matchData.teamA.partnerships = new Array(totalPartnerships).fill(0);
+                        matchData.teamB.partnerships = new Array(totalPartnerships).fill(0);
+                    }
+
+                    // Check if innings should end
+                    if (matchData.overs >= matchFormat) {
+                        if (matchData.currentInnings === 'A') {
+                            matchData.currentInnings = 'B';
+                            // Reset innings-specific data
+                            matchData.overs = 0;
+                            matchData.balls = 0;
+                            matchData.partnershipNumber = 1;
+                            matchData.currentBowler = { name: '', overs: 0, wickets: 0 };
+                            // Prompt for new batsmen and bowler
+                            promptNewBatsmen();
+                            promptNewBowler();
+                        }
                     }
 
                     // Handle timer status
@@ -352,32 +380,46 @@
                     document.getElementById("teamA").textContent = teamA;
                     document.getElementById("teamB").textContent = teamB;
 
-                    // Update team totals
-                    document.getElementById("teamATotal").textContent = 
-                        `${matchData.teamA.totalScore}/${matchData.teamA.wickets}`;
-                    document.getElementById("teamBTotal").textContent = 
-                        `${matchData.teamB.totalScore}/${matchData.teamB.wickets}`;
+                    // Update team totals (runs only)
+                    document.getElementById("teamATotal").textContent = matchData.teamA.totalScore;
+                    document.getElementById("teamBTotal").textContent = matchData.teamB.totalScore;
 
-                    // Update batsmen details
-                    updateBatsmenDisplay('A', matchData.teamA.currentBatsmen);
-                    updateBatsmenDisplay('B', matchData.teamB.currentBatsmen);
+                    // Show/hide team sections based on current innings
+                    document.getElementById("teamASection").style.display = 
+                        matchData.currentInnings === 'A' ? 'block' : 'none';
+                    document.getElementById("teamBSection").style.display = 
+                        matchData.currentInnings === 'B' ? 'block' : 'none';
 
-                    // Update partnerships
+                    // Update partnerships for both teams (always visible)
                     updatePartnerships('A', matchData.teamA.partnerships);
                     updatePartnerships('B', matchData.teamB.partnerships);
 
-                    // Update current bowler
-                    document.getElementById("currentBowler").textContent = 
-                        `Current Bowler: ${matchData.currentBowler.name}`;
-                    document.getElementById("bowlerStats").textContent = 
-                        `Overs: ${matchData.currentBowler.overs}.${matchData.balls} | Wickets: ${matchData.currentBowler.wickets}`;
+                    // Update batsmen details only for batting team
+                    if (matchData.currentInnings === 'A') {
+                        updateBatsmenDisplay('A', matchData.teamA.currentBatsmen);
+                    } else {
+                        updateBatsmenDisplay('B', matchData.teamB.currentBatsmen);
+                    }
+
+                    // Update current bowler only for bowling team
+                    if (matchData.currentInnings === 'A') {
+                        document.getElementById("currentBowler").textContent = 
+                            `Current Bowler: ${matchData.currentBowler.name}`;
+                        document.getElementById("bowlerStats").textContent = 
+                            `Overs: ${matchData.currentBowler.overs}.${matchData.balls} | Wickets: ${matchData.currentBowler.wickets}`;
+                    } else {
+                        document.getElementById("currentBowler").textContent = 
+                            `Current Bowler: ${matchData.currentBowler.name}`;
+                        document.getElementById("bowlerStats").textContent = 
+                            `Overs: ${matchData.currentBowler.overs}.${matchData.balls} | Wickets: ${matchData.currentBowler.wickets}`;
+                    }
 
                     // Show target if in second innings
                     const targetDiv = document.getElementById("target");
                     if (matchData.currentInnings === 'B') {
                         const target = matchData.teamA.totalScore + 1;
                         targetDiv.style.display = "block";
-                        targetDiv.textContent = `Target: ${target} runs from 12 overs`;
+                        targetDiv.textContent = `Target: ${target} runs from ${matchFormat} overs`;
                     } else {
                         targetDiv.style.display = "none";
                     }
@@ -407,10 +449,16 @@
 
         function updatePartnerships(team, partnerships) {
             const container = document.getElementById(`team${team}Partnerships`);
+            container.innerHTML = ''; // Clear existing partnerships
+            
             partnerships.forEach((score, index) => {
-                container.children[index].textContent = `Partnership ${index + 1}: ${score}`;
-                container.children[index].classList.toggle("active", 
-                    matchData.currentInnings === team && matchData.partnershipNumber === index + 1);
+                const partnershipDiv = document.createElement('div');
+                partnershipDiv.className = 'partnership';
+                partnershipDiv.textContent = `Partnership ${index + 1}: ${score}`;
+                if (matchData.currentInnings === team && matchData.partnershipNumber === index + 1) {
+                    partnershipDiv.classList.add('active');
+                }
+                container.appendChild(partnershipDiv);
             });
         }
 
