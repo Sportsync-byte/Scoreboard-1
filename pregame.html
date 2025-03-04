@@ -416,16 +416,22 @@
                 localStorage.setItem('matchData', JSON.stringify(matchData));
                 debugLog('Match data stored successfully');
 
-                // Open batsman setup window
+                // Open batsman setup window with proper window features
                 const batsmanWindow = window.open('batsman.html', 'BatsmanSetup', 
-                    'width=400,height=500,resizable=yes,scrollbars=yes');
+                    'width=400,height=500,resizable=yes,scrollbars=yes,menubar=no,toolbar=no,location=no,status=no');
                 
                 if (!batsmanWindow) {
                     throw new Error('Failed to open batsman setup window. Please allow popups.');
                 }
 
-                // Close this window
-                window.close();
+                // Ensure the new window is focused
+                batsmanWindow.focus();
+
+                // Close this window after a short delay to ensure the new window is opened
+                setTimeout(() => {
+                    window.close();
+                }, 100);
+
             } catch (error) {
                 debugLog(`Error in startMatch: ${error.message}`);
                 const errorContainer = document.getElementById('errorContainer');
