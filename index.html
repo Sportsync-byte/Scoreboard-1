@@ -38,7 +38,11 @@
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            display: block;
+            display: block !important;
+        }
+
+        #preGameSetup {
+            display: block !important;
         }
 
         .form-group {
@@ -180,6 +184,16 @@
             color: #1a1a1a;
         }
 
+        .reset-btn {
+            background: #ff4444;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .reset-btn:hover {
+            background: #cc0000;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 10px;
@@ -197,6 +211,7 @@
 </head>
 <body>
     <div class="container">
+        <button onclick="resetPage()" class="reset-btn">Reset Page</button>
         <h1>Indoor Cricket Scorer</h1>
         
         <!-- Pre-game Setup -->
@@ -333,6 +348,23 @@
         let timerInterval;
         let remainingTime;
         let isTimerRunning = false;
+
+        // Reset page function
+        function resetPage() {
+            if (isLocalStorageAvailable()) {
+                localStorage.clear();
+            }
+            location.reload();
+        }
+
+        // Debug function
+        function debugSetup() {
+            const preGameSetup = document.getElementById("preGameSetup");
+            console.log("Pre-game setup element:", preGameSetup);
+            console.log("Display style:", preGameSetup.style.display);
+            console.log("Classes:", preGameSetup.classList);
+            console.log("Parent visibility:", preGameSetup.parentElement.style.display);
+        }
 
         // Handle preset game selection
         function handlePresetChange() {
@@ -723,15 +755,24 @@
 
         // Initialize page
         document.addEventListener("DOMContentLoaded", function() {
-            // Show pre-game setup by default
-            document.getElementById("preGameSetup").classList.remove("hidden");
-            
-            // Check if match is in progress
-            if (isLocalStorageAvailable() && localStorage.getItem("matchData")) {
-                document.getElementById("preGameSetup").classList.add("hidden");
-                document.getElementById("batsmanSetup").classList.remove("hidden");
-                document.getElementById("scoringControls").classList.remove("hidden");
+            // Force show pre-game setup
+            const preGameSetup = document.getElementById("preGameSetup");
+            if (preGameSetup) {
+                preGameSetup.style.display = "block";
+                preGameSetup.classList.remove("hidden");
             }
+            
+            // Clear any existing match data
+            if (isLocalStorageAvailable()) {
+                localStorage.clear();
+            }
+            
+            // Hide other sections
+            document.getElementById("batsmanSetup").classList.add("hidden");
+            document.getElementById("scoringControls").classList.add("hidden");
+
+            // Debug setup
+            debugSetup();
         });
     </script>
 </body>
