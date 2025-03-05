@@ -24,6 +24,7 @@
             background: #2a2a2a;
             border-radius: 10px;
             padding: 1rem;
+            position: relative;
         }
         .team-section.active {
             border: 2px solid #28a745;
@@ -32,45 +33,45 @@
         .team-name {
             font-size: 2.5rem;
             font-weight: bold;
-            text-align: center;
+            text-align: left;
             margin-bottom: 1rem;
         }
         .partnerships-container {
             display: flex;
-            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
             margin-bottom: 1rem;
-            height: 30vh;
+            height: auto;
         }
         .partnership-box {
-            flex: 1;
-            margin: 0 0.5rem;
-            background: #333;
-            border-radius: 10px;
+            background: #ff0000;
+            color: white;
             padding: 1rem;
-            text-align: center;
-            position: relative;
-        }
-        .partnership-box.winning {
-            border: 2px solid #28a745;
-            box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+            min-width: 80px;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
         }
         .partnership-score {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
-            margin-bottom: 0.5rem;
+            margin: 0;
         }
         .partnership-overs {
-            font-size: 1.2rem;
-            color: #ccc;
+            display: none;
         }
         .team-total {
             position: absolute;
-            right: 1rem;
-            top: 1rem;
-            font-size: 2rem;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 4rem;
             font-weight: bold;
+            color: #ff0000;
         }
-        .current-players {
+                .current-players {
             position: absolute;
             bottom: 1rem;
             left: 1rem;
@@ -146,20 +147,23 @@
     <div class="container-fluid">
         <!-- First Innings Team -->
         <div class="team-section" id="firstInningsTeam">
-            <div class="team-name" id="firstTeamName">Team A</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="team-name" id="firstTeamName">Team A</div>
+                <div class="team-total" id="firstTeamTotal">0</div>
+            </div>
             <div class="partnerships-container" id="firstPartnerships">
                 <!-- Partnership boxes will be dynamically added here -->
             </div>
-            <div class="team-total" id="firstTeamTotal">0</div>
         </div>
-
-        <!-- Second Innings Team -->
+                <!-- Second Innings Team -->
         <div class="team-section" id="secondInningsTeam">
-            <div class="team-name" id="secondTeamName">Team B</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="team-name" id="secondTeamName">Team B</div>
+                <div class="team-total" id="secondTeamTotal">0</div>
+            </div>
             <div class="partnerships-container" id="secondPartnerships">
                 <!-- Partnership boxes will be dynamically added here -->
             </div>
-            <div class="team-total" id="secondTeamTotal">0</div>
         </div>
 
         <!-- Current Players Display -->
@@ -217,8 +221,7 @@
             overInfo: document.getElementById('overInfo'),
             animationContainer: document.getElementById('animationContainer')
         };
-
-        // Initialize Scoreboard
+                // Initialize Scoreboard
         function initializeScoreboard() {
             // Load game state from localStorage
             const savedState = localStorage.getItem('indoorCricketGame');
@@ -288,24 +291,14 @@
                 const box = document.createElement('div');
                 box.className = 'partnership-box';
                 
-                // Check if this partnership won the skin
-                if (gameState.isSecondInnings && gameState.firstInnings.partnerships[i]) {
-                    const firstInningsScore = gameState.firstInnings.partnerships[i].score;
-                    if (partnership.score > firstInningsScore) {
-                        box.classList.add('winning');
-                    }
-                }
-                
                 box.innerHTML = `
                     <div class="partnership-score">${partnership.score}</div>
-                    <div class="partnership-overs">${partnership.overs.toFixed(1)}</div>
                 `;
                 
                 container.appendChild(box);
             }
         }
-
-        // Update Current Players
+                // Update Current Players
         function updateCurrentPlayers() {
             if (gameState.currentBatsmen && gameState.currentBatsmen.striker && gameState.currentBatsmen.nonStriker) {
                 elements.currentBatsmen.textContent = 
