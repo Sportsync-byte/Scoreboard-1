@@ -519,10 +519,22 @@
             
             gameState.currentScore += runs;
             
+            // Change strike for every run scored
+            if (runs > 0) {
+                changeStrike();
+            }
+            
             gameState.overs.ballsLeft--;
             if (gameState.overs.ballsLeft === 0) {
                 gameState.overs.ballsLeft = 6;
                 gameState.currentOver++;
+                
+                // Prompt for new bowler after each over
+                if (gameState.currentBowler) {
+                    gameState.currentBowler.overs++;
+                    alert('Over complete! Please select a new bowler.');
+                    showPlayerSelect('bowler');
+                }
             }
             
             if (runs === 0) {
