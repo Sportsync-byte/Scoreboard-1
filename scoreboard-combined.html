@@ -428,35 +428,11 @@
                             format: format
                         };
 
-                        // Ensure correct number of partnerships
-                        const maxPartnerships = format === '8aside' ? 4 : 3;
-                        while (gameState.team1.partnerships.length < maxPartnerships) {
-                            gameState.team1.partnerships.push({
-                                runs: 0,
-                                overs: 0,
-                                batsmen: []
-                            });
-                        }
-                        while (gameState.team2.partnerships.length < maxPartnerships) {
-                            gameState.team2.partnerships.push({
-                                runs: 0,
-                                overs: 0,
-                                batsmen: []
-                            });
-                        }
-
-                        // Handle extras in last over of partnership
-                        if (Math.floor(umpireState.currentOver) === umpireState.partnership.overs + 3 && 
-                            Math.round((umpireState.currentOver % 1) * 10) === 6) {
-                            if (umpireState.extras.wides > 0 || umpireState.extras.noBalls > 0 || umpireState.extras.legsideWides > 0) {
-                                gameState.overs.ballsLeft = 6;
-                            }
-                        }
-                        
+                        // Update display
                         updateDisplay();
                     }
                 }
-            }, 1000);
+            }, 100); // Check more frequently for smoother updates
         }
 
         // Initialize when page loads
