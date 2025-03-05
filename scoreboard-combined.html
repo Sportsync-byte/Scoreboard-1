@@ -350,8 +350,53 @@
                 if (lastUpdate) {
                     const gameStateStr = localStorage.getItem('indoorCricketGame');
                     if (gameStateStr) {
-                        const newState = JSON.parse(gameStateStr);
-                        gameState = newState;
+                        const umpireState = JSON.parse(gameStateStr);
+                        
+                        // Convert umpire state to scoreboard state
+                        gameState = {
+                            team1: {
+                                name: umpireState.battingTeam,
+                                score: umpireState.currentScore,
+                                partnerships: [{
+                                    score: umpireState.partnership.runs,
+                                    runs: umpireState.partnership.runs,
+                                    overs: umpireState.partnership.overs,
+                                    winner: false
+                                }],
+                                currentBatsmen: {
+                                    striker: {
+                                        name: umpireState.currentBatsmen.striker?.name || '',
+                                        score: umpireState.currentBatsmen.striker?.score || 0,
+                                        balls: umpireState.currentBatsmen.striker?.balls || 0
+                                    },
+                                    nonStriker: {
+                                        name: umpireState.currentBatsmen.nonStriker?.name || '',
+                                        score: umpireState.currentBatsmen.nonStriker?.score || 0,
+                                        balls: umpireState.currentBatsmen.nonStriker?.balls || 0
+                                    }
+                                }
+                            },
+                            team2: {
+                                name: umpireState.fieldingTeam,
+                                score: umpireState.target || 0,
+                                partnerships: [],
+                                currentBatsmen: {
+                                    striker: { name: '', score: 0, balls: 0 },
+                                    nonStriker: { name: '', score: 0, balls: 0 }
+                                }
+                            },
+                            timer: {
+                                minutes: Math.floor(umpireState.timer.elapsed / 60000),
+                                seconds: Math.floor((umpireState.timer.elapsed % 60000) / 1000),
+                                isRunning: umpireState.timer.isRunning
+                            },
+                            overs: {
+                                current: umpireState.currentOver,
+                                total: umpireState.totalOvers,
+                                ballsLeft: 6 - Math.round((umpireState.currentOver % 1) * 10)
+                            }
+                        };
+                        
                         updateDisplay();
                     }
                 }
@@ -361,6 +406,8 @@
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
             listenForUpdates();
+            // Request initial update
+            updateDisplay();
         });
     </script>
 </body>
