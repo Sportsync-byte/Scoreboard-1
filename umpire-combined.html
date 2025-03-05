@@ -258,9 +258,9 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="btn-group w-100 mb-2">
-                                            <button class="btn btn-outline-secondary" onclick="handleWide()">Wide</button>
-                                            <button class="btn btn-outline-secondary" onclick="handleNoBall()">No Ball</button>
-                                            <button class="btn btn-outline-secondary" onclick="handleLegSideWide()">Leg Side Wide</button>
+                                            <button class="btn btn-outline-secondary" onclick="handleExtra('wides')">Wide</button>
+                                            <button class="btn btn-outline-secondary" onclick="handleExtra('noBalls')">No Ball</button>
+                                            <button class="btn btn-outline-secondary" onclick="handleExtra('legsideWides')">Leg Side Wide</button>
                                         </div>
                                         <div class="btn-group w-100 mb-2">
                                             <button class="btn btn-outline-primary" onclick="showCustomRunsInput()">Custom Runs</button>
@@ -289,14 +289,23 @@
         </div>
     </div>
 
-    <!-- Extra Ball Modal -->
-    <div id="extraBallModal" class="modal">
+    <!-- Third Ball Warning Modal -->
+    <div id="thirdBallWarningModal" class="modal">
+        <div class="modal-content">
+            <h3>Third Ball Warning!</h3>
+            <p>Two dot balls in a row. Score must change on this ball!</p>
+            <button class="btn btn-primary" onclick="closeThirdBallWarning()">OK</button>
+        </div>
+    </div>
+
+    <!-- Add Ball Modal -->
+    <div id="addBallModal" class="modal">
         <div class="modal-content">
             <h3>Extra Ball Available</h3>
             <p>Would you like to add an extra ball to this over?</p>
             <div class="btn-group">
-                <button class="btn btn-success" onclick="handleExtraBall(true)">Yes</button>
-                <button class="btn btn-danger" onclick="handleExtraBall(false)">No</button>
+                <button class="btn btn-success" onclick="handleAddBall(true)">Yes</button>
+                <button class="btn btn-danger" onclick="handleAddBall(false)">No</button>
             </div>
         </div>
     </div>
@@ -332,12 +341,6 @@
                 <button class="btn btn-primary" onclick="applyPlayerSelect()">Apply</button>
             </div>
         </div>
-    </div>
-
-    <!-- Warning Popup -->
-    <div id="warningPopup" class="warning-popup" style="display: none;">
-        <h4>Third Ball Warning!</h4>
-        <p>Two dot balls in a row. Score must change on this ball!</p>
     </div>
 
     <script>
@@ -376,7 +379,7 @@
                 elapsed: 0,
                 isRunning: false
             },
-            lastTwoBalls: []
+            consecutiveDotBalls: 0
         };
 
         // DOM Elements
@@ -430,170 +433,6 @@
             bowlerSelect.textContent = gameState.currentBowler?.name || 'Select Bowler';
         }
 
-        // Handle Ball
-        function handleBall(runs) {
-            if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
-                alert('Please select batsmen and bowler first');
-                return;
-            }
-
-            const ball = {
-                runs: runs,
-                batsman: gameState.currentBatsmen.striker,
-                bowler: gameState.currentBowler,
-                timestamp: new Date()
-            };
-
-            gameState.currentScore += runs;
-            gameState.currentBatsmen.striker.score += runs;
-            gameState.currentBatsmen.striker.balls++;
-            gameState.partnership.runs += runs;
-            gameState.partnership.balls++;
-            gameState.currentOver += 0.1;
-            gameState.currentBowler.overs += 0.1;
-            gameState.currentBowler.runs += runs;
-            
-            if (runs === 4) gameState.currentBatsmen.striker.fours++;
-            if (runs === 6) gameState.currentBatsmen.striker.sixes++;
-            
-            // Always swap batsmen on runs (except for extras)
-            const temp = gameState.currentBatsmen.striker;
-            gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
-            gameState.currentBatsmen.nonStriker = temp;
-
-            // Check for third ball warning
-            checkThirdBallWarning(runs);
-
-            checkOverComplete();
-            gameState.ballHistory.push(ball);
-            updateDisplay();
-            saveGameState();
-            updateScoreboard();
-        }
-
-        // Handle Wicket
-        function handleWicket(type) {
-            if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
-                alert('Please select batsmen and bowler first');
-                return;
-            }
-
-            const ball = {
-                type: type,
-                batsman: gameState.currentBatsmen.striker,
-                bowler: gameState.currentBowler,
-                timestamp: new Date()
-            };
-
-            gameState.wickets++;
-            gameState.currentBatsmen.striker.score -= 5; // Penalty runs for all dismissals
-            gameState.currentScore -= 5; // Penalty runs
-            gameState.partnership.runs -= 5; // Penalty runs
-            gameState.currentBatsmen.striker.balls++;
-            gameState.partnership.balls++;
-            gameState.currentOver += 0.1;
-            gameState.currentBowler.overs += 0.1;
-            gameState.currentBowler.wickets++;
-            gameState.currentBowler.runs += 5; // Penalty runs added to bowler's figures
-
-            // Swap batsmen
-            const temp = gameState.currentBatsmen.striker;
-            gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
-            gameState.currentBatsmen.nonStriker = temp;
-
-            checkOverComplete();
-            gameState.ballHistory.push(ball);
-            updateDisplay();
-            saveGameState();
-            updateScoreboard();
-        }
-
-        // Handle Extras
-        function handleWide() {
-            handleExtra(2, 'wides');
-        }
-
-        function handleNoBall() {
-            handleExtra(2, 'noBalls');
-        }
-
-        function handleLegSideWide() {
-            handleExtra(2, 'legsideWides');
-        }
-
-        function handleExtra(runs, type) {
-            if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
-                alert('Please select batsmen and bowler first');
-                return;
-            }
-
-            const ball = {
-                type: type,
-                runs: runs,
-                batsman: gameState.currentBatsmen.striker,
-                bowler: gameState.currentBowler,
-                timestamp: new Date()
-            };
-
-            gameState.currentScore += runs;
-            gameState.currentBatsmen.striker.score += runs;
-            gameState.partnership.runs += runs;
-            gameState.extras[type]++;
-            gameState.currentOver += 0.1;
-            gameState.currentBowler.overs += 0.1;
-            gameState.currentBowler.runs += runs;
-
-            // Don't swap batsmen for extras
-            // Don't increment batsman's balls faced for extras
-
-            // Check if this is the last over of the partnership
-            const currentOver = Math.floor(gameState.currentOver);
-            const currentBall = Math.round((gameState.currentOver % 1) * 10);
-            
-            if (currentOver === gameState.partnership.overs + 3 && currentBall === 6) {
-                // This is the last over of the partnership, show extra ball prompt
-                showExtraBallModal();
-            } else {
-                checkOverComplete();
-            }
-
-            gameState.ballHistory.push(ball);
-            updateDisplay();
-            saveGameState();
-            updateScoreboard();
-        }
-
-        // Check Over Complete
-        function checkOverComplete() {
-            const currentOver = Math.floor(gameState.currentOver);
-            const currentBall = Math.round((gameState.currentOver % 1) * 10);
-            
-            if (currentBall === 6) {
-                // Over complete
-                if (currentOver === gameState.partnership.overs + 4) {
-                    // Last ball of partnership (4 overs)
-                    showNewPartnershipModal();
-                } else {
-                    // Normal over complete - show bowler selection
-                    setTimeout(() => {
-                        showPlayerSelect('bowler');
-                    }, 500);
-                }
-            }
-        }
-
-        // Third ball warning system
-        function checkThirdBallWarning(runs) {
-            if (runs === 0) {
-                gameState.lastTwoBalls.push(0);
-                if (gameState.lastTwoBalls.length === 2) {
-                    showWarningPopup();
-                }
-            } else {
-                gameState.lastTwoBalls = [];
-            }
-        }
-
         // Timer Functions
         function startTimer() {
             if (!gameState.timer.isRunning) {
@@ -641,19 +480,122 @@
             }
         }
 
-        // Extra Ball Modal
-        function showExtraBallModal() {
-            elements.extraBallModal.style.display = 'block';
+        // Handle extras (wides, no balls, legside wides)
+        function handleExtra(type) {
+            if (!gameState.timer.isRunning) return;
+            
+            // Check if this is the last over of the partnership
+            const isLastOver = Math.floor(gameState.currentOver) === gameState.partnership.overs + 3;
+            
+            // Add the extra
+            gameState.extras[type]++;
+            gameState.currentScore++;
+            gameState.currentBatsmen.striker.score++;
+            gameState.partnership.runs++;
+            
+            // If it's the last over of the partnership, show the add ball prompt
+            if (isLastOver) {
+                showAddBallPrompt();
+            }
+            
+            // Update display
+            updateDisplay();
+            saveGameState();
+            updateScoreboard();
         }
 
-        function handleExtraBall(addBall) {
-            elements.extraBallModal.style.display = 'none';
+        // Handle regular ball
+        function handleBall(runs) {
+            if (!gameState.timer.isRunning) return;
+            
+            // Check if this is the last over of the partnership
+            const isLastOver = Math.floor(gameState.currentOver) === gameState.partnership.overs + 3;
+            
+            // Add runs
+            gameState.currentScore += runs;
+            gameState.currentBatsmen.striker.score += runs;
+            gameState.currentBatsmen.striker.balls++;
+            gameState.partnership.runs += runs;
+            gameState.partnership.balls++;
+            
+            // Check for third ball warning
+            if (runs === 0) {
+                checkThirdBallWarning();
+            } else {
+                // Reset consecutive dot balls if runs were scored
+                gameState.consecutiveDotBalls = 0;
+            }
+            
+            // If it's the last over of the partnership and an extra was bowled, don't count this ball
+            if (isLastOver && (gameState.extras.wides > 0 || gameState.extras.noBalls > 0 || gameState.extras.legsideWides > 0)) {
+                gameState.partnership.balls--;
+            }
+            
+            // Update display
+            updateDisplay();
+            saveGameState();
+            updateScoreboard();
+        }
+
+        // Handle wicket
+        function handleWicket(type) {
+            if (!gameState.timer.isRunning) return;
+            
+            // Apply -5 run penalty
+            gameState.currentScore -= 5;
+            gameState.currentBatsmen.striker.score -= 5;
+            gameState.partnership.runs -= 5;
+            
+            // Add third ball out with -5 runs
+            gameState.currentBatsmen.striker.balls += 3;
+            gameState.partnership.balls += 3;
+            
+            // Update display
+            updateDisplay();
+            saveGameState();
+            updateScoreboard();
+        }
+
+        // Check for third ball warning
+        function checkThirdBallWarning() {
+            gameState.consecutiveDotBalls++;
+            if (gameState.consecutiveDotBalls === 2) {
+                showThirdBallWarning();
+            }
+        }
+
+        // Show third ball warning
+        function showThirdBallWarning() {
+            const warningModal = document.getElementById('thirdBallWarningModal');
+            warningModal.style.display = 'block';
+        }
+
+        // Close third ball warning
+        function closeThirdBallWarning() {
+            const warningModal = document.getElementById('thirdBallWarningModal');
+            warningModal.style.display = 'none';
+        }
+
+        // Show add ball prompt
+        function showAddBallPrompt() {
+            const addBallModal = document.getElementById('addBallModal');
+            addBallModal.style.display = 'block';
+        }
+
+        // Handle add ball
+        function handleAddBall(addBall) {
+            const addBallModal = document.getElementById('addBallModal');
+            addBallModal.style.display = 'none';
+            
             if (addBall) {
                 gameState.currentOver += 0.1;
                 gameState.currentBowler.overs += 0.1;
             }
-            // Show new partnership selection
-            showNewPartnershipModal();
+            
+            // Update display and save state
+            updateDisplay();
+            saveGameState();
+            updateScoreboard();
         }
 
         // New Partnership
