@@ -22,72 +22,53 @@
             text-align: center;
             margin-bottom: 2rem;
         }
-        .teams-container {
+        .innings-section {
+            margin-bottom: 3rem;
+        }
+        .team-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 2rem;
-        }
-        .team {
-            flex: 1;
-            text-align: center;
-            padding: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
             background: #2a2a2a;
             border-radius: 10px;
-            margin: 0 1rem;
         }
         .team-name {
             font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        .score {
-            font-size: 3rem;
             font-weight: bold;
-            margin-bottom: 0.5rem;
         }
-        .overs {
-            font-size: 1.5rem;
-            color: #888;
-        }
-        .partnerships-container {
-            margin-top: 2rem;
-        }
-        .partnerships-section {
-            margin-bottom: 2rem;
-        }
-        .partnerships-section h4 {
-            color: #fff;
-            margin-bottom: 1rem;
-            text-align: center;
+        .team-score {
+            font-size: 2.5rem;
+            font-weight: bold;
         }
         .partnerships-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            display: flex;
+            justify-content: flex-start;
             gap: 1rem;
+            margin-top: 1rem;
+            overflow-x: auto;
+            padding: 1rem 0;
         }
         .partnership-box {
+            min-width: 200px;
             background: #2a2a2a;
             border-radius: 8px;
             padding: 1rem;
-            margin-bottom: 1rem;
             border: 1px solid #444;
         }
-        
         .winning-partnership {
             border: 2px solid #28a745;
             box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
         }
-        
         .partnership-header {
             font-size: 1.2rem;
             font-weight: bold;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             color: #fff;
         }
         .partnership-content {
             color: #ddd;
-        }
-        .partnership-item {
-            margin-bottom: 0.5rem;
         }
         .partnership-runs {
             font-size: 1.5rem;
@@ -108,13 +89,34 @@
         .batsman-score {
             color: #888;
         }
-        .current-players {
+        .bottom-info {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            padding: 1rem;
             display: flex;
             justify-content: space-between;
-            margin-top: 2rem;
-            padding: 1rem;
-            background: #2a2a2a;
-            border-radius: 10px;
+            align-items: center;
+            border-top: 1px solid #444;
+        }
+        .timer-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .overs {
+            font-size: 1.5rem;
+            color: #888;
+        }
+        .current-players {
+            display: flex;
+            gap: 2rem;
         }
         .player {
             text-align: center;
@@ -122,7 +124,7 @@
         .player-label {
             font-size: 0.9rem;
             color: #888;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
         .player-name {
             font-size: 1.2rem;
@@ -132,39 +134,14 @@
             font-size: 1rem;
             color: #888;
         }
-        .extras {
-            text-align: center;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            background: #2a2a2a;
-            border-radius: 5px;
-        }
-        .extras-label {
-            color: #888;
-            margin-bottom: 0.5rem;
-        }
-        .extras-value {
-            font-size: 1.2rem;
-            color: #fff;
-        }
-        .first-innings-label {
-            font-size: 0.8rem;
-            color: #888;
-            margin-top: 0.5rem;
-        }
         .bowler-figures {
-            margin-top: 1rem;
-            padding: 0.5rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            font-size: 0.9rem;
+            text-align: right;
+            padding-right: 1rem;
         }
-        
         .current-bowler {
             font-weight: bold;
             margin-bottom: 0.25rem;
         }
-        
         .bowler-stats {
             color: #ccc;
         }
@@ -176,47 +153,55 @@
             <h1>Indoor Cricket Scoreboard</h1>
         </div>
 
-        <div class="teams-container">
-            <div class="team">
+        <!-- First Innings Section -->
+        <div class="innings-section">
+            <div class="team-header">
                 <div class="team-name" id="battingTeam">Team A</div>
-                <div class="score" id="score">0/0</div>
+                <div class="team-score" id="score">0</div>
+            </div>
+            <div class="partnerships-list" id="battingPartnerships">
+                <!-- Partnerships will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Second Innings Section -->
+        <div class="innings-section">
+            <div class="team-header">
+                <div class="team-name" id="fieldingTeam">Team B</div>
+                <div class="team-score" id="firstInningsScore">0</div>
+            </div>
+            <div class="partnerships-list" id="fieldingPartnerships">
+                <!-- Partnerships will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Bottom Info Bar -->
+        <div class="bottom-info">
+            <div class="timer-section">
+                <div class="timer" id="matchTimer">00:00</div>
                 <div class="overs" id="overs">0.0/16.0</div>
-                <div id="bowlerFigures" class="bowler-figures">
-                    <div class="current-bowler">Current Bowler: <span id="currentBowlerName">-</span></div>
-                    <div class="bowler-stats">Overs: <span id="bowlerOvers">0.0</span> | Wickets: <span id="bowlerWickets">0</span> | Runs: <span id="bowlerRuns">0</span></div>
+            </div>
+            <div class="current-players">
+                <div class="player">
+                    <div class="player-label">Striker</div>
+                    <div class="player-name" id="strikerName">Select Striker</div>
+                    <div class="player-score" id="strikerScore">0 (0)</div>
+                </div>
+                <div class="player">
+                    <div class="player-label">Non-Striker</div>
+                    <div class="player-name" id="nonStrikerName">Select Non-Striker</div>
+                    <div class="player-score" id="nonStrikerScore">0 (0)</div>
+                </div>
+                <div class="player">
+                    <div class="player-label">Bowler</div>
+                    <div class="player-name" id="bowlerName">Select Bowler</div>
+                    <div class="player-score" id="bowlerStats">0/0</div>
                 </div>
             </div>
-            <div class="team">
-                <div class="team-name" id="fieldingTeam">Team B</div>
-                <div class="score" id="firstInningsScore"></div>
+            <div class="bowler-figures">
+                <div class="current-bowler">Current Bowler: <span id="currentBowlerName">-</span></div>
+                <div class="bowler-stats">Overs: <span id="bowlerOvers">0.0</span> | Wickets: <span id="bowlerWickets">0</span> | Runs: <span id="bowlerRuns">0</span></div>
             </div>
-        </div>
-
-        <div class="current-players">
-            <div class="player">
-                <div class="player-label">Striker</div>
-                <div class="player-name" id="strikerName">Select Striker</div>
-                <div class="player-score" id="strikerScore">0 (0)</div>
-            </div>
-            <div class="player">
-                <div class="player-label">Non-Striker</div>
-                <div class="player-name" id="nonStrikerName">Select Non-Striker</div>
-                <div class="player-score" id="nonStrikerScore">0 (0)</div>
-            </div>
-            <div class="player">
-                <div class="player-label">Bowler</div>
-                <div class="player-name" id="bowlerName">Select Bowler</div>
-                <div class="player-score" id="bowlerStats">0/0</div>
-            </div>
-        </div>
-
-        <div class="extras">
-            <div class="extras-label">Extras</div>
-            <div class="extras-value" id="extras">Wides: 0, No Balls: 0, Leg Side Wides: 0</div>
-        </div>
-
-        <div class="partnerships-container" id="partnershipsContainer">
-            <!-- Partnerships will be dynamically added here -->
         </div>
     </div>
 
@@ -229,13 +214,12 @@
             // Update team names and scores
             document.getElementById('battingTeam').textContent = gameState.battingTeam;
             document.getElementById('fieldingTeam').textContent = gameState.fieldingTeam;
-            document.getElementById('score').textContent = `${gameState.currentScore}/${gameState.wickets}`;
+            document.getElementById('score').textContent = gameState.currentScore;
             document.getElementById('overs').textContent = `${gameState.currentOver.toFixed(1)}/${gameState.totalOvers}`;
 
             // Update first innings score if available
             if (gameState.firstInnings && gameState.firstInnings.score > 0) {
-                document.getElementById('firstInningsScore').textContent = 
-                    `${gameState.firstInnings.score}/${gameState.firstInnings.wickets}`;
+                document.getElementById('firstInningsScore').textContent = gameState.firstInnings.score;
             }
 
             // Update current players
@@ -251,10 +235,6 @@
             document.getElementById('bowlerStats').textContent = 
                 `${gameState.currentBowler.wickets}/${gameState.currentBowler.runs}`;
 
-            // Update extras
-            document.getElementById('extras').textContent = 
-                `Wides: ${gameState.extras.wides}, No Balls: ${gameState.extras.noBalls}, Leg Side Wides: ${gameState.extras.legsideWides}`;
-
             // Update bowler figures
             document.getElementById('currentBowlerName').textContent = gameState.currentBowler.name || '-';
             document.getElementById('bowlerOvers').textContent = gameState.currentBowler.overs.toFixed(1);
@@ -267,77 +247,67 @@
 
         // Function to update partnerships display
         function updatePartnershipsDisplay(gameState) {
-            const partnershipsContainer = document.getElementById('partnershipsContainer');
-            partnershipsContainer.innerHTML = '';
+            const battingPartnerships = document.getElementById('battingPartnerships');
+            const fieldingPartnerships = document.getElementById('fieldingPartnerships');
+            
+            // Clear existing partnerships
+            battingPartnerships.innerHTML = '';
+            fieldingPartnerships.innerHTML = '';
 
             // Show first innings partnerships if they exist
             if (gameState.firstInnings && gameState.firstInnings.partnerships.length > 0) {
-                const firstInningsSection = document.createElement('div');
-                firstInningsSection.className = 'partnerships-section';
-                firstInningsSection.innerHTML = `
-                    <h4>${gameState.fieldingTeam} (First Innings)</h4>
-                    <div class="partnerships-list">
-                        ${gameState.firstInnings.partnerships.map((partnership, index) => {
-                            const currentInningsPartnership = gameState.partnerships[index];
-                            const isWinner = !currentInningsPartnership || partnership.runs > currentInningsPartnership.runs;
-                            
-                            return `
-                                <div class="partnership-box ${isWinner ? 'winning-partnership' : ''}">
-                                    <div class="partnership-header">Partnership ${index + 1}</div>
-                                    <div class="partnership-content">
-                                        <div class="partnership-item">
-                                            <div class="partnership-runs">${partnership.runs} runs</div>
-                                            <div class="partnership-batsmen">
-                                                ${partnership.batsmen ? partnership.batsmen.map(b => `
-                                                    <div class="batsman">
-                                                        <span class="batsman-name">${b.name}</span>
-                                                        <span class="batsman-score">${b.score} (${b.balls})</span>
-                                                    </div>
-                                                `).join('') : ''}
-                                            </div>
+                gameState.firstInnings.partnerships.forEach((partnership, index) => {
+                    const currentInningsPartnership = gameState.partnerships[index];
+                    const isWinner = !currentInningsPartnership || partnership.runs > currentInningsPartnership.runs;
+                    
+                    const partnershipBox = document.createElement('div');
+                    partnershipBox.className = `partnership-box ${isWinner ? 'winning-partnership' : ''}`;
+                    partnershipBox.innerHTML = `
+                        <div class="partnership-header">Partnership ${index + 1}</div>
+                        <div class="partnership-content">
+                            <div class="partnership-item">
+                                <div class="partnership-runs">${partnership.runs} runs</div>
+                                <div class="partnership-batsmen">
+                                    ${partnership.batsmen ? partnership.batsmen.map(b => `
+                                        <div class="batsman">
+                                            <span class="batsman-name">${b.name}</span>
+                                            <span class="batsman-score">${b.score} (${b.balls})</span>
                                         </div>
-                                    </div>
+                                    `).join('') : ''}
                                 </div>
-                            `;
-                        }).join('')}
-                    </div>
-                `;
-                partnershipsContainer.appendChild(firstInningsSection);
+                            </div>
+                        </div>
+                    `;
+                    fieldingPartnerships.appendChild(partnershipBox);
+                });
             }
 
             // Show current innings partnerships
             if (gameState.partnerships && gameState.partnerships.length > 0) {
-                const currentInningsSection = document.createElement('div');
-                currentInningsSection.className = 'partnerships-section';
-                currentInningsSection.innerHTML = `
-                    <h4>${gameState.battingTeam} (Current Innings)</h4>
-                    <div class="partnerships-list">
-                        ${gameState.partnerships.map((partnership, index) => {
-                            const firstInningsPartnership = gameState.firstInnings.partnerships[index];
-                            const isWinner = !firstInningsPartnership || partnership.runs > firstInningsPartnership.runs;
-                            
-                            return `
-                                <div class="partnership-box ${isWinner ? 'winning-partnership' : ''}">
-                                    <div class="partnership-header">Partnership ${index + 1}</div>
-                                    <div class="partnership-content">
-                                        <div class="partnership-item">
-                                            <div class="partnership-runs">${partnership.runs} runs</div>
-                                            <div class="partnership-batsmen">
-                                                ${partnership.batsmen ? partnership.batsmen.map(b => `
-                                                    <div class="batsman">
-                                                        <span class="batsman-name">${b.name}</span>
-                                                        <span class="batsman-score">${b.score} (${b.balls})</span>
-                                                    </div>
-                                                `).join('') : ''}
-                                            </div>
+                gameState.partnerships.forEach((partnership, index) => {
+                    const firstInningsPartnership = gameState.firstInnings.partnerships[index];
+                    const isWinner = !firstInningsPartnership || partnership.runs > firstInningsPartnership.runs;
+                    
+                    const partnershipBox = document.createElement('div');
+                    partnershipBox.className = `partnership-box ${isWinner ? 'winning-partnership' : ''}`;
+                    partnershipBox.innerHTML = `
+                        <div class="partnership-header">Partnership ${index + 1}</div>
+                        <div class="partnership-content">
+                            <div class="partnership-item">
+                                <div class="partnership-runs">${partnership.runs} runs</div>
+                                <div class="partnership-batsmen">
+                                    ${partnership.batsmen ? partnership.batsmen.map(b => `
+                                        <div class="batsman">
+                                            <span class="batsman-name">${b.name}</span>
+                                            <span class="batsman-score">${b.score} (${b.balls})</span>
                                         </div>
-                                    </div>
+                                    `).join('') : ''}
                                 </div>
-                            `;
-                        }).join('')}
-                    </div>
-                `;
-                partnershipsContainer.appendChild(currentInningsSection);
+                            </div>
+                        </div>
+                    `;
+                    battingPartnerships.appendChild(partnershipBox);
+                });
             }
         }
 
