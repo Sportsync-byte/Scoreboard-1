@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indoor Cricket Umpire Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+        .card-header {
+            background: #007bff;
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        .preview-scoreboard {
+            background: #1a1a1a;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .timer.warning {
+            color: #ffc107;
+            animation: flash 1s infinite;
+        }
+        .timer.danger {
+            color: #dc3545;
+            animation: flash 0.5s infinite;
+        }
+        @keyframes flash {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .scoring-btn {
+            min-width: 60px;
+            margin: 0.25rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+        .current-players {
+            background: #2a2a2a;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        .current-players .player {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Preview Scoreboard -->
+            <div class="col-12 preview-scoreboard">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <h3 id="previewBattingTeam">Team A</h3>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h3 id="previewScore">0/0</h3>
+                        <div id="previewOvers">0.0/16.0</div>
+                        <div id="lastBallDisplay" class="last-ball-display">
+                            <div class="last-ball">Last Ball: <span id="lastBallResult">-</span></div>
+                            <div class="balls-remaining">Balls Left: <span id="ballsRemaining">6</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h3 id="previewFieldingTeam">Team B</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timer -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Match Timer</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="timer" id="matchTimer">00:00</div>
+                        <div class="text-center">
+                            <button class="btn btn-success" onclick="startTimer()">Start</button>
+                            <button class="btn btn-danger" onclick="stopTimer()">Stop</button>
+                            <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Players -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Current Players</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="current-players">
+                            <div class="player">
+                                <label>Striker:</label>
+                                <select id="striker" class="form-select"></select>
+                            </div>
+                            <div class="player">
+                                <label>Non-Striker:</label>
+                                <select id="nonStriker" class="form-select"></select>
+                            </div>
+                            <div class="player">
+                                <label>Current Bowler:</label>
+                                <select id="currentBowler" class="form-select"></select>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button id="addBatsmanBtn" class="btn btn-primary">Add Batsman</button>
+                            <button id="addBowlerBtn" class="btn btn-primary">Add Bowler</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scoring -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Scoring</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <button class="btn btn-outline-primary scoring-btn" data-runs="0">0</button>
+                            <button class="btn btn-outline-primary scoring-btn" data-runs="1">1</button>
+                            <button class="btn btn-outline-primary scoring-btn" data-runs="2">2</button>
+                            <button class="btn btn-outline-primary scoring-btn" data-runs="3">3</button>
+                            <button class="btn btn-outline-primary scoring-btn" data-runs="4">4</button>
+                            <button class="btn btn-outline-primary scoring-btn" data-runs="5">5</button>
+                            <button class="btn btn-outline-primary scoring-btn" data-runs="6">6</button>
+                            <button class="btn btn-outline-primary scoring-btn" data-runs="7">7</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-danger" onclick="handleWicket('bowled')">Bowled</button>
+                            <button class="btn btn-outline-danger" onclick="handleWicket('caught')">Caught</button>
+                            <button class="btn btn-outline-danger" onclick="handleWicket('runout')">Run Out</button>
+                            <button class="btn btn-outline-danger" onclick="handleWicket('thirdball')">3rd Ball</button>
+                            <button class="btn btn-outline-danger" onclick="handleWicket('obstruction')">Obstruction</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button id="wideBtn" class="btn btn-outline-warning">Wide</button>
+                            <button id="noBallBtn" class="btn btn-outline-warning">No Ball</button>
+                            <button id="legsideWideBtn" class="btn btn-outline-warning">Leg Side Wide</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button id="undoBtn" class="btn btn-outline-secondary">Undo Last Ball</button>
+                            <button id="saveMatchBtn" class="btn btn-outline-success">Save Match</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="partnershipChangeModal" class="modal">
+        <div class="modal-content">
+            <h3>New Partnership</h3>
+            <p>Please select new batsmen for this partnership.</p>
+            <div class="mb-3">
+                <label>Striker:</label>
+                <select id="newStriker" class="form-select"></select>
+            </div>
+            <div class="mb-3">
+                <label>Non-Striker:</label>
+                <select id="newNonStriker" class="form-select"></select>
+            </div>
+            <div class="text-end">
+                <button class="btn btn-secondary" onclick="closePartnershipModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyPartnershipChange()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bowlerChangeModal" class="modal">
+        <div class="modal-content">
+            <h3>New Bowler</h3>
+            <p>Please select a new bowler for this over.</p>
+            <div class="mb-3">
+                <label>Bowler:</label>
+                <select id="newBowler" class="form-select"></select>
+            </div>
+            <div class="text-end">
+                <button class="btn btn-secondary" onclick="closeBowlerModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyBowlerChange()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="thirdBallWarningModal" class="modal">
+        <div class="modal-content">
+            <h3>Third Ball Warning!</h3>
+            <p>Two dot balls in a row. Score must change on this ball!</p>
+            <button class="btn btn-primary" onclick="closeThirdBallWarning()">OK</button>
+        </div>
+    </div>
+
+    <div id="inningsChangeModal" class="modal">
+        <div class="modal-content">
+            <h3>Second Innings</h3>
+            <p>First innings complete. Teams will now swap roles.</p>
+            <button class="btn btn-primary" onclick="startSecondInnings()">Start Second Innings</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            battingTeam: '',
+            fieldingTeam: '',
+            currentScore: 0,
+            wickets: 0,
+            currentOver: 0,
+            totalOvers: 16,
+            currentPartnership: 0,
+            totalPartnerships: 3,
+            batsmen: [],
+            bowlers: [],
+            currentBatsmen: {
+                striker: null,
+                nonStriker: null
+            },
+            currentBowler: null,
+            ballHistory: [],
+            extras: {
+                wides: 0,
+                noBalls: 0,
+                legsideWides: 0
+            },
+            timer: {
+                isRunning: false,
+                elapsed: 0,
+                startTime: 0
+            },
+            matchDuration: 40,
+            consecutiveDotBalls: 0,
+            isSecondInnings: false,
+            firstInnings: {
+                score: 0,
+                partnerships: []
+            }
+        };
+
+        // DOM Elements
+        const elements = {
+            battingTeam: document.getElementById('battingTeam'),
+            fieldingTeam: document.getElementById('fieldingTeam'),
+            striker: document.getElementById('striker'),
+            nonStriker: document.getElementById('nonStriker'),
+            currentBowler: document.getElementById('currentBowler'),
+            previewBattingTeam: document.getElementById('previewBattingTeam'),
+            previewFieldingTeam: document.getElementById('previewFieldingTeam'),
+            previewScore: document.getElementById('previewScore'),
+            previewOvers: document.getElementById('previewOvers'),
+            lastBallResult: document.getElementById('lastBallResult'),
+            ballsRemaining: document.getElementById('ballsRemaining'),
+            matchTimer: document.getElementById('matchTimer')
+        };
+
+        // Initialize Game
+        function initializeGame() {
+            // Load saved game state if exists
+            const savedState = localStorage.getItem('indoorCricketGame');
+            if (savedState) {
+                gameState = JSON.parse(savedState);
+                updateDisplay();
+            }
+            
+            // Add event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add batsman button
+                document.getElementById('addBatsmanBtn').addEventListener('click', addNewBatsman);
+                
+                // Add bowler button
+                document.getElementById('addBowlerBtn').addEventListener('click', addNewBowler);
+                
+                // Add event listeners for scoring buttons
+                document.querySelectorAll('.scoring-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const runs = parseInt(this.dataset.runs);
+                        handleBall(runs);
+                    });
+                });
+                
+                // Add event listeners for extras
+                document.getElementById('wideBtn').addEventListener('click', () => handleExtra('wides'));
+                document.getElementById('noBallBtn').addEventListener('click', () => handleExtra('noBalls'));
+                document.getElementById('legsideWideBtn').addEventListener('click', () => handleExtra('legsideWides'));
+                
+                // Add event listener for undo
+                document.getElementById('undoBtn').addEventListener('click', undoLastBall);
+                
+                // Add event listener for save match
+                document.getElementById('saveMatchBtn').addEventListener('click', saveMatch);
+            });
+        }
+
+        // Update Display
+        function updateDisplay() {
+            elements.previewScore.textContent = `${gameState.currentScore}/${gameState.wickets}`;
+            elements.previewOvers.textContent = `${gameState.currentOver.toFixed(1)}/${gameState.totalOvers}`;
+            elements.previewBattingTeam.textContent = gameState.battingTeam;
+            elements.previewFieldingTeam.textContent = gameState.fieldingTeam;
+            elements.ballsRemaining.textContent = (6 - (gameState.currentOver % 1) * 6).toFixed(0);
+            
+            updateBatsmenSelects();
+            updateBowlerSelect();
+            updateTimerDisplay();
+        }
+
+        // Update Batsmen Selects
+        function updateBatsmenSelects() {
+            const strikerSelect = elements.striker;
+            const nonStrikerSelect = elements.nonStriker;
+            
+            // Clear existing options
+            strikerSelect.innerHTML = '<option value="">Select Batsman</option>';
+            nonStrikerSelect.innerHTML = '<option value="">Select Batsman</option>';
+            
+            // Add batsmen options
+            gameState.batsmen.forEach(batsman => {
+                const option = document.createElement('option');
+                option.value = batsman.id;
+                option.textContent = `${batsman.name} (${batsman.score})`;
+                
+                strikerSelect.appendChild(option.cloneNode(true));
+                nonStrikerSelect.appendChild(option);
+            });
+            
+            // Set selected values
+            if (gameState.currentBatsmen.striker) {
+                strikerSelect.value = gameState.currentBatsmen.striker.id;
+            }
+            if (gameState.currentBatsmen.nonStriker) {
+                nonStrikerSelect.value = gameState.currentBatsmen.nonStriker.id;
+            }
+        }
+
+        // Update Bowler Select
+        function updateBowlerSelect() {
+            const bowlerSelect = elements.currentBowler;
+            bowlerSelect.innerHTML = '<option value="">Select Bowler</option>';
+            
+            gameState.bowlers.forEach(bowler => {
+                const option = document.createElement('option');
+                option.value = bowler.id;
+                option.textContent = `${bowler.name} (${bowler.overs.toFixed(1)}/${bowler.wickets})`;
+                bowlerSelect.appendChild(option);
+            });
+            
+            if (gameState.currentBowler) {
+                bowlerSelect.value = gameState.currentBowler.id;
+            }
+        }
+
+        // Add New Batsman
+        function addNewBatsman() {
+            const name = prompt('Enter batsman name:');
+            if (name) {
+                const newBatsman = {
+                    id: Date.now(),
+                    name: name,
+                    score: 0,
+                    balls: 0,
+                    fours: 0,
+                    sixes: 0
+                };
+                gameState.batsmen.push(newBatsman);
+                updateBatsmenSelects();
+                saveGameState();
+            }
+        }
+
+        // Add New Bowler
+        function addNewBowler() {
+            const name = prompt('Enter bowler name:');
+            if (name) {
+                const newBowler = {
+                    id: Date.now(),
+                    name: name,
+                    overs: 0,
+                    wickets: 0,
+                    runs: 0
+                };
+                gameState.bowlers.push(newBowler);
+                updateBowlerSelect();
+                saveGameState();
+            }
+        }
+
+        // Handle Ball
+        function handleBall(runs) {
+            if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
+                alert('Please select batsmen and bowler first');
+                return;
+            }
+
+            const ball = {
+                runs: runs,
+                batsman: gameState.currentBatsmen.striker,
+                bowler: gameState.currentBowler,
+                timestamp: new Date()
+            };
+
+            gameState.currentScore += runs;
+            gameState.currentBatsmen.striker.score += runs;
+            gameState.currentBatsmen.striker.balls++;
+            
+            if (runs === 0) {
+                gameState.consecutiveDotBalls++;
+                if (gameState.consecutiveDotBalls === 2) {
+                    showThirdBallWarning();
+                }
+            } else {
+                gameState.consecutiveDotBalls = 0;
+            }
+            
+            if (runs % 2 === 1) {
+                // Swap batsmen on odd runs
+                const temp = gameState.currentBatsmen.striker;
+                gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
+                gameState.currentBatsmen.nonStriker = temp;
+            }
+            
+            gameState.currentOver += 0.1;
+            gameState.currentBowler.overs += 0.1;
+            
+            gameState.ballHistory.push(ball);
+            elements.lastBallResult.textContent = runs;
+            
+            updateDisplay();
+            saveGameState();
+            updateScoreboard();
+            
+            checkOverComplete();
+        }
+
+        // Handle Wicket
+        function handleWicket(type) {
+            if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
+                alert('Please select batsmen and bowler first');
+                return;
+            }
+
+            const ball = {
+                runs: -5,
+                isWicket: true,
+                wicketType: type,
+                batsman: gameState.currentBatsmen.striker,
+                bowler: gameState.currentBowler,
+                timestamp: new Date()
+            };
+
+            gameState.currentScore -= 5;
+            gameState.currentBatsmen.striker.score -= 5;
+            gameState.currentBatsmen.striker.balls++;
+            gameState.wickets++;
+            
+            // Swap batsmen
+            const temp = gameState.currentBatsmen.striker;
+            gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
+            gameState.currentBatsmen.nonStriker = temp;
+            
+            gameState.currentOver += 0.1;
+            gameState.currentBowler.overs += 0.1;
+            gameState.currentBowler.wickets++;
+            
+            gameState.ballHistory.push(ball);
+            elements.lastBallResult.textContent = 'W';
+            
+            updateDisplay();
+            saveGameState();
+            updateScoreboard();
+            
+            checkOverComplete();
+        }
+
+        // Handle Extras
+        function handleExtra(type) {
+            if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
+                alert('Please select batsmen and bowler first');
+                return;
+            }
+
+            const ball = {
+                runs: 2,
+                isExtra: true,
+                extraType: type,
+                batsman: gameState.currentBatsmen.striker,
+                bowler: gameState.currentBowler,
+                timestamp: new Date()
+            };
+
+            gameState.currentScore += 2;
+            gameState.currentBatsmen.striker.score += 2;
+            gameState.currentBatsmen.striker.balls++;
+            gameState.extras[type]++;
+            
+            gameState.currentOver += 0.1;
+            gameState.currentBowler.overs += 0.1;
+            
+            gameState.ballHistory.push(ball);
+            elements.lastBallResult.textContent = type === 'wides' ? 'Wd' : type === 'noBalls' ? 'Nb' : 'Lb';
+            
+            updateDisplay();
+            saveGameState();
+            updateScoreboard();
+            
+            checkOverComplete();
+        }
+
+        // Check Over Complete
+        function checkOverComplete() {
+            if (gameState.currentOver % 1 === 0) {
+                showBowlerChangeModal();
+            }
+        }
+
+        // Check Partnership Change
+        function checkPartnershipChange() {
+            if (gameState.currentOver >= gameState.currentPartnership * 4) {
+                showPartnershipChangeModal();
+            }
+        }
+
+        // Show Modals
+        function showPartnershipChangeModal() {
+            document.getElementById('partnershipChangeModal').style.display = 'block';
+        }
+
+        function showBowlerChangeModal() {
+            document.getElementById('bowlerChangeModal').style.display = 'block';
+        }
+
+        function showThirdBallWarning() {
+            document.getElementById('thirdBallWarningModal').style.display = 'block';
+        }
+
+        // Close Modals
+        function closePartnershipModal() {
+            document.getElementById('partnershipChangeModal').style.display = 'none';
+        }
+
+        function closeBowlerModal() {
+            document.getElementById('bowlerChangeModal').style.display = 'none';
+        }
+
+        function closeThirdBallWarning() {
+            document.getElementById('thirdBallWarningModal').style.display = 'none';
+        }
+
+        // Apply Changes
+        function applyPartnershipChange() {
+            const newStriker = document.getElementById('newStriker').value;
+            const newNonStriker = document.getElementById('newNonStriker').value;
+            
+            if (!newStriker || !newNonStriker) {
+                alert('Please select both batsmen');
+                return;
+            }
+            
+            gameState.currentBatsmen.striker = gameState.batsmen.find(b => b.id === parseInt(newStriker));
+            gameState.currentBatsmen.nonStriker = gameState.batsmen.find(b => b.id === parseInt(newNonStriker));
+            gameState.currentPartnership++;
+            
+            closePartnershipModal();
+            updateDisplay();
+            saveGameState();
+        }
+
+        function applyBowlerChange() {
+            const newBowler = document.getElementById('newBowler').value;
+            
+            if (!newBowler) {
+                alert('Please select a bowler');
+                return;
+            }
+            
+            gameState.currentBowler = gameState.bowlers.find(b => b.id === parseInt(newBowler));
+            
+            closeBowlerModal();
+            updateDisplay();
+            saveGameState();
+        }
+
+        // Start Second Innings
+        function startSecondInnings() {
+            gameState.isSecondInnings = true;
+            gameState.firstInnings.score = gameState.currentScore;
+            gameState.firstInnings.partnerships = [...gameState.partnerships];
+            
+            // Swap teams
+            const temp = gameState.battingTeam;
+            gameState.battingTeam = gameState.fieldingTeam;
+            gameState.fieldingTeam = temp;
+            
+            // Reset game state
+            gameState.currentScore = 0;
+            gameState.wickets = 0;
+            gameState.currentOver = 0;
+            gameState.currentPartnership = 0;
+            gameState.consecutiveDotBalls = 0;
+            
+            // Reset timer
+            resetTimer();
+            
+            document.getElementById('inningsChangeModal').style.display = 'none';
+            updateDisplay();
+            saveGameState();
+        }
+
+        // Timer functions
+        function startTimer() {
+            if (!gameState.timer.isRunning) {
+                gameState.timer.isRunning = true;
+                gameState.timer.startTime = Date.now() - gameState.timer.elapsed;
+                saveGameState();
+            }
+        }
+
+        function stopTimer() {
+            if (gameState.timer.isRunning) {
+                gameState.timer.isRunning = false;
+                gameState.timer.elapsed = Date.now() - gameState.timer.startTime;
+                saveGameState();
+            }
+        }
+
+        function resetTimer() {
+            gameState.timer = {
+                isRunning: false,
+                elapsed: 0,
+                startTime: 0
+            };
+            saveGameState();
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const totalTime = gameState.matchDuration * 60 * 1000;
+            const remainingTime = Math.max(0, totalTime - gameState.timer.elapsed);
+            const minutes = Math.floor(remainingTime / 60000);
+            const seconds = Math.floor((remainingTime % 60000) / 1000);
+            
+            const timerElement = elements.matchTimer;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update timer color based on remaining time
+            if (remainingTime <= 0) {
+                timerElement.classList.add('danger');
+                playWarningSound();
+            } else if (remainingTime <= 5 * 60 * 1000) { // 5 minutes
+                timerElement.classList.add('warning');
+            } else {
+                timerElement.classList.remove('warning', 'danger');
+            }
+        }
+
+        // Play warning sound
+        function playWarningSound() {
+            const audio = new Audio('warning.mp3');
+            audio.play();
+        }
+
+        // Update timer every second
+        setInterval(() => {
+            if (gameState.timer.isRunning) {
+                gameState.timer.elapsed = Date.now() - gameState.timer.startTime;
+                updateTimerDisplay();
+                saveGameState();
+            }
+        }, 1000);
+
+        // Save Game State
+        function saveGameState() {
+            localStorage.setItem('indoorCricketGame', JSON.stringify(gameState));
+        }
+
+        // Save Match
+        function saveMatch() {
+            const matchData = {
+                ...gameState,
+                timestamp: new Date(),
+                status: 'completed'
+            };
+            
+            const savedMatches = JSON.parse(localStorage.getItem('indoorCricketMatches') || '[]');
+            savedMatches.push(matchData);
+            localStorage.setItem('indoorCricketMatches', JSON.stringify(savedMatches));
+            
+            alert('Match saved successfully!');
+        }
+
+        // Update Scoreboard
+        function updateScoreboard() {
+            // This function will be implemented to communicate with the scoreboard window
+            // using localStorage or other methods
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeGame);
+    </script>
+</body>
+</html>
