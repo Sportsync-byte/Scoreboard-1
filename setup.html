@@ -401,8 +401,11 @@
             // Save game state to localStorage
             localStorage.setItem('indoorCricketGame', JSON.stringify(gameState));
 
-            // Redirect to umpire's interface
-            window.location.href = 'umpire-combined.html';
+            // Open scoreboard in a new window
+            window.open('scoreboard.html', 'scoreboardWindow', 'width=1920,height=1080,fullscreen=yes');
+            
+            // Redirect to umpire interface
+            window.location.href = 'umpire.html';
         });
     </script>
 </body>
