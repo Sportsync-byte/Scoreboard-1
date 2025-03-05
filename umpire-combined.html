@@ -293,6 +293,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- Add Partnerships Container -->
+        <div class="partnerships-container" id="partnershipsContainer">
+            <!-- Partnerships will be dynamically added here -->
+        </div>
     </div>
 
     <!-- Custom Runs Modal -->
@@ -358,6 +363,7 @@
                 overs: 0,
                 wickets: 0
             },
+            partnerships: [],
             extras: {
                 wides: 0,
                 noBalls: 0,
@@ -368,7 +374,7 @@
                 elapsed: 0,
                 startTime: 0
             },
-            matchDuration: 40, // minutes
+            matchDuration: 40,
             consecutiveDotBalls: 0,
             ballHistory: [],
             firstInnings: {
@@ -377,6 +383,9 @@
                 wickets: 0,
                 battingTeam: '',
                 fieldingTeam: ''
+            },
+            overs: {
+                ballsLeft: 6
             }
         };
 
@@ -399,7 +408,8 @@
         function initializeGameState() {
             const savedState = localStorage.getItem('indoorCricketGame');
             if (savedState) {
-                gameState = JSON.parse(savedState);
+                const parsedState = JSON.parse(savedState);
+                gameState = { ...gameState, ...parsedState };
             }
             updateDisplay();
         }
@@ -412,21 +422,16 @@
 
         // Update display with current game state
         function updateDisplay() {
-            // Update preview scoreboard
             elements.previewBattingTeam.textContent = gameState.battingTeam;
             elements.previewFieldingTeam.textContent = gameState.fieldingTeam;
             elements.previewScore.textContent = `${gameState.currentScore}/${gameState.wickets}`;
             elements.previewOvers.textContent = `${gameState.currentOver.toFixed(1)}/${gameState.totalOvers}`;
 
-            // Update current players
             elements.strikerName.textContent = gameState.currentBatsmen.striker.name || 'Select Striker';
             elements.nonStrikerName.textContent = gameState.currentBatsmen.nonStriker.name || 'Select Non-Striker';
             elements.currentBowlerName.textContent = gameState.currentBowler.name || 'Select Bowler';
 
-            // Update timer
             updateTimerDisplay();
-
-            // Update partnerships display
             updatePartnershipsDisplay();
         }
 
@@ -436,6 +441,9 @@
                 gameState.timer.isRunning = true;
                 gameState.timer.startTime = Date.now() - gameState.timer.elapsed;
                 saveGameState();
+                
+                // Open scoreboard in a new window
+                window.open('scoreboard-combined.html', 'Scoreboard', 'width=800,height=600');
             }
         }
 
@@ -479,21 +487,17 @@
         function handleExtra(type) {
             if (!gameState.timer.isRunning) return;
             
-            // Check if this is the last over of the partnership
             const isLastOver = Math.floor(gameState.currentOver) === gameState.partnership.overs + 3;
             
-            // Add the extra
             gameState.extras[type]++;
             gameState.currentScore++;
             gameState.currentBatsmen.striker.score++;
             gameState.partnership.runs++;
             
-            // If it's the last over of the partnership, show the add ball prompt
             if (isLastOver) {
                 showAddBallPrompt();
             }
             
-            // Update display
             updateDisplay();
             saveGameState();
         }
@@ -502,40 +506,32 @@
         function handleBall(runs) {
             if (!gameState.timer.isRunning) return;
             
-            // Update current batsmen scores
             if (gameState.currentBatsmen.striker) {
                 gameState.currentBatsmen.striker.score += runs;
                 gameState.currentBatsmen.striker.balls++;
             }
             
-            // Update partnership
             if (gameState.partnerships.length > 0) {
                 const currentPartnership = gameState.partnerships[gameState.partnerships.length - 1];
                 currentPartnership.runs += runs;
-                currentPartnership.overs += 1/6; // Add 1/6 of an over
+                currentPartnership.overs += 1/6;
             }
             
-            // Update total score
             gameState.currentScore += runs;
             
-            // Update overs
             gameState.overs.ballsLeft--;
             if (gameState.overs.ballsLeft === 0) {
                 gameState.overs.ballsLeft = 6;
                 gameState.currentOver++;
             }
             
-            // Check for third ball warning
             if (runs === 0) {
                 checkThirdBallWarning();
             } else {
-                // Reset consecutive dot balls if runs were scored
                 gameState.consecutiveDotBalls = 0;
             }
             
-            // Check if innings is complete (only when all overs are done)
             if (gameState.currentOver >= gameState.totalOvers) {
-                // Store first innings data
                 gameState.firstInnings = {
                     partnerships: [...gameState.partnerships],
                     score: gameState.currentScore,
@@ -544,12 +540,10 @@
                     fieldingTeam: gameState.fieldingTeam
                 };
                 
-                // Swap teams for second innings
                 const tempTeam = gameState.battingTeam;
                 gameState.battingTeam = gameState.fieldingTeam;
                 gameState.fieldingTeam = tempTeam;
                 
-                // Reset game state for second innings
                 gameState.currentScore = 0;
                 gameState.wickets = 0;
                 gameState.currentOver = 0;
@@ -561,12 +555,10 @@
                 };
                 gameState.currentBowler = { name: '', overs: 0, wickets: 0, runs: 0 };
                 
-                // Update display and save state
                 updateDisplay();
                 saveGameState();
             }
             
-            // Update display
             updateDisplay();
             saveGameState();
         }
@@ -575,16 +567,13 @@
         function handleWicket(type) {
             if (!gameState.timer.isRunning) return;
             
-            // Apply -5 run penalty
             gameState.currentScore -= 5;
             gameState.currentBatsmen.striker.score -= 5;
             gameState.partnership.runs -= 5;
             
-            // Add third ball out with -5 runs
             gameState.currentBatsmen.striker.balls += 3;
             gameState.partnership.balls += 3;
             
-            // Update display
             updateDisplay();
             saveGameState();
         }
@@ -627,7 +616,6 @@
                 }
             }
             
-            // Update display and save state
             updateDisplay();
             saveGameState();
         }
@@ -658,7 +646,6 @@
             
             const lastBall = gameState.ballHistory.pop();
             
-            // Update overs
             if (gameState.overs.ballsLeft >= 6) {
                 gameState.currentOver -= 0.1;
                 if (gameState.currentBowler) {
@@ -674,7 +661,7 @@
                 if (gameState.currentBowler) {
                     gameState.currentBowler.wickets--;
                 }
-                gameState.currentScore += 5; // Restore penalty runs
+                gameState.currentScore += 5;
                 gameState.currentBatsmen.striker.score += 5;
                 gameState.partnership.runs += 5;
             } else {
@@ -739,7 +726,6 @@
 
             title.textContent = `Select ${type.charAt(0).toUpperCase() + type.slice(1)}`;
             
-            // Get available players based on type
             const players = getAvailablePlayers(type);
             
             playerList.innerHTML = players.map(player => `
@@ -803,15 +789,13 @@
             saveGameState();
         }
 
-        // Add new function to update partnerships display
+        // Update partnerships display
         function updatePartnershipsDisplay() {
             const partnershipsContainer = document.getElementById('partnershipsContainer');
             if (!partnershipsContainer) return;
 
-            // Clear existing partnerships
             partnershipsContainer.innerHTML = '';
 
-            // Show first innings partnerships if they exist
             if (gameState.firstInnings.partnerships.length > 0) {
                 const firstInningsSection = document.createElement('div');
                 firstInningsSection.className = 'partnerships-section';
@@ -819,7 +803,6 @@
                     <h4>${gameState.fieldingTeam} (First Innings)</h4>
                     <div class="partnerships-list">
                         ${gameState.firstInnings.partnerships.map((partnership, index) => {
-                            // Check if this partnership won
                             const currentInningsPartnership = gameState.partnerships[index];
                             const isWinner = !currentInningsPartnership || partnership.runs > currentInningsPartnership.runs;
                             
@@ -847,7 +830,6 @@
                 partnershipsContainer.appendChild(firstInningsSection);
             }
 
-            // Show current innings partnerships
             if (gameState.partnerships.length > 0) {
                 const currentInningsSection = document.createElement('div');
                 currentInningsSection.className = 'partnerships-section';
@@ -855,7 +837,6 @@
                     <h4>${gameState.battingTeam} (Current Innings)</h4>
                     <div class="partnerships-list">
                         ${gameState.partnerships.map((partnership, index) => {
-                            // Check if this partnership won
                             const firstInningsPartnership = gameState.firstInnings.partnerships[index];
                             const isWinner = !firstInningsPartnership || partnership.runs > firstInningsPartnership.runs;
                             
