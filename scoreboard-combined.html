@@ -152,6 +152,22 @@
             color: #888;
             margin-top: 0.5rem;
         }
+        .bowler-figures {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .current-bowler {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .bowler-stats {
+            color: #ccc;
+        }
     </style>
 </head>
 <body>
@@ -165,6 +181,10 @@
                 <div class="team-name" id="battingTeam">Team A</div>
                 <div class="score" id="score">0/0</div>
                 <div class="overs" id="overs">0.0/16.0</div>
+                <div id="bowlerFigures" class="bowler-figures">
+                    <div class="current-bowler">Current Bowler: <span id="currentBowlerName">-</span></div>
+                    <div class="bowler-stats">Overs: <span id="bowlerOvers">0.0</span> | Wickets: <span id="bowlerWickets">0</span> | Runs: <span id="bowlerRuns">0</span></div>
+                </div>
             </div>
             <div class="team">
                 <div class="team-name" id="fieldingTeam">Team B</div>
@@ -235,6 +255,12 @@
             document.getElementById('extras').textContent = 
                 `Wides: ${gameState.extras.wides}, No Balls: ${gameState.extras.noBalls}, Leg Side Wides: ${gameState.extras.legsideWides}`;
 
+            // Update bowler figures
+            document.getElementById('currentBowlerName').textContent = gameState.currentBowler.name || '-';
+            document.getElementById('bowlerOvers').textContent = gameState.currentBowler.overs.toFixed(1);
+            document.getElementById('bowlerWickets').textContent = gameState.currentBowler.wickets;
+            document.getElementById('bowlerRuns').textContent = gameState.currentBowler.runs;
+
             // Update partnerships
             updatePartnershipsDisplay(gameState);
         }
@@ -252,7 +278,6 @@
                     <h4>${gameState.fieldingTeam} (First Innings)</h4>
                     <div class="partnerships-list">
                         ${gameState.firstInnings.partnerships.map((partnership, index) => {
-                            // Check if this partnership won
                             const currentInningsPartnership = gameState.partnerships[index];
                             const isWinner = !currentInningsPartnership || partnership.runs > currentInningsPartnership.runs;
                             
@@ -288,7 +313,6 @@
                     <h4>${gameState.battingTeam} (Current Innings)</h4>
                     <div class="partnerships-list">
                         ${gameState.partnerships.map((partnership, index) => {
-                            // Check if this partnership won
                             const firstInningsPartnership = gameState.firstInnings.partnerships[index];
                             const isWinner = !firstInningsPartnership || partnership.runs > firstInningsPartnership.runs;
                             
