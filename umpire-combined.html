@@ -624,59 +624,70 @@
 
         // New Partnership
         function showNewPartnershipModal() {
-            const modal = document.getElementById('playerSelectModal');
-            const title = document.getElementById('playerSelectTitle');
-            const playerList = document.getElementById('playerList');
+            const modal = document.getElementById('newPartnershipModal');
+            const newStrikerSelect = document.getElementById('newStriker');
+            const newNonStrikerSelect = document.getElementById('newNonStriker');
+            const newBowlerSelect = document.getElementById('newBowler');
 
-            title.textContent = 'Select New Partnership';
+            // Get available players for each position
+            const availableBatsmen = gameState.batsmen.filter(batsman => 
+                !gameState.currentBatsmen.striker || batsman.id !== gameState.currentBatsmen.striker.id
+            );
             
-            // Get available players
-            const players = getAvailablePlayers('batsmen');
+            const availableBowlers = gameState.bowlers.filter(bowler => 
+                !gameState.currentBowler || bowler.id !== gameState.currentBowler.id
+            );
             
-            playerList.innerHTML = `
-                <div class="mb-3">
-                    <label>Striker:</label>
-                    <select id="newStriker" class="form-select">
-                        ${players.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Non-Striker:</label>
-                    <select id="newNonStriker" class="form-select">
-                        ${players.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label>Bowler:</label>
-                    <select id="newBowler" class="form-select">
-                        ${getAvailablePlayers('bowlers').map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
-                    </select>
-                </div>
-            `;
+            // Update the select elements
+            newStrikerSelect.innerHTML = availableBatsmen.map(p => 
+                `<option value="${p.id}">${p.name}</option>`
+            ).join('');
+            
+            newNonStrikerSelect.innerHTML = availableBatsmen.map(p => 
+                `<option value="${p.id}">${p.name}</option>`
+            ).join('');
+            
+            newBowlerSelect.innerHTML = availableBowlers.map(p => 
+                `<option value="${p.id}">${p.name}</option>`
+            ).join('');
 
             modal.style.display = 'block';
         }
 
         function startNewPartnership() {
-            const newStriker = document.getElementById('newStriker').value;
-            const newNonStriker = document.getElementById('newNonStriker').value;
-            const newBowler = document.getElementById('newBowler').value;
+            const newStrikerId = parseInt(document.getElementById('newStriker').value);
+            const newNonStrikerId = parseInt(document.getElementById('newNonStriker').value);
+            const newBowlerId = parseInt(document.getElementById('newBowler').value);
 
-            if (!newStriker || !newNonStriker || !newBowler) {
+            if (!newStrikerId || !newNonStrikerId || !newBowlerId) {
                 alert('Please select all players');
                 return;
             }
 
-            gameState.currentBatsmen.striker = gameState.batsmen.find(b => b.id === parseInt(newStriker));
-            gameState.currentBatsmen.nonStriker = gameState.batsmen.find(b => b.id === parseInt(newNonStriker));
-            gameState.currentBowler = gameState.bowlers.find(b => b.id === parseInt(newBowler));
+            // Find the selected players
+            const newStriker = gameState.batsmen.find(b => b.id === newStrikerId);
+            const newNonStriker = gameState.batsmen.find(b => b.id === newNonStrikerId);
+            const newBowler = gameState.bowlers.find(b => b.id === newBowlerId);
+
+            if (!newStriker || !newNonStriker || !newBowler) {
+                alert('Error finding selected players');
+                return;
+            }
+
+            // Update the current players
+            gameState.currentBatsmen.striker = newStriker;
+            gameState.currentBatsmen.nonStriker = newNonStriker;
+            gameState.currentBowler = newBowler;
+
+            // Reset partnership stats
             gameState.partnership = {
                 runs: 0,
                 balls: 0,
                 overs: Math.floor(gameState.currentOver)
             };
 
-            elements.newPartnershipModal.style.display = 'none';
+            // Close modal and update display
+            document.getElementById('newPartnershipModal').style.display = 'none';
             updateDisplay();
             saveGameState();
             updateScoreboard();
@@ -786,23 +797,16 @@
 
         // Get available players based on type
         function getAvailablePlayers(type) {
-            if (type === 'batsmen') {
+            if (type === 'striker' || type === 'nonStriker') {
                 return gameState.batsmen.filter(batsman => 
                     !gameState.currentBatsmen.striker || batsman.id !== gameState.currentBatsmen.striker.id
                 );
-            } else if (type === 'bowlers') {
+            } else if (type === 'bowler') {
                 return gameState.bowlers.filter(bowler => 
                     !gameState.currentBowler || bowler.id !== gameState.currentBowler.id
                 );
             }
             return [];
-        }
-
-        // Get player by ID
-        function getPlayerById(id) {
-            const batsman = gameState.batsmen.find(b => b.id === parseInt(id));
-            if (batsman) return batsman;
-            return gameState.bowlers.find(b => b.id === parseInt(id));
         }
 
         function showPlayerSelect(type) {
@@ -838,23 +842,29 @@
                 return;
             }
 
-            const player = getPlayerById(currentSelection.selectedId);
+            const playerId = parseInt(currentSelection.selectedId);
+            let player;
+
             switch (currentSelection.type) {
                 case 'striker':
+                    player = gameState.batsmen.find(b => b.id === playerId);
                     gameState.currentBatsmen.striker = player;
                     elements.strikerName.textContent = player.name;
                     break;
                 case 'nonStriker':
+                    player = gameState.batsmen.find(b => b.id === playerId);
                     gameState.currentBatsmen.nonStriker = player;
                     elements.nonStrikerName.textContent = player.name;
                     break;
                 case 'bowler':
+                    player = gameState.bowlers.find(b => b.id === playerId);
                     gameState.currentBowler = player;
                     elements.currentBowlerName.textContent = player.name;
                     break;
             }
 
             closePlayerSelect();
+            saveGameState();
         }
 
         function closePlayerSelect() {
