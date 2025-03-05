@@ -157,6 +157,24 @@
         .player-item.selected {
             background-color: #e3f2fd;
         }
+        .partnership-box {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #444;
+        }
+        
+        .winning-partnership {
+            border: 2px solid #28a745;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+        }
+        
+        .partnership-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -310,27 +328,6 @@
         </div>
     </div>
 
-    <!-- New Partnership Modal -->
-    <div id="newPartnershipModal" class="modal">
-        <div class="modal-content">
-            <h3>New Partnership</h3>
-            <p>Select new batsmen for the next partnership:</p>
-            <div class="mb-3">
-                <label>Striker:</label>
-                <select id="newStriker" class="form-select"></select>
-            </div>
-            <div class="mb-3">
-                <label>Non-Striker:</label>
-                <select id="newNonStriker" class="form-select"></select>
-            </div>
-            <div class="mb-3">
-                <label>Bowler:</label>
-                <select id="newBowler" class="form-select"></select>
-            </div>
-            <button class="btn btn-primary" onclick="startNewPartnership()">Start Partnership</button>
-        </div>
-    </div>
-
     <!-- Player Selection Modal -->
     <div id="playerSelectModal" class="player-select-modal">
         <div class="player-select-content">
@@ -373,7 +370,14 @@
             },
             matchDuration: 40, // minutes
             consecutiveDotBalls: 0,
-            ballHistory: []
+            ballHistory: [],
+            firstInnings: {
+                partnerships: [],
+                score: 0,
+                wickets: 0,
+                battingTeam: '',
+                fieldingTeam: ''
+            }
         };
 
         // DOM Elements
@@ -388,7 +392,6 @@
             currentBowlerName: document.getElementById('currentBowlerName'),
             customRunsModal: document.getElementById('customRunsModal'),
             addBallModal: document.getElementById('addBallModal'),
-            newPartnershipModal: document.getElementById('newPartnershipModal'),
             playerSelectModal: document.getElementById('playerSelectModal')
         };
 
@@ -422,6 +425,9 @@
 
             // Update timer
             updateTimerDisplay();
+
+            // Update partnerships display
+            updatePartnershipsDisplay();
         }
 
         // Timer functions
@@ -496,20 +502,27 @@
         function handleBall(runs) {
             if (!gameState.timer.isRunning) return;
             
-            // Check if this is the last over of the partnership
-            const isLastOver = Math.floor(gameState.currentOver) === gameState.partnership.overs + 3;
+            // Update current batsmen scores
+            if (gameState.currentBatsmen.striker) {
+                gameState.currentBatsmen.striker.score += runs;
+                gameState.currentBatsmen.striker.balls++;
+            }
             
-            // Add runs
+            // Update partnership
+            if (gameState.partnerships.length > 0) {
+                const currentPartnership = gameState.partnerships[gameState.partnerships.length - 1];
+                currentPartnership.runs += runs;
+                currentPartnership.overs += 1/6; // Add 1/6 of an over
+            }
+            
+            // Update total score
             gameState.currentScore += runs;
-            gameState.currentBatsmen.striker.score += runs;
-            gameState.currentBatsmen.striker.balls++;
-            gameState.partnership.runs += runs;
-            gameState.partnership.balls++;
             
             // Update overs
-            gameState.currentOver += 0.1;
-            if (gameState.currentBowler) {
-                gameState.currentBowler.overs += 0.1;
+            gameState.overs.ballsLeft--;
+            if (gameState.overs.ballsLeft === 0) {
+                gameState.overs.ballsLeft = 6;
+                gameState.currentOver++;
             }
             
             // Check for third ball warning
@@ -520,9 +533,37 @@
                 gameState.consecutiveDotBalls = 0;
             }
             
-            // If it's the last over of the partnership and an extra was bowled, don't count this ball
-            if (isLastOver && (gameState.extras.wides > 0 || gameState.extras.noBalls > 0 || gameState.extras.legsideWides > 0)) {
-                gameState.partnership.balls--;
+            // Check if innings is complete (only when all overs are done)
+            if (gameState.currentOver >= gameState.totalOvers) {
+                // Store first innings data
+                gameState.firstInnings = {
+                    partnerships: [...gameState.partnerships],
+                    score: gameState.currentScore,
+                    wickets: gameState.wickets,
+                    battingTeam: gameState.battingTeam,
+                    fieldingTeam: gameState.fieldingTeam
+                };
+                
+                // Swap teams for second innings
+                const tempTeam = gameState.battingTeam;
+                gameState.battingTeam = gameState.fieldingTeam;
+                gameState.fieldingTeam = tempTeam;
+                
+                // Reset game state for second innings
+                gameState.currentScore = 0;
+                gameState.wickets = 0;
+                gameState.currentOver = 0;
+                gameState.overs.ballsLeft = 6;
+                gameState.partnerships = [];
+                gameState.currentBatsmen = {
+                    striker: { name: '', score: 0, balls: 0 },
+                    nonStriker: { name: '', score: 0, balls: 0 }
+                };
+                gameState.currentBowler = { name: '', overs: 0, wickets: 0, runs: 0 };
+                
+                // Update display and save state
+                updateDisplay();
+                saveGameState();
             }
             
             // Update display
@@ -760,6 +801,87 @@
             gameState.currentBatsmen.nonStriker = temp;
             updateDisplay();
             saveGameState();
+        }
+
+        // Add new function to update partnerships display
+        function updatePartnershipsDisplay() {
+            const partnershipsContainer = document.getElementById('partnershipsContainer');
+            if (!partnershipsContainer) return;
+
+            // Clear existing partnerships
+            partnershipsContainer.innerHTML = '';
+
+            // Show first innings partnerships if they exist
+            if (gameState.firstInnings.partnerships.length > 0) {
+                const firstInningsSection = document.createElement('div');
+                firstInningsSection.className = 'partnerships-section';
+                firstInningsSection.innerHTML = `
+                    <h4>${gameState.fieldingTeam} (First Innings)</h4>
+                    <div class="partnerships-list">
+                        ${gameState.firstInnings.partnerships.map((partnership, index) => {
+                            // Check if this partnership won
+                            const currentInningsPartnership = gameState.partnerships[index];
+                            const isWinner = !currentInningsPartnership || partnership.runs > currentInningsPartnership.runs;
+                            
+                            return `
+                                <div class="partnership-box ${isWinner ? 'winning-partnership' : ''}">
+                                    <div class="partnership-header">Partnership ${index + 1}</div>
+                                    <div class="partnership-content">
+                                        <div class="partnership-item">
+                                            <div class="partnership-runs">${partnership.runs} runs</div>
+                                            <div class="partnership-batsmen">
+                                                ${partnership.batsmen ? partnership.batsmen.map(b => `
+                                                    <div class="batsman">
+                                                        <span class="batsman-name">${b.name}</span>
+                                                        <span class="batsman-score">${b.score} (${b.balls})</span>
+                                                    </div>
+                                                `).join('') : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                partnershipsContainer.appendChild(firstInningsSection);
+            }
+
+            // Show current innings partnerships
+            if (gameState.partnerships.length > 0) {
+                const currentInningsSection = document.createElement('div');
+                currentInningsSection.className = 'partnerships-section';
+                currentInningsSection.innerHTML = `
+                    <h4>${gameState.battingTeam} (Current Innings)</h4>
+                    <div class="partnerships-list">
+                        ${gameState.partnerships.map((partnership, index) => {
+                            // Check if this partnership won
+                            const firstInningsPartnership = gameState.firstInnings.partnerships[index];
+                            const isWinner = !firstInningsPartnership || partnership.runs > firstInningsPartnership.runs;
+                            
+                            return `
+                                <div class="partnership-box ${isWinner ? 'winning-partnership' : ''}">
+                                    <div class="partnership-header">Partnership ${index + 1}</div>
+                                    <div class="partnership-content">
+                                        <div class="partnership-item">
+                                            <div class="partnership-runs">${partnership.runs} runs</div>
+                                            <div class="partnership-batsmen">
+                                                ${partnership.batsmen ? partnership.batsmen.map(b => `
+                                                    <div class="batsman">
+                                                        <span class="batsman-name">${b.name}</span>
+                                                        <span class="batsman-score">${b.score} (${b.balls})</span>
+                                                    </div>
+                                                `).join('') : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                partnershipsContainer.appendChild(currentInningsSection);
+            }
         }
 
         // Initialize when page loads
