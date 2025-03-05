@@ -344,45 +344,36 @@
     </div>
 
     <script>
-        // Game State
         let gameState = {
-            format: '',
             battingTeam: '',
             fieldingTeam: '',
-            target: 0,
-            matchDuration: 0,
             currentScore: 0,
             wickets: 0,
             currentOver: 0,
-            totalOvers: 0,
-            partnershipOvers: 0,
-            batsmen: [],
-            bowlers: [],
+            totalOvers: 16,
             currentBatsmen: {
-                striker: null,
-                nonStriker: null
+                striker: { name: '', score: 0, balls: 0 },
+                nonStriker: { name: '', score: 0, balls: 0 }
             },
-            currentBowler: null,
-            ballHistory: [],
+            currentBowler: { name: '', overs: 0, wickets: 0, runs: 0 },
+            partnership: {
+                runs: 0,
+                overs: 0,
+                wickets: 0
+            },
             extras: {
                 wides: 0,
                 noBalls: 0,
                 legsideWides: 0
             },
-            partnership: {
-                runs: 0,
-                balls: 0,
-                overs: 0
-            },
             timer: {
-                startTime: null,
+                isRunning: false,
                 elapsed: 0,
-                isRunning: false
+                startTime: 0
             },
+            matchDuration: 40, // minutes
             consecutiveDotBalls: 0,
-            overs: {
-                ballsLeft: 6
-            }
+            ballHistory: []
         };
 
         // DOM Elements
@@ -396,104 +387,87 @@
             nonStrikerName: document.getElementById('nonStrikerName'),
             currentBowlerName: document.getElementById('currentBowlerName'),
             customRunsModal: document.getElementById('customRunsModal'),
-            extraBallModal: document.getElementById('extraBallModal'),
+            addBallModal: document.getElementById('addBallModal'),
             newPartnershipModal: document.getElementById('newPartnershipModal'),
             playerSelectModal: document.getElementById('playerSelectModal')
         };
 
-        // Initialize Game
-        function initializeGame() {
+        // Initialize game state from localStorage if available
+        function initializeGameState() {
             const savedState = localStorage.getItem('indoorCricketGame');
             if (savedState) {
                 gameState = JSON.parse(savedState);
-                updateDisplay();
-            } else {
-                window.location.href = 'setup.html';
             }
+            updateDisplay();
         }
 
-        // Update Display
+        // Update localStorage with current game state
+        function saveGameState() {
+            localStorage.setItem('indoorCricketGame', JSON.stringify(gameState));
+            localStorage.setItem('lastUpdate', Date.now().toString());
+        }
+
+        // Update display with current game state
         function updateDisplay() {
+            // Update preview scoreboard
             elements.previewBattingTeam.textContent = gameState.battingTeam;
             elements.previewFieldingTeam.textContent = gameState.fieldingTeam;
             elements.previewScore.textContent = `${gameState.currentScore}/${gameState.wickets}`;
             elements.previewOvers.textContent = `${gameState.currentOver.toFixed(1)}/${gameState.totalOvers}`;
-            
-            // Update overs display
-            const oversDisplay = document.getElementById('oversDisplay');
-            if (oversDisplay) {
-                oversDisplay.textContent = `Overs: ${gameState.currentOver.toFixed(1)}/${gameState.totalOvers}`;
-            }
-            
-            // Update balls left display
-            const ballsLeftDisplay = document.getElementById('ballsLeft');
-            if (ballsLeftDisplay) {
-                ballsLeftDisplay.textContent = `Balls Left: ${gameState.overs.ballsLeft}`;
-            }
-            
-            updateBatsmenDisplay();
-            updateBowlerSelect();
-            updateTimer();
+
+            // Update current players
+            elements.strikerName.textContent = gameState.currentBatsmen.striker.name || 'Select Striker';
+            elements.nonStrikerName.textContent = gameState.currentBatsmen.nonStriker.name || 'Select Non-Striker';
+            elements.currentBowlerName.textContent = gameState.currentBowler.name || 'Select Bowler';
+
+            // Update timer
+            updateTimerDisplay();
         }
 
-        // Update Batsmen Display
-        function updateBatsmenDisplay() {
-            elements.strikerName.textContent = gameState.currentBatsmen.striker?.name || 'Select Striker';
-            elements.nonStrikerName.textContent = gameState.currentBatsmen.nonStriker?.name || 'Select Non-Striker';
-        }
-
-        // Update Bowler Select
-        function updateBowlerSelect() {
-            const bowlerSelect = elements.currentBowlerName;
-            bowlerSelect.textContent = gameState.currentBowler?.name || 'Select Bowler';
-        }
-
-        // Timer Functions
+        // Timer functions
         function startTimer() {
             if (!gameState.timer.isRunning) {
-                gameState.timer.startTime = Date.now() - gameState.timer.elapsed;
                 gameState.timer.isRunning = true;
-                updateTimer();
+                gameState.timer.startTime = Date.now() - gameState.timer.elapsed;
+                saveGameState();
             }
         }
 
         function stopTimer() {
-            gameState.timer.isRunning = false;
+            if (gameState.timer.isRunning) {
+                gameState.timer.isRunning = false;
+                gameState.timer.elapsed = Date.now() - gameState.timer.startTime;
+                saveGameState();
+            }
         }
 
         function resetTimer() {
-            gameState.timer.elapsed = 0;
-            gameState.timer.isRunning = false;
-            updateTimer();
+            gameState.timer = {
+                isRunning: false,
+                elapsed: 0,
+                startTime: 0
+            };
+            saveGameState();
+            updateTimerDisplay();
         }
 
-        function updateTimer() {
-            if (gameState.timer.isRunning) {
-                gameState.timer.elapsed = Date.now() - gameState.timer.startTime;
-            }
-            
-            // Calculate remaining time
-            const totalTime = gameState.matchDuration * 60 * 1000; // Convert minutes to milliseconds
+        function updateTimerDisplay() {
+            const totalTime = gameState.matchDuration * 60 * 1000;
             const remainingTime = Math.max(0, totalTime - gameState.timer.elapsed);
-            
             const minutes = Math.floor(remainingTime / 60000);
             const seconds = Math.floor((remainingTime % 60000) / 1000);
-            elements.matchTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            // Update timer color based on remaining time
-            if (remainingTime <= 0) {
-                elements.matchTimer.classList.add('danger');
-                playWarningSound();
-            } else if (remainingTime <= 300000) { // 5 minutes
-                elements.matchTimer.classList.add('warning');
-            } else {
-                elements.matchTimer.classList.remove('warning', 'danger');
-            }
-            
-            if (gameState.timer.isRunning) {
-                requestAnimationFrame(updateTimer);
-            }
+            elements.matchTimer.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
+
+        // Update timer every second
+        setInterval(() => {
+            if (gameState.timer.isRunning) {
+                gameState.timer.elapsed = Date.now() - gameState.timer.startTime;
+                updateTimerDisplay();
+                saveGameState();
+            }
+        }, 1000);
 
         // Handle extras (wides, no balls, legside wides)
         function handleExtra(type) {
@@ -516,7 +490,6 @@
             // Update display
             updateDisplay();
             saveGameState();
-            updateScoreboard();
         }
 
         // Handle regular ball
@@ -534,13 +507,9 @@
             gameState.partnership.balls++;
             
             // Update overs
-            gameState.overs.ballsLeft--;
-            if (gameState.overs.ballsLeft <= 0) {
-                gameState.overs.ballsLeft = 6;
-                gameState.currentOver += 0.1;
-                if (gameState.currentBowler) {
-                    gameState.currentBowler.overs += 0.1;
-                }
+            gameState.currentOver += 0.1;
+            if (gameState.currentBowler) {
+                gameState.currentBowler.overs += 0.1;
             }
             
             // Check for third ball warning
@@ -554,13 +523,11 @@
             // If it's the last over of the partnership and an extra was bowled, don't count this ball
             if (isLastOver && (gameState.extras.wides > 0 || gameState.extras.noBalls > 0 || gameState.extras.legsideWides > 0)) {
                 gameState.partnership.balls--;
-                gameState.overs.ballsLeft = 6;
             }
             
             // Update display
             updateDisplay();
             saveGameState();
-            updateScoreboard();
         }
 
         // Handle wicket
@@ -579,7 +546,6 @@
             // Update display
             updateDisplay();
             saveGameState();
-            updateScoreboard();
         }
 
         // Check for third ball warning
@@ -618,84 +584,11 @@
                 if (gameState.currentBowler) {
                     gameState.currentBowler.overs += 0.1;
                 }
-                gameState.overs.ballsLeft = 6;
             }
             
             // Update display and save state
             updateDisplay();
             saveGameState();
-            updateScoreboard();
-        }
-
-        // New Partnership
-        function showNewPartnershipModal() {
-            const modal = document.getElementById('newPartnershipModal');
-            const newStrikerSelect = document.getElementById('newStriker');
-            const newNonStrikerSelect = document.getElementById('newNonStriker');
-            const newBowlerSelect = document.getElementById('newBowler');
-
-            // Get available players for each position
-            const availableBatsmen = gameState.batsmen.filter(batsman => 
-                !gameState.currentBatsmen.striker || batsman.id !== gameState.currentBatsmen.striker.id
-            );
-            
-            const availableBowlers = gameState.bowlers.filter(bowler => 
-                !gameState.currentBowler || bowler.id !== gameState.currentBowler.id
-            );
-            
-            // Update the select elements
-            newStrikerSelect.innerHTML = availableBatsmen.map(p => 
-                `<option value="${p.id}">${p.name}</option>`
-            ).join('');
-            
-            newNonStrikerSelect.innerHTML = availableBatsmen.map(p => 
-                `<option value="${p.id}">${p.name}</option>`
-            ).join('');
-            
-            newBowlerSelect.innerHTML = availableBowlers.map(p => 
-                `<option value="${p.id}">${p.name}</option>`
-            ).join('');
-
-            modal.style.display = 'block';
-        }
-
-        function startNewPartnership() {
-            const newStrikerId = parseInt(document.getElementById('newStriker').value);
-            const newNonStrikerId = parseInt(document.getElementById('newNonStriker').value);
-            const newBowlerId = parseInt(document.getElementById('newBowler').value);
-
-            if (!newStrikerId || !newNonStrikerId || !newBowlerId) {
-                alert('Please select all players');
-                return;
-            }
-
-            // Find the selected players
-            const newStriker = gameState.batsmen.find(b => b.id === newStrikerId);
-            const newNonStriker = gameState.batsmen.find(b => b.id === newNonStrikerId);
-            const newBowler = gameState.bowlers.find(b => b.id === newBowlerId);
-
-            if (!newStriker || !newNonStriker || !newBowler) {
-                alert('Error finding selected players');
-                return;
-            }
-
-            // Update the current players
-            gameState.currentBatsmen.striker = newStriker;
-            gameState.currentBatsmen.nonStriker = newNonStriker;
-            gameState.currentBowler = newBowler;
-
-            // Reset partnership stats
-            gameState.partnership = {
-                runs: 0,
-                balls: 0,
-                overs: Math.floor(gameState.currentOver)
-            };
-
-            // Close modal and update display
-            document.getElementById('newPartnershipModal').style.display = 'none';
-            updateDisplay();
-            saveGameState();
-            updateScoreboard();
         }
 
         // Custom Runs
@@ -714,6 +607,7 @@
                 return;
             }
             handleBall(runs);
+            closeCustomRunsModal();
             document.getElementById('customRuns').value = '';
         }
 
@@ -759,12 +653,6 @@
             
             updateDisplay();
             saveGameState();
-            updateScoreboard();
-        }
-
-        // Save Game State
-        function saveGameState() {
-            localStorage.setItem('indoorCricketGame', JSON.stringify(gameState));
         }
 
         // Save Match
@@ -780,11 +668,6 @@
             localStorage.setItem('indoorCricketMatches', JSON.stringify(savedMatches));
             
             alert('Match saved successfully!');
-        }
-
-        // Update Scoreboard
-        function updateScoreboard() {
-            localStorage.setItem('lastUpdate', Date.now().toString());
         }
 
         // Player selection system
@@ -875,21 +758,13 @@
             const temp = gameState.currentBatsmen.striker;
             gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
             gameState.currentBatsmen.nonStriker = temp;
-            updateBatsmenDisplay();
+            updateDisplay();
+            saveGameState();
         }
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            initializeGame();
-            // Open scoreboard in new window with a slight delay
-            setTimeout(() => {
-                const scoreboardWindow = window.open('scoreboard-combined.html', 'Scoreboard', 'width=800,height=600');
-                if (scoreboardWindow) {
-                    console.log('Scoreboard opened successfully');
-                } else {
-                    console.log('Failed to open scoreboard - popup might be blocked');
-                }
-            }, 1000);
+            initializeGameState();
         });
     </script>
 </body>
