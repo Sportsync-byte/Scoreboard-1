@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indoor Cricket Scoreboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .container-fluid {
+            height: 100vh;
+            padding: 1rem;
+        }
+        .team-section {
+            height: 45vh;
+            margin-bottom: 1rem;
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+        .team-section.active {
+            border: 2px solid #28a745;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.3);
+        }
+        .team-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .partnerships-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            height: 30vh;
+        }
+        .partnership-box {
+            flex: 1;
+            margin: 0 0.5rem;
+            background: #333;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            position: relative;
+        }
+        .partnership-box.winning {
+            border: 2px solid #28a745;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+        }
+        .partnership-score {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .partnership-overs {
+            font-size: 1.2rem;
+            color: #ccc;
+        }
+        .team-total {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .current-players {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            padding: 0.5rem;
+            display: none;
+        }
+        .current-players.show {
+            display: block;
+        }
+        .player {
+            margin: 0.25rem 0;
+            font-size: 1.2rem;
+        }
+        .timer {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            font-size: 3rem;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+        .timer.warning {
+            color: #ffc107;
+            animation: flash 1s infinite;
+        }
+        .timer.danger {
+            color: #dc3545;
+            animation: flash 0.5s infinite;
+        }
+        @keyframes flash {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .over-info {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            font-size: 2rem;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+        .animation-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+        }
+        .animation-container.show {
+            display: block;
+        }
+        @keyframes wicket {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes boundary {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- First Innings Team -->
+        <div class="team-section" id="firstInningsTeam">
+            <div class="team-name" id="firstTeamName">Team A</div>
+            <div class="partnerships-container" id="firstPartnerships">
+                <!-- Partnership boxes will be dynamically added here -->
+            </div>
+            <div class="team-total" id="firstTeamTotal">0</div>
+        </div>
+
+        <!-- Second Innings Team -->
+        <div class="team-section" id="secondInningsTeam">
+            <div class="team-name" id="secondTeamName">Team B</div>
+            <div class="partnerships-container" id="secondPartnerships">
+                <!-- Partnership boxes will be dynamically added here -->
+            </div>
+            <div class="team-total" id="secondTeamTotal">0</div>
+        </div>
+
+        <!-- Current Players Display -->
+        <div class="current-players" id="currentPlayers">
+            <div class="player" id="currentBatsmen"></div>
+            <div class="player" id="currentBowler"></div>
+        </div>
+
+        <!-- Timer -->
+        <div class="timer" id="matchTimer">00:00</div>
+
+        <!-- Over Info -->
+        <div class="over-info" id="overInfo">0.0/16.0</div>
+
+        <!-- Animation Container -->
+        <div class="animation-container" id="animationContainer"></div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            battingTeam: '',
+            fieldingTeam: '',
+            currentScore: 0,
+            wickets: 0,
+            currentOver: 0,
+            totalOvers: 16,
+            currentPartnership: 0,
+            totalPartnerships: 3,
+            partnerships: [],
+            firstInnings: {
+                score: 0,
+                partnerships: []
+            },
+            isSecondInnings: false,
+            timer: {
+                isRunning: false,
+                elapsed: 0,
+                startTime: 0
+            }
+        };
+
+        // DOM Elements
+        const elements = {
+            firstTeamName: document.getElementById('firstTeamName'),
+            secondTeamName: document.getElementById('secondTeamName'),
+            firstTeamTotal: document.getElementById('firstTeamTotal'),
+            secondTeamTotal: document.getElementById('secondTeamTotal'),
+            firstPartnerships: document.getElementById('firstPartnerships'),
+            secondPartnerships: document.getElementById('secondPartnerships'),
+            currentPlayers: document.getElementById('currentPlayers'),
+            currentBatsmen: document.getElementById('currentBatsmen'),
+            currentBowler: document.getElementById('currentBowler'),
+            matchTimer: document.getElementById('matchTimer'),
+            overInfo: document.getElementById('overInfo'),
+            animationContainer: document.getElementById('animationContainer')
+        };
+
+        // Initialize Scoreboard
+        function initializeScoreboard() {
+            // Load game state from localStorage
+            const savedState = localStorage.getItem('indoorCricketGame');
+            if (savedState) {
+                gameState = JSON.parse(savedState);
+                updateDisplay();
+            }
+
+            // Set up interval to check for updates
+            setInterval(checkForUpdates, 100);
+        }
+
+        // Check for Updates
+        function checkForUpdates() {
+            const savedState = localStorage.getItem('indoorCricketGame');
+            if (savedState) {
+                const newState = JSON.parse(savedState);
+                if (JSON.stringify(newState) !== JSON.stringify(gameState)) {
+                    gameState = newState;
+                    updateDisplay();
+                }
+            }
+        }
+
+        // Update Display
+        function updateDisplay() {
+            // Update team names
+            elements.firstTeamName.textContent = gameState.isSecondInnings ? gameState.fieldingTeam : gameState.battingTeam;
+            elements.secondTeamName.textContent = gameState.isSecondInnings ? gameState.battingTeam : gameState.fieldingTeam;
+
+            // Update team totals
+            if (gameState.isSecondInnings) {
+                elements.firstTeamTotal.textContent = gameState.firstInnings.score;
+                elements.secondTeamTotal.textContent = gameState.currentScore;
+            } else {
+                elements.firstTeamTotal.textContent = gameState.currentScore;
+                elements.secondTeamTotal.textContent = '0';
+            }
+
+            // Update partnerships
+            updatePartnerships();
+
+            // Update current players
+            updateCurrentPlayers();
+
+            // Update timer
+            updateTimer();
+
+            // Update over info
+            elements.overInfo.textContent = `${gameState.currentOver.toFixed(1)}/${gameState.totalOvers}`;
+
+            // Update active team section
+            updateActiveTeam();
+        }
+
+        // Update Partnerships
+        function updatePartnerships() {
+            const partnerships = gameState.isSecondInnings ? gameState.partnerships : gameState.firstInnings.partnerships;
+            const container = gameState.isSecondInnings ? elements.secondPartnerships : elements.firstPartnerships;
+            
+            // Clear existing partnerships
+            container.innerHTML = '';
+            
+            // Add partnership boxes
+            for (let i = 0; i < gameState.totalPartnerships; i++) {
+                const partnership = partnerships[i] || { score: 0, overs: 0 };
+                const box = document.createElement('div');
+                box.className = 'partnership-box';
+                
+                // Check if this partnership won the skin
+                if (gameState.isSecondInnings && gameState.firstInnings.partnerships[i]) {
+                    const firstInningsScore = gameState.firstInnings.partnerships[i].score;
+                    if (partnership.score > firstInningsScore) {
+                        box.classList.add('winning');
+                    }
+                }
+                
+                box.innerHTML = `
+                    <div class="partnership-score">${partnership.score}</div>
+                    <div class="partnership-overs">${partnership.overs.toFixed(1)}</div>
+                `;
+                
+                container.appendChild(box);
+            }
+        }
+
+        // Update Current Players
+        function updateCurrentPlayers() {
+            if (gameState.currentBatsmen && gameState.currentBatsmen.striker && gameState.currentBatsmen.nonStriker) {
+                elements.currentBatsmen.textContent = 
+                    `${gameState.currentBatsmen.striker.name}: ${gameState.currentBatsmen.striker.score} | ` +
+                    `${gameState.currentBatsmen.nonStriker.name}: ${gameState.currentBatsmen.nonStriker.score}`;
+                elements.currentPlayers.classList.add('show');
+            } else {
+                elements.currentPlayers.classList.remove('show');
+            }
+
+            if (gameState.currentBowler) {
+                elements.currentBowler.textContent = 
+                    `${gameState.currentBowler.name}: ${gameState.currentBowler.overs.toFixed(1)}/${gameState.currentBowler.wickets}`;
+            }
+        }
+
+        // Update Timer
+        function updateTimer() {
+            const totalTime = gameState.matchDuration * 60 * 1000;
+            const remainingTime = Math.max(0, totalTime - gameState.timer.elapsed);
+            const minutes = Math.floor(remainingTime / 60000);
+            const seconds = Math.floor((remainingTime % 60000) / 1000);
+            
+            elements.matchTimer.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update timer color based on remaining time
+            if (remainingTime <= 0) {
+                elements.matchTimer.classList.add('danger');
+            } else if (remainingTime <= 5 * 60 * 1000) { // 5 minutes
+                elements.matchTimer.classList.add('warning');
+            } else {
+                elements.matchTimer.classList.remove('warning', 'danger');
+            }
+        }
+
+        // Update Active Team
+        function updateActiveTeam() {
+            const firstTeam = document.getElementById('firstInningsTeam');
+            const secondTeam = document.getElementById('secondInningsTeam');
+            
+            if (gameState.isSecondInnings) {
+                firstTeam.classList.remove('active');
+                secondTeam.classList.add('active');
+            } else {
+                firstTeam.classList.add('active');
+                secondTeam.classList.remove('active');
+            }
+        }
+
+        // Show Animation
+        function showAnimation(type) {
+            const container = elements.animationContainer;
+            container.innerHTML = '';
+            
+            let animation;
+            switch (type) {
+                case 'wicket':
+                    animation = document.createElement('div');
+                    animation.style.animation = 'wicket 1s ease-in-out';
+                    animation.innerHTML = '🎯';
+                    break;
+                case 'boundary':
+                    animation = document.createElement('div');
+                    animation.style.animation = 'boundary 1s ease-in-out';
+                    animation.innerHTML = '🏏';
+                    break;
+            }
+            
+            if (animation) {
+                container.appendChild(animation);
+                container.classList.add('show');
+                setTimeout(() => {
+                    container.classList.remove('show');
+                }, 1000);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializeScoreboard);
+    </script>
+</body>
+</html>
