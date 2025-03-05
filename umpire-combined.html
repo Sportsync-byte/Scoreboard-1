@@ -430,39 +430,6 @@
             bowlerSelect.textContent = gameState.currentBowler?.name || 'Select Bowler';
         }
 
-        // Timer Functions
-        function startTimer() {
-            if (!gameState.timer.isRunning) {
-                gameState.timer.startTime = Date.now() - gameState.timer.elapsed;
-                gameState.timer.isRunning = true;
-                updateTimer();
-            }
-        }
-
-        function stopTimer() {
-            gameState.timer.isRunning = false;
-        }
-
-        function resetTimer() {
-            gameState.timer.elapsed = 0;
-            gameState.timer.isRunning = false;
-            updateTimer();
-        }
-
-        function updateTimer() {
-            if (gameState.timer.isRunning) {
-                gameState.timer.elapsed = Date.now() - gameState.timer.startTime;
-            }
-            
-            const minutes = Math.floor(gameState.timer.elapsed / 60000);
-            const seconds = Math.floor((gameState.timer.elapsed % 60000) / 1000);
-            elements.matchTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (gameState.timer.isRunning) {
-                requestAnimationFrame(updateTimer);
-            }
-        }
-
         // Handle Ball
         function handleBall(runs) {
             if (!gameState.currentBatsmen.striker || !gameState.currentBowler) {
@@ -489,12 +456,13 @@
             if (runs === 4) gameState.currentBatsmen.striker.fours++;
             if (runs === 6) gameState.currentBatsmen.striker.sixes++;
             
-            if (runs % 2 === 1) {
-                // Swap batsmen on odd runs
-                const temp = gameState.currentBatsmen.striker;
-                gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
-                gameState.currentBatsmen.nonStriker = temp;
-            }
+            // Always swap batsmen on runs (except for extras)
+            const temp = gameState.currentBatsmen.striker;
+            gameState.currentBatsmen.striker = gameState.currentBatsmen.nonStriker;
+            gameState.currentBatsmen.nonStriker = temp;
+
+            // Check for third ball warning
+            checkThirdBallWarning(runs);
 
             checkOverComplete();
             gameState.ballHistory.push(ball);
@@ -538,11 +506,6 @@
             updateDisplay();
             saveGameState();
             updateScoreboard();
-
-            // Show new partnership selection after a short delay
-            setTimeout(() => {
-                showNewPartnershipModal();
-            }, 500);
         }
 
         // Handle Extras
@@ -580,7 +543,20 @@
             gameState.currentBowler.overs += 0.1;
             gameState.currentBowler.runs += runs;
 
-            checkOverComplete();
+            // Don't swap batsmen for extras
+            // Don't increment batsman's balls faced for extras
+
+            // Check if this is the last over of the partnership
+            const currentOver = Math.floor(gameState.currentOver);
+            const currentBall = Math.round((gameState.currentOver % 1) * 10);
+            
+            if (currentOver === gameState.partnership.overs + 3 && currentBall === 6) {
+                // This is the last over of the partnership, show extra ball prompt
+                showExtraBallModal();
+            } else {
+                checkOverComplete();
+            }
+
             gameState.ballHistory.push(ball);
             updateDisplay();
             saveGameState();
@@ -594,16 +570,74 @@
             
             if (currentBall === 6) {
                 // Over complete
-                if (currentOver === gameState.partnership.overs + gameState.partnershipOvers - 1 && 
-                    currentBall === 6) {
-                    // Last ball of partnership
-                    showExtraBallModal();
+                if (currentOver === gameState.partnership.overs + 4) {
+                    // Last ball of partnership (4 overs)
+                    showNewPartnershipModal();
                 } else {
                     // Normal over complete - show bowler selection
                     setTimeout(() => {
                         showPlayerSelect('bowler');
                     }, 500);
                 }
+            }
+        }
+
+        // Third ball warning system
+        function checkThirdBallWarning(runs) {
+            if (runs === 0) {
+                gameState.lastTwoBalls.push(0);
+                if (gameState.lastTwoBalls.length === 2) {
+                    showWarningPopup();
+                }
+            } else {
+                gameState.lastTwoBalls = [];
+            }
+        }
+
+        // Timer Functions
+        function startTimer() {
+            if (!gameState.timer.isRunning) {
+                gameState.timer.startTime = Date.now() - gameState.timer.elapsed;
+                gameState.timer.isRunning = true;
+                updateTimer();
+            }
+        }
+
+        function stopTimer() {
+            gameState.timer.isRunning = false;
+        }
+
+        function resetTimer() {
+            gameState.timer.elapsed = 0;
+            gameState.timer.isRunning = false;
+            updateTimer();
+        }
+
+        function updateTimer() {
+            if (gameState.timer.isRunning) {
+                gameState.timer.elapsed = Date.now() - gameState.timer.startTime;
+            }
+            
+            // Calculate remaining time
+            const totalTime = gameState.matchDuration * 60 * 1000; // Convert minutes to milliseconds
+            const remainingTime = Math.max(0, totalTime - gameState.timer.elapsed);
+            
+            const minutes = Math.floor(remainingTime / 60000);
+            const seconds = Math.floor((remainingTime % 60000) / 1000);
+            elements.matchTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update timer color based on remaining time
+            if (remainingTime <= 0) {
+                elements.matchTimer.classList.add('danger');
+                playWarningSound();
+            } else if (remainingTime <= 300000) { // 5 minutes
+                elements.matchTimer.classList.add('warning');
+            } else {
+                elements.matchTimer.classList.remove('warning', 'danger');
+            }
+            
+            if (gameState.timer.isRunning) {
+                requestAnimationFrame(updateTimer);
             }
         }
 
@@ -767,26 +801,6 @@
         // Update Scoreboard
         function updateScoreboard() {
             localStorage.setItem('lastUpdate', Date.now().toString());
-        }
-
-        // Third ball warning system
-        function checkThirdBallWarning(runs) {
-            if (runs === 0) {
-                gameState.lastTwoBalls.push(0);
-                if (gameState.lastTwoBalls.length === 2) {
-                    showWarningPopup();
-                }
-            } else {
-                gameState.lastTwoBalls = [];
-            }
-        }
-
-        function showWarningPopup() {
-            const popup = document.getElementById('warningPopup');
-            popup.style.display = 'block';
-            setTimeout(() => {
-                popup.style.display = 'none';
-            }, 5000);
         }
 
         // Player selection system
