@@ -238,7 +238,7 @@
 
     <script>
         // Audio for timer warning
-        const warningSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); // Add your warning sound base64 here
+        const warningSound = new Audio('warning.mp3'); // Replace with your sound file path
 
         let gameState = {
             team1: {
@@ -295,17 +295,25 @@
             document.getElementById('ballsLeft').textContent = `Balls Left: ${gameState.overs.ballsLeft}`;
         }
 
-        // Update partnerships display
+        // Update partnerships display - Modified to keep partnerships visible
         function updatePartnerships(containerId, partnerships) {
             const container = document.getElementById(containerId);
-            container.innerHTML = partnerships.map((partnership, index) => `
-                <div class="partnership ${partnership.winner ? 'winner' : ''}">
-                    <div class="partnership-number">${index + 1}</div>
-                    <div class="partnership-score">${partnership.score}</div>
-                    <div class="partnership-runs">${partnership.runs} runs</div>
-                    <div class="partnership-overs">${partnership.overs.toFixed(1)} ov</div>
-                </div>
-            `).join('');
+            // Keep existing partnerships and add new ones
+            const existingPartnerships = container.children.length;
+            if (partnerships.length > existingPartnerships) {
+                // Add new partnership without removing existing ones
+                partnerships.slice(existingPartnerships).forEach(partnership => {
+                    const partnershipElement = document.createElement('div');
+                    partnershipElement.className = 'partnership';
+                    partnershipElement.innerHTML = `
+                        <div class="partnership-number">${partnerships.length}</div>
+                        <div class="partnership-score">${partnership.score}</div>
+                        <div class="partnership-runs">${partnership.runs} runs</div>
+                        <div class="partnership-overs">${partnership.overs.toFixed(1)} ov</div>
+                    `;
+                    container.appendChild(partnershipElement);
+                });
+            }
         }
 
         // Update batsmen display
@@ -319,14 +327,13 @@
             document.getElementById(`${teamPrefix}NonStrikerBalls`).textContent = `(${batsmen.nonStriker.balls})`;
         }
 
-        // Update timer display
+        // Update timer display - Modified for countdown and warnings
         function updateTimer() {
             const timerElement = document.getElementById('matchTimer');
             const minutes = gameState.timer.minutes.toString().padStart(2, '0');
             const seconds = gameState.timer.seconds.toString().padStart(2, '0');
             timerElement.textContent = `${minutes}:${seconds}`;
 
-            // Update timer color based on remaining time
             const totalSeconds = gameState.timer.minutes * 60 + gameState.timer.seconds;
             if (totalSeconds <= 0) {
                 timerElement.classList.add('danger');
@@ -357,23 +364,10 @@
                             team1: {
                                 name: umpireState.battingTeam,
                                 score: umpireState.currentScore,
-                                partnerships: [{
-                                    score: umpireState.partnership.runs,
-                                    runs: umpireState.partnership.runs,
-                                    overs: umpireState.partnership.overs,
-                                    winner: false
-                                }],
+                                partnerships: umpireState.partnerships || [],
                                 currentBatsmen: {
-                                    striker: {
-                                        name: umpireState.currentBatsmen.striker?.name || '',
-                                        score: umpireState.currentBatsmen.striker?.score || 0,
-                                        balls: umpireState.currentBatsmen.striker?.balls || 0
-                                    },
-                                    nonStriker: {
-                                        name: umpireState.currentBatsmen.nonStriker?.name || '',
-                                        score: umpireState.currentBatsmen.nonStriker?.score || 0,
-                                        balls: umpireState.currentBatsmen.nonStriker?.balls || 0
-                                    }
+                                    striker: umpireState.currentBatsmen.striker || { name: '', score: 0, balls: 0 },
+                                    nonStriker: umpireState.currentBatsmen.nonStriker || { name: '', score: 0, balls: 0 }
                                 }
                             },
                             team2: {
@@ -381,21 +375,29 @@
                                 score: umpireState.target || 0,
                                 partnerships: [],
                                 currentBatsmen: {
-                                    striker: { name: '', score: 0, balls: 0 },
+                                    striker: umpireState.currentBowler || { name: '', score: 0, balls: 0 },
                                     nonStriker: { name: '', score: 0, balls: 0 }
                                 }
                             },
                             timer: {
-                                minutes: Math.floor(umpireState.timer.elapsed / 60000),
-                                seconds: Math.floor((umpireState.timer.elapsed % 60000) / 1000),
+                                minutes: Math.floor((umpireState.matchDuration * 60 - umpireState.timer.elapsed) / 60000),
+                                seconds: Math.floor(((umpireState.matchDuration * 60 - umpireState.timer.elapsed) % 60000) / 1000),
                                 isRunning: umpireState.timer.isRunning
                             },
                             overs: {
                                 current: umpireState.currentOver,
                                 total: umpireState.totalOvers,
-                                ballsLeft: 6 - Math.round((umpireState.currentOver % 1) * 10)
+                                ballsLeft: 6 // Reset to 6 at start of over
                             }
                         };
+
+                        // Handle extras in last over of partnership
+                        if (Math.floor(umpireState.currentOver) === umpireState.partnership.overs + 3 && 
+                            Math.round((umpireState.currentOver % 1) * 10) === 6) {
+                            if (umpireState.extras.wides > 0 || umpireState.extras.noBalls > 0 || umpireState.extras.legsideWides > 0) {
+                                gameState.overs.ballsLeft = 6;
+                            }
+                        }
                         
                         updateDisplay();
                     }
