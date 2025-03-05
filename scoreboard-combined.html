@@ -39,71 +39,85 @@
             font-weight: bold;
             color: #fff;
         }
-        .partnerships-container {
+        .partnerships {
             display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            flex-direction: row;
             overflow-x: auto;
+            gap: 10px;
+            margin-top: 20px;
             padding-bottom: 10px;
         }
-        .partnership {
-            background: #333;
+        .partnership-box {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 200px;
+            flex-shrink: 0;
+        }
+        .partnership-header {
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 5px;
+        }
+        .partnership-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .partnership-item {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 5px;
             padding: 10px;
-            min-width: 100px;
-            text-align: center;
-            position: relative;
-        }
-        .partnership.winner {
-            background: #28a745;
-        }
-        .partnership-number {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 5px;
-        }
-        .partnership-score {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
         .partnership-runs {
-            font-size: 1rem;
-            color: #ccc;
+            color: #fff;
+            font-size: 1.2em;
+            font-weight: bold;
         }
         .partnership-overs {
-            font-size: 0.8rem;
-            color: #999;
+            color: #ccc;
+            font-size: 0.9em;
         }
-        .batsmen-container {
+        .partnership-batsmen {
             display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 0.9em;
         }
         .batsman {
-            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            color: #fff;
+        }
+        .current-players {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .current-batsmen {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .current-bowler {
             text-align: center;
-            padding: 10px;
-            background: #333;
-            border-radius: 5px;
-            margin: 0 5px;
+            color: #fff;
+            font-size: 1.1em;
         }
-        .batsman-name {
-            font-size: 1.2rem;
+        .bowler-name {
             font-weight: bold;
-            color: #fff;
-            margin-bottom: 5px;
+            color: #ff6b6b;
         }
-        .batsman-score {
-            font-size: 1.5rem;
-            color: #fff;
-        }
-        .batsman-balls {
-            font-size: 0.8rem;
-            color: #999;
+        .bowler-figures {
+            margin-left: 10px;
         }
         .bottom-info {
             display: flex;
@@ -128,27 +142,13 @@
         .overs-info {
             display: flex;
             gap: 20px;
-        }
-        .overs-display, .balls-left {
             font-size: 1.5rem;
             color: #fff;
         }
-        .current-bowler {
-            text-align: center;
-            padding: 10px;
-            background: #333;
+        .overs-display, .balls-left {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
             border-radius: 5px;
-            margin-top: 15px;
-        }
-        .bowler-name {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 5px;
-        }
-        .bowler-stats {
-            font-size: 1rem;
-            color: #ccc;
         }
         @media (max-width: 768px) {
             .team-name {
@@ -186,19 +186,21 @@
                 <div class="team-name" id="team1Name">Team A</div>
                 <div class="team-score" id="team1Score">0</div>
             </div>
-            <div class="partnerships-container" id="team1Partnerships">
+            <div class="partnerships" id="team1Partnerships">
                 <!-- Partnerships will be added here dynamically -->
             </div>
-            <div class="batsmen-container">
-                <div class="batsman">
-                    <div class="batsman-name" id="team1StrikerName">Striker</div>
-                    <div class="batsman-score" id="team1StrikerScore">0</div>
-                    <div class="batsman-balls" id="team1StrikerBalls">(0)</div>
-                </div>
-                <div class="batsman">
-                    <div class="batsman-name" id="team1NonStrikerName">Non-Striker</div>
-                    <div class="batsman-score" id="team1NonStrikerScore">0</div>
-                    <div class="batsman-balls" id="team1NonStrikerBalls">(0)</div>
+            <div class="current-players">
+                <div class="current-batsmen">
+                    <div class="batsman">
+                        <div class="batsman-name" id="team1StrikerName">Striker</div>
+                        <div class="batsman-score" id="team1StrikerScore">0</div>
+                        <div class="batsman-balls" id="team1StrikerBalls">(0)</div>
+                    </div>
+                    <div class="batsman">
+                        <div class="batsman-name" id="team1NonStrikerName">Non-Striker</div>
+                        <div class="batsman-score" id="team1NonStrikerScore">0</div>
+                        <div class="batsman-balls" id="team1NonStrikerBalls">(0)</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -209,19 +211,21 @@
                 <div class="team-name" id="team2Name">Team B</div>
                 <div class="team-score" id="team2Score">0</div>
             </div>
-            <div class="partnerships-container" id="team2Partnerships">
+            <div class="partnerships" id="team2Partnerships">
                 <!-- Partnerships will be added here dynamically -->
             </div>
-            <div class="batsmen-container">
-                <div class="batsman">
-                    <div class="batsman-name" id="team2StrikerName">Striker</div>
-                    <div class="batsman-score" id="team2StrikerScore">0</div>
-                    <div class="batsman-balls" id="team2StrikerBalls">(0)</div>
-                </div>
-                <div class="batsman">
-                    <div class="batsman-name" id="team2NonStrikerName">Non-Striker</div>
-                    <div class="batsman-score" id="team2NonStrikerScore">0</div>
-                    <div class="batsman-balls" id="team2NonStrikerBalls">(0)</div>
+            <div class="current-players">
+                <div class="current-batsmen">
+                    <div class="batsman">
+                        <div class="batsman-name" id="team2StrikerName">Striker</div>
+                        <div class="batsman-score" id="team2StrikerScore">0</div>
+                        <div class="batsman-balls" id="team2StrikerBalls">(0)</div>
+                    </div>
+                    <div class="batsman">
+                        <div class="batsman-name" id="team2NonStrikerName">Non-Striker</div>
+                        <div class="batsman-score" id="team2NonStrikerScore">0</div>
+                        <div class="batsman-balls" id="team2NonStrikerBalls">(0)</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -268,7 +272,8 @@
                 current: 0,
                 total: 16,
                 ballsLeft: 6
-            }
+            },
+            format: '' // Add format to track 6 or 8 aside
         };
 
         // Update display with new game state
@@ -300,14 +305,39 @@
             const container = document.getElementById(containerId);
             container.innerHTML = ''; // Clear existing partnerships
             
+            // Get the format from localStorage
+            const setupData = JSON.parse(localStorage.getItem('indoorCricketSetup') || '{}');
+            const format = setupData.format || '8aside'; // Default to 8aside if not set
+            const maxPartnerships = format === '8aside' ? 4 : 3;
+            
+            // Create empty partnerships if needed
+            while (partnerships.length < maxPartnerships) {
+                partnerships.push({
+                    runs: 0,
+                    overs: 0,
+                    batsmen: []
+                });
+            }
+            
             partnerships.forEach((partnership, index) => {
                 const partnershipElement = document.createElement('div');
-                partnershipElement.className = 'partnership';
+                partnershipElement.className = 'partnership-box';
                 partnershipElement.innerHTML = `
-                    <div class="partnership-number">${index + 1}</div>
-                    <div class="partnership-score">${partnership.score}</div>
-                    <div class="partnership-runs">${partnership.runs} runs</div>
-                    <div class="partnership-overs">${partnership.overs.toFixed(1)} ov</div>
+                    <div class="partnership-header">Partnership ${index + 1}</div>
+                    <div class="partnership-content">
+                        <div class="partnership-item">
+                            <div class="partnership-runs">${partnership.runs} runs</div>
+                            <div class="partnership-overs">${partnership.overs.toFixed(1)} ov</div>
+                            <div class="partnership-batsmen">
+                                ${partnership.batsmen ? partnership.batsmen.map(b => `
+                                    <div class="batsman">
+                                        <span class="batsman-name">${b.name}</span>
+                                        <span class="batsman-score">${b.score} (${b.balls})</span>
+                                    </div>
+                                `).join('') : ''}
+                            </div>
+                        </div>
+                    </div>
                 `;
                 container.appendChild(partnershipElement);
             });
@@ -326,16 +356,22 @@
 
         // Update timer display
         function updateTimer() {
-            const timerElement = document.getElementById('matchTimer');
-            const minutes = gameState.timer.minutes.toString().padStart(2, '0');
-            const seconds = gameState.timer.seconds.toString().padStart(2, '0');
-            timerElement.textContent = `${minutes}:${seconds}`;
+            const gameState = JSON.parse(localStorage.getItem('indoorCricketGame') || '{}');
+            if (!gameState.timer) return;
 
-            const totalSeconds = gameState.timer.minutes * 60 + gameState.timer.seconds;
-            if (totalSeconds <= 0) {
+            const totalTime = gameState.matchDuration * 60 * 1000; // Convert minutes to milliseconds
+            const remainingTime = Math.max(0, totalTime - gameState.timer.elapsed);
+            
+            const minutes = Math.floor(remainingTime / 60000);
+            const seconds = Math.floor((remainingTime % 60000) / 1000);
+            document.getElementById('matchTimer').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update timer color based on remaining time
+            const timerElement = document.getElementById('matchTimer');
+            if (remainingTime <= 0) {
                 timerElement.classList.add('danger');
                 playWarningSound();
-            } else if (totalSeconds <= 300) { // 5 minutes
+            } else if (remainingTime <= 300000) { // 5 minutes
                 timerElement.classList.add('warning');
             } else {
                 timerElement.classList.remove('warning', 'danger');
@@ -344,7 +380,8 @@
 
         // Play warning sound
         function playWarningSound() {
-            warningSound.play().catch(error => console.log('Error playing sound:', error));
+            const audio = new Audio('warning.mp3');
+            audio.play().catch(error => console.log('Error playing warning sound:', error));
         }
 
         // Listen for updates from the umpire's interface
@@ -355,6 +392,8 @@
                     const gameStateStr = localStorage.getItem('indoorCricketGame');
                     if (gameStateStr) {
                         const umpireState = JSON.parse(gameStateStr);
+                        const setupData = JSON.parse(localStorage.getItem('indoorCricketSetup') || '{}');
+                        const format = setupData.format || '8aside';
                         
                         // Convert umpire state to scoreboard state
                         gameState = {
@@ -384,9 +423,27 @@
                             overs: {
                                 current: umpireState.currentOver,
                                 total: umpireState.totalOvers,
-                                ballsLeft: 6 // Reset to 6 at start of over
-                            }
+                                ballsLeft: umpireState.overs?.ballsLeft || 6
+                            },
+                            format: format
                         };
+
+                        // Ensure correct number of partnerships
+                        const maxPartnerships = format === '8aside' ? 4 : 3;
+                        while (gameState.team1.partnerships.length < maxPartnerships) {
+                            gameState.team1.partnerships.push({
+                                runs: 0,
+                                overs: 0,
+                                batsmen: []
+                            });
+                        }
+                        while (gameState.team2.partnerships.length < maxPartnerships) {
+                            gameState.team2.partnerships.push({
+                                runs: 0,
+                                overs: 0,
+                                batsmen: []
+                            });
+                        }
 
                         // Handle extras in last over of partnership
                         if (Math.floor(umpireState.currentOver) === umpireState.partnership.overs + 3 && 
@@ -404,9 +461,60 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            listenForUpdates();
-            // Request initial update
+            // Get setup data
+            const setupData = JSON.parse(localStorage.getItem('indoorCricketSetup') || '{}');
+            const format = setupData.format || '8aside';
+            const maxPartnerships = format === '8aside' ? 4 : 3;
+            
+            // Test game state with correct number of partnerships
+            const testGameState = {
+                team1: {
+                    name: 'Team A',
+                    score: 90,
+                    partnerships: Array(maxPartnerships).fill(null).map((_, index) => ({
+                        score: 25,
+                        runs: 25,
+                        overs: 4.0,
+                        batsmen: []
+                    })),
+                    currentBatsmen: {
+                        striker: { name: 'Smith', score: 45, balls: 25 },
+                        nonStriker: { name: 'Jones', score: 30, balls: 20 }
+                    }
+                },
+                team2: {
+                    name: 'Team B',
+                    score: 50,
+                    partnerships: Array(maxPartnerships).fill(null).map((_, index) => ({
+                        score: 35,
+                        runs: 35,
+                        overs: 5.0,
+                        batsmen: []
+                    })),
+                    currentBatsmen: {
+                        striker: { name: 'Wilson', score: 25, balls: 15 },
+                        nonStriker: { name: 'Taylor', score: 20, balls: 12 }
+                    }
+                },
+                timer: {
+                    minutes: 15,
+                    seconds: 30,
+                    isRunning: true
+                },
+                overs: {
+                    current: 7.0,
+                    total: 16.0,
+                    ballsLeft: 6
+                },
+                format: format
+            };
+
+            // Apply test state
+            gameState = testGameState;
             updateDisplay();
+
+            // Start listening for updates
+            listenForUpdates();
         });
     </script>
 </body>
