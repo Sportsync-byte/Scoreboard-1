@@ -86,7 +86,7 @@
     </style>
 </head>
 <body class="bg-light">
-    <div class="container-fluid">
+        <div class="container-fluid">
         <div class="row">
             <!-- Preview Scoreboard -->
             <div class="col-12 preview-scoreboard">
@@ -153,8 +153,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Scoring -->
+                        <!-- Scoring -->
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
@@ -194,7 +193,34 @@
     </div>
 
     <!-- Modals -->
-    <div id="partnershipChangeModal" class="modal">
+    <div id="addBatsmanModal" class="modal">
+        <div class="modal-content">
+            <h3>Add New Batsman</h3>
+            <div class="mb-3">
+                <label for="newBatsmanName">Batsman Name:</label>
+                <input type="text" id="newBatsmanName" class="form-control" placeholder="Enter batsman name">
+            </div>
+            <div class="text-end">
+                <button class="btn btn-secondary" onclick="closeAddBatsmanModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAddBatsman()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addBowlerModal" class="modal">
+        <div class="modal-content">
+            <h3>Add New Bowler</h3>
+            <div class="mb-3">
+                <label for="newBowlerName">Bowler Name:</label>
+                <input type="text" id="newBowlerName" class="form-control" placeholder="Enter bowler name">
+            </div>
+            <div class="text-end">
+                <button class="btn btn-secondary" onclick="closeAddBowlerModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAddBowler()">Add</button>
+            </div>
+        </div>
+    </div>
+        <div id="partnershipChangeModal" class="modal">
         <div class="modal-content">
             <h3>New Partnership</h3>
             <p>Please select new batsmen for this partnership.</p>
@@ -281,8 +307,7 @@
                 partnerships: []
             }
         };
-
-        // DOM Elements
+                // DOM Elements
         const elements = {
             battingTeam: document.getElementById('battingTeam'),
             fieldingTeam: document.getElementById('fieldingTeam'),
@@ -376,8 +401,7 @@
                 nonStrikerSelect.value = gameState.currentBatsmen.nonStriker.id;
             }
         }
-
-        // Update Bowler Select
+                // Update Bowler Select
         function updateBowlerSelect() {
             const bowlerSelect = elements.currentBowler;
             bowlerSelect.innerHTML = '<option value="">Select Bowler</option>';
@@ -396,7 +420,16 @@
 
         // Add New Batsman
         function addNewBatsman() {
-            const name = prompt('Enter batsman name:');
+            document.getElementById('addBatsmanModal').style.display = 'block';
+        }
+
+        function closeAddBatsmanModal() {
+            document.getElementById('addBatsmanModal').style.display = 'none';
+            document.getElementById('newBatsmanName').value = '';
+        }
+
+        function confirmAddBatsman() {
+            const name = document.getElementById('newBatsmanName').value.trim();
             if (name) {
                 const newBatsman = {
                     id: Date.now(),
@@ -409,12 +442,24 @@
                 gameState.batsmen.push(newBatsman);
                 updateBatsmenSelects();
                 saveGameState();
+                closeAddBatsmanModal();
+            } else {
+                alert('Please enter a batsman name');
             }
         }
 
         // Add New Bowler
         function addNewBowler() {
-            const name = prompt('Enter bowler name:');
+            document.getElementById('addBowlerModal').style.display = 'block';
+        }
+
+        function closeAddBowlerModal() {
+            document.getElementById('addBowlerModal').style.display = 'none';
+            document.getElementById('newBowlerName').value = '';
+        }
+
+        function confirmAddBowler() {
+            const name = document.getElementById('newBowlerName').value.trim();
             if (name) {
                 const newBowler = {
                     id: Date.now(),
@@ -426,6 +471,9 @@
                 gameState.bowlers.push(newBowler);
                 updateBowlerSelect();
                 saveGameState();
+                closeAddBowlerModal();
+            } else {
+                alert('Please enter a bowler name');
             }
         }
 
@@ -446,8 +494,7 @@
             gameState.currentScore += runs;
             gameState.currentBatsmen.striker.score += runs;
             gameState.currentBatsmen.striker.balls++;
-            
-            if (runs === 0) {
+                        if (runs === 0) {
                 gameState.consecutiveDotBalls++;
                 if (gameState.consecutiveDotBalls === 2) {
                     showThirdBallWarning();
@@ -531,8 +578,7 @@
                 bowler: gameState.currentBowler,
                 timestamp: new Date()
             };
-
-            gameState.currentScore += 2;
+                        gameState.currentScore += 2;
             gameState.currentBatsmen.striker.score += 2;
             gameState.currentBatsmen.striker.balls++;
             gameState.extras[type]++;
@@ -608,8 +654,7 @@
             updateDisplay();
             saveGameState();
         }
-
-        function applyBowlerChange() {
+                function applyBowlerChange() {
             const newBowler = document.getElementById('newBowler').value;
             
             if (!newBowler) {
