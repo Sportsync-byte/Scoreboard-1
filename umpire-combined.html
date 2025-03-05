@@ -379,7 +379,10 @@
                 elapsed: 0,
                 isRunning: false
             },
-            consecutiveDotBalls: 0
+            consecutiveDotBalls: 0,
+            overs: {
+                ballsLeft: 6
+            }
         };
 
         // DOM Elements
@@ -415,6 +418,18 @@
             elements.previewFieldingTeam.textContent = gameState.fieldingTeam;
             elements.previewScore.textContent = `${gameState.currentScore}/${gameState.wickets}`;
             elements.previewOvers.textContent = `${gameState.currentOver.toFixed(1)}/${gameState.totalOvers}`;
+            
+            // Update overs display
+            const oversDisplay = document.getElementById('oversDisplay');
+            if (oversDisplay) {
+                oversDisplay.textContent = `Overs: ${gameState.currentOver.toFixed(1)}/${gameState.totalOvers}`;
+            }
+            
+            // Update balls left display
+            const ballsLeftDisplay = document.getElementById('ballsLeft');
+            if (ballsLeftDisplay) {
+                ballsLeftDisplay.textContent = `Balls Left: ${gameState.overs.ballsLeft}`;
+            }
             
             updateBatsmenDisplay();
             updateBowlerSelect();
@@ -518,6 +533,16 @@
             gameState.partnership.runs += runs;
             gameState.partnership.balls++;
             
+            // Update overs
+            gameState.overs.ballsLeft--;
+            if (gameState.overs.ballsLeft <= 0) {
+                gameState.overs.ballsLeft = 6;
+                gameState.currentOver += 0.1;
+                if (gameState.currentBowler) {
+                    gameState.currentBowler.overs += 0.1;
+                }
+            }
+            
             // Check for third ball warning
             if (runs === 0) {
                 checkThirdBallWarning();
@@ -529,6 +554,7 @@
             // If it's the last over of the partnership and an extra was bowled, don't count this ball
             if (isLastOver && (gameState.extras.wides > 0 || gameState.extras.noBalls > 0 || gameState.extras.legsideWides > 0)) {
                 gameState.partnership.balls--;
+                gameState.overs.ballsLeft = 6;
             }
             
             // Update display
@@ -589,7 +615,10 @@
             
             if (addBall) {
                 gameState.currentOver += 0.1;
-                gameState.currentBowler.overs += 0.1;
+                if (gameState.currentBowler) {
+                    gameState.currentBowler.overs += 0.1;
+                }
+                gameState.overs.ballsLeft = 6;
             }
             
             // Update display and save state
@@ -693,12 +722,23 @@
             if (gameState.ballHistory.length === 0) return;
             
             const lastBall = gameState.ballHistory.pop();
-            gameState.currentOver -= 0.1;
-            gameState.currentBowler.overs -= 0.1;
+            
+            // Update overs
+            if (gameState.overs.ballsLeft >= 6) {
+                gameState.currentOver -= 0.1;
+                if (gameState.currentBowler) {
+                    gameState.currentBowler.overs -= 0.1;
+                }
+                gameState.overs.ballsLeft = 6;
+            } else {
+                gameState.overs.ballsLeft++;
+            }
             
             if (lastBall.type && lastBall.type.includes('wicket')) {
                 gameState.wickets--;
-                gameState.currentBowler.wickets--;
+                if (gameState.currentBowler) {
+                    gameState.currentBowler.wickets--;
+                }
                 gameState.currentScore += 5; // Restore penalty runs
                 gameState.currentBatsmen.striker.score += 5;
                 gameState.partnership.runs += 5;
@@ -708,7 +748,9 @@
                 gameState.currentBatsmen.striker.balls--;
                 gameState.partnership.runs -= lastBall.runs;
                 gameState.partnership.balls--;
-                gameState.currentBowler.runs -= lastBall.runs;
+                if (gameState.currentBowler) {
+                    gameState.currentBowler.runs -= lastBall.runs;
+                }
                 
                 if (lastBall.type) {
                     gameState.extras[lastBall.type]--;
