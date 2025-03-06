@@ -53,8 +53,7 @@
         .control-button {
             background-color: #28a745;
         }
-
-        .game-info {
+                .game-info {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
@@ -115,34 +114,30 @@
             cursor: pointer;
         }
 
-        .wicket-type-button {
-            width: 100%;
-            margin-bottom: 0.5rem;
-            padding: 0.5rem;
-            background-color: #dc3545;
-            border: none;
-            border-radius: 4px;
-            color: white;
+        .form-group {
+            margin-bottom: 1rem;
         }
 
-        .extras-type-button {
-            width: 100%;
-            margin-bottom: 0.5rem;
-            padding: 0.5rem;
-            background-color: #ffc107;
-            border: none;
-            border-radius: 4px;
-            color: black;
-        }
-
-        .player-select {
+        .form-control {
             width: 100%;
             padding: 0.5rem;
             margin-bottom: 0.5rem;
             background-color: #3a3a3a;
-            color: white;
             border: none;
             border-radius: 4px;
+            color: white;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
         }
 
         .timer-controls {
@@ -216,7 +211,13 @@
             <button class="score-button" onclick="addRuns(5)">5</button>
             <button class="score-button" onclick="addRuns(6)">6</button>
             <button class="score-button" onclick="addRuns(7)">7</button>
-            <button class="score-button wicket-button" onclick="showWicketModal()">WICKET</button>
+            <button class="score-button wicket-button" onclick="addWicket('bowled')">BOWLED</button>
+            <button class="score-button wicket-button" onclick="addWicket('caught')">CAUGHT</button>
+            <button class="score-button wicket-button" onclick="addWicket('runout')">RUN OUT</button>
+            <button class="score-button wicket-button" onclick="addWicket('stumped')">STUMPED</button>
+            <button class="score-button wicket-button" onclick="addWicket('hitwicket')">HIT WICKET</button>
+            <button class="score-button wicket-button" onclick="addWicket('obstruction')">OBSTRUCTION</button>
+            <button class="score-button wicket-button" onclick="addWicket('thirdball')">THIRD BALL</button>
             <button class="score-button extras-button" onclick="showExtrasModal()">EXTRAS</button>
             <button class="score-button control-button" onclick="undoLastBall()">UNDO</button>
             <button class="score-button control-button" onclick="endOver()">END OVER</button>
@@ -229,20 +230,33 @@
             <span id="timerDisplay">00:00</span>
         </div>
 
-        <!-- Wicket Modal -->
-        <div id="wicketModal" class="modal">
+        <!-- Batsmen Modal -->
+        <div id="batsmenModal" class="modal">
             <div class="modal-content">
-                <span class="close-modal" onclick="closeWicketModal()">&times;</span>
-                <h3>Select Wicket Type</h3>
-                <button class="wicket-type-button" onclick="addWicket('bowled')">Bowled</button>
-                <button class="wicket-type-button" onclick="addWicket('caught')">Caught</button>
-                <button class="wicket-type-button" onclick="addWicket('runout')">Run Out</button>
-                <button class="wicket-type-button" onclick="addWicket('stumped')">Stumped</button>
-                <button class="wicket-type-button" onclick="addWicket('obstruction')">Obstruction</button>
-                <button class="wicket-type-button" onclick="addWicket('thirdball')">Third Ball</button>
-                <select id="newBatsmanSelect" class="player-select">
-                    <!-- Options will be populated dynamically -->
-                </select>
+                <span class="close-modal" onclick="closeBatsmenModal()">&times;</span>
+                <h3>Enter Batsmen Names</h3>
+                <div class="form-group">
+                    <label>Striker:</label>
+                    <input type="text" id="strikerName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Non-Striker:</label>
+                    <input type="text" id="nonStrikerName" class="form-control">
+                </div>
+                <button onclick="confirmBatsmen()" class="btn btn-primary">Confirm</button>
+            </div>
+        </div>
+
+        <!-- Bowler Modal -->
+        <div id="bowlerModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeBowlerModal()">&times;</span>
+                <h3>Enter Bowler Name</h3>
+                <div class="form-group">
+                    <label>Bowler:</label>
+                    <input type="text" id="bowlerName" class="form-control">
+                </div>
+                <button onclick="confirmBowler()" class="btn btn-primary">Confirm</button>
             </div>
         </div>
 
@@ -256,9 +270,7 @@
                 <button class="extras-type-button" onclick="addExtras('penalty')">Penalty</button>
             </div>
         </div>
-    </div>
-
-    <script>
+            <script>
         // Game State
         let gameState = {
             battingTeam: '',
@@ -269,12 +281,20 @@
             totalOvers: 16,
             currentPartnership: 0,
             partnerships: [],
-            ballHistory: [],
             currentBatsmen: {
                 striker: null,
-                nonStriker: null
+                nonStriker: null,
+                strikerRuns: 0,
+                nonStrikerRuns: 0
             },
-            availableBatsmen: [],
+            currentBowler: {
+                name: null,
+                overs: 0,
+                runs: 0,
+                wickets: 0
+            },
+            bowlerFigures: [],
+            ballHistory: [],
             timer: {
                 isRunning: false,
                 startTime: 0,
@@ -290,8 +310,11 @@
                 gameState = JSON.parse(savedState);
                 updateDisplay();
                 updateBallHistory();
-                populateNewBatsmanSelect();
             }
+            // Prompt for initial batsmen
+            handleNewPartnership();
+            // Prompt for initial bowler
+            handleNewOver();
         }
 
         // Update Display
@@ -308,56 +331,135 @@
             
             // Update batsmen info
             document.getElementById('batsman1').textContent = 
-                gameState.currentBatsmen.striker || '-';
+                `${gameState.currentBatsmen.striker} (${gameState.currentBatsmen.strikerRuns}*)`;
             document.getElementById('batsman2').textContent = 
-                gameState.currentBatsmen.nonStriker || '-';
+                `${gameState.currentBatsmen.nonStriker} (${gameState.currentBatsmen.nonStrikerRuns})`;
 
             // Save state to localStorage
             localStorage.setItem('indoorCricketGame', JSON.stringify(gameState));
         }
-
-        // Add Runs
+                        // Add Runs
         function addRuns(runs) {
             if (gameState.wickets >= 8) return;
             
             gameState.currentScore += runs;
             if (gameState.partnerships[gameState.currentPartnership]) {
                 gameState.partnerships[gameState.currentPartnership].score += runs;
+                gameState.partnerships[gameState.currentPartnership].balls = 
+                    (gameState.partnerships[gameState.currentPartnership].balls || 0) + 1;
+            }
+
+            // Update batsman runs
+            gameState.currentBatsmen.strikerRuns += runs;
+
+            // Update bowler figures
+            if (gameState.currentBowler) {
+                gameState.currentBowler.runs += runs;
             }
 
             const ball = {
                 type: 'runs',
                 value: runs,
-                over: gameState.currentOver
+                over: gameState.currentOver,
+                bowler: gameState.currentBowler?.name,
+                batsman: gameState.currentBatsmen.striker
             };
             gameState.ballHistory.push(ball);
 
             incrementOver();
             updateDisplay();
             updateBallHistory();
-            checkPartnershipEnd();
         }
 
-        // Add Wicket
+        // Handle Batsmen Modal
+        function handleNewPartnership() {
+            document.getElementById('batsmenModal').style.display = 'block';
+        }
+
+        function closeBatsmenModal() {
+            document.getElementById('batsmenModal').style.display = 'none';
+        }
+
+        function confirmBatsmen() {
+            const striker = document.getElementById('strikerName').value;
+            const nonStriker = document.getElementById('nonStrikerName').value;
+            
+            if (!striker || !nonStriker) {
+                alert('Please enter both batsmen names');
+                return;
+            }
+
+            gameState.currentBatsmen = {
+                striker: striker,
+                nonStriker: nonStriker,
+                strikerRuns: 0,
+                nonStrikerRuns: 0
+            };
+
+            if (gameState.partnerships[gameState.currentPartnership]) {
+                gameState.partnerships[gameState.currentPartnership].batsmen = [striker, nonStriker];
+                gameState.partnerships[gameState.currentPartnership].balls = 0;
+            } else {
+                gameState.partnerships[gameState.currentPartnership] = {
+                    score: 0,
+                    balls: 0,
+                    batsmen: [striker, nonStriker]
+                };
+            }
+
+            closeBatsmenModal();
+            updateDisplay();
+        }
+
+        // Handle Bowler Modal
+        function handleNewOver() {
+            document.getElementById('bowlerModal').style.display = 'block';
+        }
+
+        function closeBowlerModal() {
+            document.getElementById('bowlerModal').style.display = 'none';
+        }
+
+        function confirmBowler() {
+            const bowler = document.getElementById('bowlerName').value;
+            
+            if (!bowler) {
+                alert('Please enter bowler name');
+                return;
+            }
+
+            gameState.currentBowler = {
+                name: bowler,
+                overs: 0,
+                runs: 0,
+                wickets: 0
+            };
+
+            closeBowlerModal();
+            updateDisplay();
+        }
+                // Add Wicket
         function addWicket(type) {
             if (gameState.wickets >= 8) return;
 
             gameState.wickets++;
-            const newBatsman = document.getElementById('newBatsmanSelect').value;
             
-            if (gameState.currentBatsmen.striker) {
-                gameState.currentBatsmen.striker = newBatsman;
+            // Update bowler figures
+            if (gameState.currentBowler) {
+                gameState.currentBowler.wickets++;
             }
 
             const ball = {
                 type: 'wicket',
                 wicketType: type,
-                over: gameState.currentOver
+                over: gameState.currentOver,
+                bowler: gameState.currentBowler?.name,
+                batsman: gameState.currentBatsmen.striker,
+                batsmanRuns: gameState.currentBatsmen.strikerRuns
             };
             gameState.ballHistory.push(ball);
 
             incrementOver();
-            closeWicketModal();
             updateDisplay();
             updateBallHistory();
             checkPartnershipEnd();
@@ -373,11 +475,17 @@
                 gameState.partnerships[gameState.currentPartnership].score += runs;
             }
 
+            // Update bowler figures
+            if (gameState.currentBowler && type !== 'penalty') {
+                gameState.currentBowler.runs += runs;
+            }
+
             const ball = {
                 type: 'extras',
                 extrasType: type,
                 value: runs,
-                over: gameState.currentOver
+                over: gameState.currentOver,
+                bowler: gameState.currentBowler?.name
             };
             gameState.ballHistory.push(ball);
 
@@ -395,6 +503,9 @@
             const currentBalls = Math.round((gameState.currentOver % 1) * 10);
             if (currentBalls === 5) {
                 gameState.currentOver = Math.floor(gameState.currentOver) + 1;
+                if (gameState.currentBowler) {
+                    gameState.currentBowler.overs++;
+                }
                 rotateStrike();
             } else {
                 gameState.currentOver = Math.floor(gameState.currentOver) + 
@@ -407,10 +518,11 @@
             if (gameState.currentBatsmen.striker && gameState.currentBatsmen.nonStriker) {
                 [gameState.currentBatsmen.striker, gameState.currentBatsmen.nonStriker] = 
                     [gameState.currentBatsmen.nonStriker, gameState.currentBatsmen.striker];
+                [gameState.currentBatsmen.strikerRuns, gameState.currentBatsmen.nonStrikerRuns] = 
+                    [gameState.currentBatsmen.nonStrikerRuns, gameState.currentBatsmen.strikerRuns];
             }
         }
-
-        // Check Partnership End
+                        // Check Partnership End
         function checkPartnershipEnd() {
             const currentPartnershipScore = 
                 gameState.partnerships[gameState.currentPartnership]?.score || 0;
@@ -418,9 +530,42 @@
                 (gameState.wickets > 0 && gameState.wickets % 2 === 0)) {
                 if (gameState.currentPartnership < 3) {
                     gameState.currentPartnership++;
-                    gameState.partnerships[gameState.currentPartnership] = { score: 0 };
+                    gameState.partnerships[gameState.currentPartnership] = { 
+                        score: 0,
+                        balls: 0,
+                        batsmen: []
+                    };
+                    handleNewPartnership();
                 }
             }
+        }
+
+        // End Over
+        function endOver() {
+            if (Math.round((gameState.currentOver % 1) * 10) !== 0) {
+                const confirmation = confirm(
+                    'The current over is not complete. Are you sure you want to end it?'
+                );
+                if (!confirmation) return;
+            }
+
+            // Save current bowler's figures
+            if (gameState.currentBowler) {
+                if (!gameState.bowlerFigures) {
+                    gameState.bowlerFigures = [];
+                }
+                gameState.bowlerFigures.push({
+                    name: gameState.currentBowler.name,
+                    overs: gameState.currentBowler.overs,
+                    runs: gameState.currentBowler.runs,
+                    wickets: gameState.currentBowler.wickets
+                });
+            }
+
+            gameState.currentOver = Math.ceil(gameState.currentOver);
+            rotateStrike();
+            updateDisplay();
+            handleNewOver();
         }
 
         // Update Ball History
@@ -455,83 +600,6 @@
             });
         }
 
-        // Modal Functions
-        function showWicketModal() {
-            document.getElementById('wicketModal').style.display = 'block';
-        }
-
-        function closeWicketModal() {
-            document.getElementById('wicketModal').style.display = 'none';
-        }
-
-        function showExtrasModal() {
-            document.getElementById('extrasModal').style.display = 'block';
-        }
-
-        function closeExtrasModal() {
-            document.getElementById('extrasModal').style.display = 'none';
-        }
-
-        // Populate New Batsman Select
-        function populateNewBatsmanSelect() {
-            const select = document.getElementById('newBatsmanSelect');
-            select.innerHTML = '';
-            
-            gameState.availableBatsmen.forEach(batsman => {
-                if (batsman !== gameState.currentBatsmen.striker && 
-                    batsman !== gameState.currentBatsmen.nonStriker) {
-                    const option = document.createElement('option');
-                    option.value = batsman;
-                    option.textContent = batsman;
-                    select.appendChild(option);
-                }
-            });
-        }
-
-        // Undo Last Ball
-        function undoLastBall() {
-            if (gameState.ballHistory.length === 0) return;
-
-            const lastBall = gameState.ballHistory.pop();
-            
-            switch (lastBall.type) {
-                case 'runs':
-                    gameState.currentScore -= lastBall.value;
-                    if (gameState.partnerships[gameState.currentPartnership]) {
-                        gameState.partnerships[gameState.currentPartnership].score -= lastBall.value;
-                    }
-                    break;
-                case 'wicket':
-                    gameState.wickets--;
-                    break;
-                case 'extras':
-                    gameState.currentScore -= lastBall.value;
-                    if (gameState.partnerships[gameState.currentPartnership]) {
-                        gameState.partnerships[gameState.currentPartnership].score -= lastBall.value;
-                    }
-                    break;
-            }
-
-            gameState.currentOver = lastBall.over;
-            updateDisplay();
-            updateBallHistory();
-        }
-
-        // End Over
-        function endOver() {
-            if (Math.round((gameState.currentOver % 1) * 10) !== 0) {
-                const confirmation = confirm(
-                    'The current over is not complete. Are you sure you want to end it?'
-                );
-                if (!confirmation) return;
-            }
-
-            gameState.currentOver = Math.ceil(gameState.currentOver);
-            rotateStrike();
-            updateDisplay();
-            updateBallHistory();
-        }
-
         // Timer Functions
         function startTimer() {
             if (!gameState.timer.isRunning) {
@@ -554,8 +622,8 @@
                 const elapsed = Date.now() - gameState.timer.startTime;
                 const remaining = Math.max(0, gameState.timer.duration * 60 * 1000 - elapsed);
                 
-                const minutes = Math.floor(remaining / (60 * 1000));
-                const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
                 
                 document.getElementById('timerDisplay').textContent = 
                     `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
@@ -566,30 +634,49 @@
             }
         }
 
+        // Undo Last Ball
+        function undoLastBall() {
+            if (gameState.ballHistory.length === 0) return;
+
+            const lastBall = gameState.ballHistory.pop();
+            
+            switch (lastBall.type) {
+                case 'runs':
+                    gameState.currentScore -= lastBall.value;
+                    if (gameState.partnerships[gameState.currentPartnership]) {
+                        gameState.partnerships[gameState.currentPartnership].score -= lastBall.value;
+                        gameState.partnerships[gameState.currentPartnership].balls--;
+                    }
+                    if (gameState.currentBowler) {
+                        gameState.currentBowler.runs -= lastBall.value;
+                    }
+                    gameState.currentBatsmen.strikerRuns -= lastBall.value;
+                    break;
+                case 'wicket':
+                    gameState.wickets--;
+                    if (gameState.currentBowler) {
+                        gameState.currentBowler.wickets--;
+                    }
+                    break;
+                case 'extras':
+                    gameState.currentScore -= lastBall.value;
+                    if (gameState.partnerships[gameState.currentPartnership]) {
+                        gameState.partnerships[gameState.currentPartnership].score -= lastBall.value;
+                    }
+                    if (gameState.currentBowler && lastBall.extrasType !== 'penalty') {
+                        gameState.currentBowler.runs -= lastBall.value;
+                    }
+                    break;
+            }
+
+            gameState.currentOver = lastBall.over;
+            updateDisplay();
+            updateBallHistory();
+        }
+
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', initializeGame);
-
-        // Handle keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-
-            switch (e.key) {
-                case '0': addRuns(0); break;
-                case '1': addRuns(1); break;
-                case '2': addRuns(2); break;
-                case '3': addRuns(3); break;
-                case '4': addRuns(4); break;
-                case '5': addRuns(5); break;
-                case '6': addRuns(6); break;
-                case '7': addRuns(7); break;
-                case 'w': case 'W': showWicketModal(); break;
-                case 'e': case 'E': showExtrasModal(); break;
-                case 'z': case 'Z': undoLastBall(); break;
-                case 'o': case 'O': endOver(); break;
-                case 's': case 'S': startTimer(); break;
-                case 'p': case 'P': pauseTimer(); break;
-            }
-        });
     </script>
 </body>
 </html>
+                
