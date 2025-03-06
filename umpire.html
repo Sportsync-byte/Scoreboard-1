@@ -356,12 +356,21 @@
         </div>
     </div>
 
-    <!-- Include GameManager first -->
-    <script src="gameManager.js"></script>
-    
-    <script>
+    <script type="module">
+        import gameManager from './gameManager.js';
+
+        // Make functions globally available
+        window.confirmBatsmen = confirmBatsmen;
+        window.confirmBowler = confirmBowler;
+
         // Initialize game state and UI when page loads
         window.onload = function() {
+            // Check if game state exists
+            if (!gameManager.gameState) {
+                window.location.href = 'setup.html';
+                return;
+            }
+
             // Subscribe to game state changes
             gameManager.subscribe((state, event) => {
                 updateDisplay(state);
@@ -418,6 +427,16 @@
             document.getElementById('penaltyButton').addEventListener('click', () => {
                 gameManager.addExtra('penalties', -5);
             });
+
+            // Initial display update
+            updateDisplay(gameManager.gameState);
+
+            // Show initial prompts if needed
+            if (!gameManager.gameState.currentBatsmen.striker) {
+                promptForBatsmen();
+            } else if (!gameManager.gameState.currentBowler.name) {
+                promptForBowler();
+            }
         };
 
         function updateDisplay(state) {
@@ -445,7 +464,7 @@
             timerElement.textContent = gameManager.getFormattedTimer();
             timerElement.className = 'timer' + 
                 (state.timer.isPaused ? ' paused' : '') +
-                (state.timer.remaining < 300 ? ' warning' : ''); // Warning when less than 5 minutes
+                (state.timer.remaining < 300 ? ' warning' : '');
 
             // Update partnership
             const currentPartnership = state.partnerships[gameManager.getCurrentPartnershipIndex()];
