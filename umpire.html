@@ -53,7 +53,8 @@
         .control-button {
             background-color: #28a745;
         }
-                .game-info {
+
+        .game-info {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
@@ -220,10 +221,10 @@
             <button class="score-button wicket-button" onclick="addWicket('thirdball')">THIRD BALL</button>
             <button class="score-button extras-button" onclick="showExtrasModal()">EXTRAS</button>
             <button class="score-button control-button" onclick="undoLastBall()">UNDO</button>
-            <button class="score-button control-button" onclick="endOver()">END OVER</button>
+            <button class="score-button control-button" onclick="addBallToOver()">ADD BALL</button>
+            <button class="score-button control-button" onclick="startNewOver()">NEXT OVER</button>
         </div>
-
-        <!-- Timer Controls -->
+                <!-- Timer Controls -->
         <div class="timer-controls">
             <button class="timer-button" id="startTimer" onclick="startTimer()">Start Timer</button>
             <button class="timer-button pause-button" id="pauseTimer" onclick="pauseTimer()">Pause Timer</button>
@@ -270,7 +271,9 @@
                 <button class="extras-type-button" onclick="addExtras('penalty')">Penalty</button>
             </div>
         </div>
-            <script>
+    </div>
+
+    <script>
         // Game State
         let gameState = {
             battingTeam: '',
@@ -311,10 +314,7 @@
                 updateDisplay();
                 updateBallHistory();
             }
-            // Prompt for initial batsmen
             handleNewPartnership();
-            // Prompt for initial bowler
-            handleNewOver();
         }
 
         // Update Display
@@ -329,16 +329,15 @@
             document.getElementById('currentPartnership').textContent = 
                 (gameState.currentPartnership + 1);
             
-            // Update batsmen info
             document.getElementById('batsman1').textContent = 
                 `${gameState.currentBatsmen.striker} (${gameState.currentBatsmen.strikerRuns}*)`;
             document.getElementById('batsman2').textContent = 
                 `${gameState.currentBatsmen.nonStriker} (${gameState.currentBatsmen.nonStrikerRuns})`;
 
-            // Save state to localStorage
             localStorage.setItem('indoorCricketGame', JSON.stringify(gameState));
         }
-                        // Add Runs
+
+        // Add Runs
         function addRuns(runs) {
             if (gameState.wickets >= 8) return;
             
@@ -349,10 +348,7 @@
                     (gameState.partnerships[gameState.currentPartnership].balls || 0) + 1;
             }
 
-            // Update batsman runs
             gameState.currentBatsmen.strikerRuns += runs;
-
-            // Update bowler figures
             if (gameState.currentBowler) {
                 gameState.currentBowler.runs += runs;
             }
@@ -369,6 +365,49 @@
             incrementOver();
             updateDisplay();
             updateBallHistory();
+        }
+
+        // Add ball to over
+        function addBallToOver() {
+            const currentBalls = Math.round((gameState.currentOver % 1) * 10);
+            if (currentBalls < 5) {
+                gameState.currentOver = Math.floor(gameState.currentOver) + 
+                    ((currentBalls + 1) / 10);
+                updateDisplay();
+                updateBallHistory();
+            } else {
+                alert('Over is already complete. Please use "Next Over" button.');
+            }
+        }
+
+        // Start new over
+        function startNewOver() {
+            document.getElementById('bowlerModal').style.display = 'block';
+            gameState.currentOver = Math.ceil(gameState.currentOver);
+            
+            if (gameState.currentBowler) {
+                if (!gameState.bowlerFigures) {
+                    gameState.bowlerFigures = [];
+                }
+                gameState.bowlerFigures.push({
+                    name: gameState.currentBowler.name,
+                    overs: gameState.currentBowler.overs,
+                    runs: gameState.currentBowler.runs,
+                    wickets: gameState.currentBowler.wickets
+                });
+            }
+
+            rotateStrike();
+            updateDisplay();
+        }
+
+        // Increment Over
+        function incrementOver() {
+            const currentBalls = Math.round((gameState.currentOver % 1) * 10);
+            if (currentBalls < 5) {
+                gameState.currentOver = Math.floor(gameState.currentOver) + 
+                    ((currentBalls + 1) / 10);
+            }
         }
 
         // Handle Batsmen Modal
@@ -412,10 +451,6 @@
         }
 
         // Handle Bowler Modal
-        function handleNewOver() {
-            document.getElementById('bowlerModal').style.display = 'block';
-        }
-
         function closeBowlerModal() {
             document.getElementById('bowlerModal').style.display = 'none';
         }
@@ -438,13 +473,13 @@
             closeBowlerModal();
             updateDisplay();
         }
-                // Add Wicket
+
+        // Add Wicket
         function addWicket(type) {
             if (gameState.wickets >= 8) return;
 
             gameState.wickets++;
             
-            // Update bowler figures
             if (gameState.currentBowler) {
                 gameState.currentBowler.wickets++;
             }
@@ -475,7 +510,6 @@
                 gameState.partnerships[gameState.currentPartnership].score += runs;
             }
 
-            // Update bowler figures
             if (gameState.currentBowler && type !== 'penalty') {
                 gameState.currentBowler.runs += runs;
             }
@@ -498,19 +532,12 @@
             updateBallHistory();
         }
 
-        // Increment Over
-        function incrementOver() {
-            const currentBalls = Math.round((gameState.currentOver % 1) * 10);
-            if (currentBalls === 5) {
-                gameState.currentOver = Math.floor(gameState.currentOver) + 1;
-                if (gameState.currentBowler) {
-                    gameState.currentBowler.overs++;
-                }
-                rotateStrike();
-            } else {
-                gameState.currentOver = Math.floor(gameState.currentOver) + 
-                    ((currentBalls + 1) / 10);
-            }
+        function closeExtrasModal() {
+            document.getElementById('extrasModal').style.display = 'none';
+        }
+
+        function showExtrasModal() {
+            document.getElementById('extrasModal').style.display = 'block';
         }
 
         // Rotate Strike
@@ -522,7 +549,8 @@
                     [gameState.currentBatsmen.nonStrikerRuns, gameState.currentBatsmen.strikerRuns];
             }
         }
-                        // Check Partnership End
+
+        // Check Partnership End
         function checkPartnershipEnd() {
             const currentPartnershipScore = 
                 gameState.partnerships[gameState.currentPartnership]?.score || 0;
@@ -538,34 +566,6 @@
                     handleNewPartnership();
                 }
             }
-        }
-
-        // End Over
-        function endOver() {
-            if (Math.round((gameState.currentOver % 1) * 10) !== 0) {
-                const confirmation = confirm(
-                    'The current over is not complete. Are you sure you want to end it?'
-                );
-                if (!confirmation) return;
-            }
-
-            // Save current bowler's figures
-            if (gameState.currentBowler) {
-                if (!gameState.bowlerFigures) {
-                    gameState.bowlerFigures = [];
-                }
-                gameState.bowlerFigures.push({
-                    name: gameState.currentBowler.name,
-                    overs: gameState.currentBowler.overs,
-                    runs: gameState.currentBowler.runs,
-                    wickets: gameState.currentBowler.wickets
-                });
-            }
-
-            gameState.currentOver = Math.ceil(gameState.currentOver);
-            rotateStrike();
-            updateDisplay();
-            handleNewOver();
         }
 
         // Update Ball History
@@ -679,4 +679,3 @@
     </script>
 </body>
 </html>
-                
