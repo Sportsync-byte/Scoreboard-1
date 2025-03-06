@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Indoor Cricket Scoreboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #000;
-            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -29,11 +30,22 @@
             flex-direction: column;
         }
 
+        #firstInningsTeam {
+            background: linear-gradient(to bottom, #16213e, #1a1a2e);
+            border-bottom: 4px solid #4CAF50;
+        }
+
+        #secondInningsTeam {
+            background: linear-gradient(to top, #16213e, #1a1a2e);
+        }
+
         .team-name {
-            font-size: 2.5rem;
-            font-weight: bold;
+            font-size: 2.8rem;
+            font-weight: 600;
             margin-bottom: 20px;
             text-align: center;
+            color: #e2e8f0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .team-content {
@@ -43,9 +55,9 @@
         }
 
         .partnerships-container {
-            display: grid;
-            grid-template-columns: repeat(var(--partnership-count), 1fr);
-            gap: 10px;
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
             flex: 3;
         }
 
@@ -58,46 +70,53 @@
         }
 
         .partnership-box {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
+            flex: 1;
+            background: #242b3e;
+            border-radius: 12px;
+            padding: 20px;
             text-align: center;
-            min-height: 100px;
+            min-height: 120px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
         }
 
         .partnership-box.current {
-            border: 2px solid #ffd700;
-            animation: pulse 1s infinite;
+            background: linear-gradient(135deg, #2c5364, #203a43);
+            border: 2px solid #4CAF50;
+            box-shadow: 0 0 15px rgba(76,175,80,0.3);
         }
 
         .partnership-box.completed {
-            background: rgba(0, 0, 0, 0.5);
+            background: #1e2433;
         }
 
         .partnership-number {
             font-size: 1.2rem;
-            color: #ffd700;
-            margin-bottom: 5px;
+            color: #81e6d9;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
 
         .partnership-runs {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: bold;
+            color: #ffffff;
         }
 
         .physical-runs {
-            color: #4CAF50;
+            color: #68d391;
             font-size: 1.2rem;
-            margin-top: 5px;
+            margin-top: 8px;
         }
 
         .penalty-indicator {
-            color: #ff4444;
+            color: #fc8181;
             font-size: 0.9rem;
-            margin-top: 5px;
+            margin-top: 8px;
         }
 
         .team-total-box {
@@ -106,19 +125,24 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
+            background: #242b3e;
+            border-radius: 12px;
+            padding: 25px;
+            margin-left: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .team-total {
-            font-size: 4rem;
+            font-size: 4.5rem;
             font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .total-label {
             font-size: 1.5rem;
-            color: #ffd700;
+            color: #81e6d9;
+            margin-top: 10px;
         }
 
         .between-overs-info {
@@ -126,52 +150,67 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 2rem;
-            border-radius: 10px;
+            background: rgba(26, 32, 44, 0.95);
+            padding: 2.5rem;
+            border-radius: 15px;
             z-index: 1000;
             display: none;
-            min-width: 300px;
+            min-width: 320px;
             text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .between-overs-info.show {
             display: block;
         }
 
+        .between-overs-info h3 {
+            color: #81e6d9;
+            margin-bottom: 20px;
+        }
+
+        .current-batsmen, .bowler-info {
+            margin: 15px 0;
+            font-size: 1.2rem;
+        }
+
         .timer {
             position: fixed;
-            bottom: 1rem;
-            right: 1rem;
+            bottom: 1.5rem;
+            right: 1.5rem;
             font-size: 3rem;
             font-weight: bold;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 1rem;
-            border-radius: 10px;
+            background: rgba(36, 43, 62, 0.9);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            color: #ffffff;
         }
 
         .over-info {
             position: fixed;
-            bottom: 1rem;
-            left: 1rem;
+            bottom: 1.5rem;
+            left: 1.5rem;
             font-size: 2rem;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 1rem;
-            border-radius: 10px;
+            background: rgba(36, 43, 62, 0.9);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
             display: flex;
-            gap: 1rem;
+            gap: 1.5rem;
             align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .balls-remaining {
             font-size: 1.5rem;
-            color: #ffd700;
+            color: #81e6d9;
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(76,175,80,0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(76,175,80,0); }
+            100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
         }
 
         @media (max-width: 768px) {
@@ -180,19 +219,29 @@
             }
 
             .partnerships-container {
+                flex-wrap: wrap;
                 margin-bottom: 1rem;
             }
 
+            .partnership-box {
+                flex: 1 1 40%;
+                min-width: 140px;
+            }
+
             .team-total {
-                font-size: 3rem;
+                font-size: 3.5rem;
             }
 
             .timer {
                 font-size: 2rem;
+                bottom: 1rem;
+                right: 1rem;
             }
 
             .over-info {
                 font-size: 1.5rem;
+                bottom: 1rem;
+                left: 1rem;
             }
         }
     </style>
@@ -348,7 +397,9 @@
                 `;
                 
                 partnershipBox.className = 'partnership-box';
-                if (i + 1 === currentPartnership && !gameState.isSecondInnings) {
+                if (i + 1 === currentPartnership && 
+                    ((gameState.isSecondInnings && partnershipStart === 5) || 
+                    (!gameState.isSecondInnings && partnershipStart === 1))) {
                     partnershipBox.classList.add('current');
                 } else if (i + 1 < currentPartnership) {
                     partnershipBox.classList.add('completed');
@@ -383,7 +434,6 @@
         }
 
         function updateTimerAndOvers(state) {
-            // Update overs and balls remaining
             const oversDisplay = document.getElementById('oversDisplay');
             const ballsRemaining = document.getElementById('ballsRemaining');
             if (oversDisplay && ballsRemaining) {
