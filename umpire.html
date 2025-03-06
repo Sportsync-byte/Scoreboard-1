@@ -43,7 +43,7 @@
 
         .runs-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-bottom: 20px;
         }
@@ -139,34 +139,71 @@
             100% { opacity: 1; }
         }
 
-        .partnership-indicator {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #e8f5e9;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            min-width: 300px;
+        }
+
+        .modal h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .modal select {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
             border-radius: 4px;
         }
 
-        .partnership-runs {
-            font-weight: bold;
-            color: #2e7d32;
-        }
-
-        .control-section {
-            margin-bottom: 20px;
-        }
-
-        .control-section h3 {
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .wicket-types-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .confirm-button {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        .cancel-button {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .innings-indicator {
+            text-align: center;
+            font-size: 1.2em;
+            color: #1a73e8;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
 
         .ball-history {
@@ -183,20 +220,6 @@
 
         .ball-history-item:last-child {
             border-bottom: none;
-        }
-
-        .innings-indicator {
-            text-align: center;
-            font-size: 1.2em;
-            color: #1a73e8;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-
-        .custom-runs-button {
-            background-color: #e8f0fe;
-            color: #1a73e8;
-            font-weight: bold;
         }
     </style>
 </head>
@@ -283,8 +306,104 @@
         </div>
     </div>
 
+    <!-- Batsmen Selection Modal -->
+    <div id="batsmenModal" class="modal">
+        <div class="modal-content">
+            <h3>Select Batsmen</h3>
+            <select id="strikerSelect">
+                <option value="">Select Striker</option>
+            </select>
+            <select id="nonStrikerSelect">
+                <option value="">Select Non-Striker</option>
+            </select>
+            <div class="modal-buttons">
+                <button class="modal-button confirm-button" onclick="confirmBatsmen()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bowler Selection Modal -->
+    <div id="bowlerModal" class="modal">
+        <div class="modal-content">
+            <h3>Select Bowler</h3>
+            <select id="bowlerSelect">
+                <option value="">Select Bowler</option>
+            </select>
+            <div class="modal-buttons">
+                <button class="modal-button confirm-button" onclick="confirmBowler()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import gameManager from './gameManager.js';
+
+        // Make functions globally available
+        window.confirmBatsmen = confirmBatsmen;
+        window.confirmBowler = confirmBowler;
+
+        function promptForBatsmen() {
+            const modal = document.getElementById('batsmenModal');
+            const strikerSelect = document.getElementById('strikerSelect');
+            const nonStrikerSelect = document.getElementById('nonStrikerSelect');
+            
+            strikerSelect.innerHTML = '<option value="">Select Striker</option>';
+            nonStrikerSelect.innerHTML = '<option value="">Select Non-Striker</option>';
+            
+            const availableBatsmen = gameManager.gameState.players.batsmen
+                .filter(b => !b.dismissed)
+                .map(b => b.name);
+
+            availableBatsmen.forEach(name => {
+                strikerSelect.add(new Option(name, name));
+                nonStrikerSelect.add(new Option(name, name));
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function promptForBowler() {
+            const modal = document.getElementById('bowlerModal');
+            const bowlerSelect = document.getElementById('bowlerSelect');
+            
+            bowlerSelect.innerHTML = '<option value="">Select Bowler</option>';
+            
+            gameManager.gameState.players.bowlers.forEach(bowler => {
+                bowlerSelect.add(new Option(bowler.name, bowler.name));
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function confirmBatsmen() {
+            const striker = document.getElementById('strikerSelect').value;
+            const nonStriker = document.getElementById('nonStrikerSelect').value;
+            
+            if (!striker || !nonStriker || striker === nonStriker) {
+                alert('Please select different batsmen');
+                return;
+            }
+
+            gameManager.setBatsmen(striker, nonStriker);
+            document.getElementById('batsmenModal').style.display = 'none';
+            
+            // Prompt for bowler if not selected
+            if (!gameManager.gameState.currentBowler.name) {
+                promptForBowler();
+            }
+        }
+
+        function confirmBowler() {
+            const bowler = document.getElementById('bowlerSelect').value;
+            
+            if (!bowler) {
+                alert('Please select a bowler');
+                return;
+            }
+
+            gameManager.setBowler(bowler);
+            document.getElementById('bowlerModal').style.display = 'none';
+        }
 
         // Initialize game state and UI when page loads
         window.onload = function() {
@@ -315,7 +434,6 @@
             // Custom runs button
             document.getElementById('customRunsButton').addEventListener('click', () => {
                 gameManager.addRuns(0, true);
-                gameManager.recordBall();
             });
 
             // Add event listeners for wicket buttons
@@ -346,6 +464,13 @@
 
             // Initial display update
             updateDisplay(gameManager.gameState);
+
+            // Show initial prompts if needed
+            if (!gameManager.gameState.currentBatsmen.striker) {
+                promptForBatsmen();
+            } else if (!gameManager.gameState.currentBowler.name) {
+                promptForBowler();
+            }
         };
 
         function updateDisplay(state) {
@@ -377,7 +502,8 @@
             // Update partnership
             const currentPartnership = state.partnerships[gameManager.getCurrentPartnershipIndex()];
             document.getElementById('partnershipRuns').textContent = currentPartnership.runs || 0;
-            document.getElementById('partnershipNumber').textContent = gameManager.getCurrentPartnershipIndex() + 1;
+            document.getElementById('partnershipNumber').textContent = 
+                gameManager.getCurrentPartnershipIndex() + 1;
             document.getElementById('partnershipOvers').textContent = 
                 `${Math.floor(currentPartnership.balls / 6)}.${currentPartnership.balls % 6}`;
 
