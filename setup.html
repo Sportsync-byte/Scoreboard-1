@@ -234,10 +234,19 @@
 
     <div id="loadingSpinner">Setting up game...</div>
 
-    <!-- Include GameManager first -->
-    <script src="gameManager.js"></script>
-    
-    <script>
+    <script type="module">
+        import gameManager from './gameManager.js';
+
+        // Make functions available globally
+        window.addBatsman = addBatsman;
+        window.addBowler = addBowler;
+        window.removeBatsman = removeBatsman;
+        window.removeBowler = removeBowler;
+        window.loadLastMatch = loadLastMatch;
+        window.showAlert = showAlert;
+        window.showLoading = showLoading;
+        window.hideLoading = hideLoading;
+
         let batsmen = [];
         let bowlers = [];
 
