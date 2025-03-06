@@ -1,3 +1,5 @@
+'use strict';
+
 // Constants and configurations
 const GAME_CONFIGS = {
     '6aside': {
@@ -53,6 +55,8 @@ class GameManager {
 
     // Initialize new game from setup
     initializeGame(setupData) {
+        console.log('Initializing game with setup data:', setupData); // Debug log
+
         if (!setupData.format || !GAME_CONFIGS[setupData.format]) {
             throw new Error('Invalid game format');
         }
@@ -119,6 +123,8 @@ class GameManager {
             ballHistory: [],
             isComplete: false
         };
+
+        console.log('Game state initialized:', this.gameState); // Debug log
 
         this.saveState();
         this.notifyListeners('gameInitialized');
@@ -430,7 +436,9 @@ class GameManager {
 
 // Create singleton instance
 const gameManager = new GameManager();
-window.gameManager = gameManager; // Make globally available
+
+// Make available globally
+window.gameManager = gameManager;
 
 // Export for module usage
 export default gameManager;
