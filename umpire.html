@@ -269,7 +269,8 @@
         <div id="thirdBallWarning" class="third-ball-warning" style="display: none;">
             Warning: Next ball will be third ball for current batsman
         </div>
-                   <!-- Modals -->
+
+        <!-- Modals -->
         <div id="batsmenModal" class="modal">
             <div class="modal-content">
                 <h2>Select Batsmen</h2>
@@ -295,21 +296,29 @@
             </div>
         </div>
     </div>
-
-    <script>
+        <script>
         let gameState = null;
 
         window.onload = function() {
+            // Check if we have setup data
+            const setupData = JSON.parse(localStorage.getItem('indoorCricketGame'));
+            if (!setupData) {
+                showAlert("No game setup data found. Please return to setup page.");
+                window.location.href = 'setup.html';
+                return;
+            }
+
             initializeGameState();
+            // Show batsmen selection modal immediately
             promptForBatsmen();
+            // Bowler prompt will be shown after batsmen are selected
             gameState.needsBowlerPrompt = true;
-            startTimer();
         }
 
         function initializeGameState() {
             const setupData = JSON.parse(localStorage.getItem('indoorCricketGame'));
-            const format = setupData ? setupData.format : '8aside';
-            const matchDuration = setupData ? setupData.matchDuration : 60;
+            const format = setupData.format;
+            const matchDuration = setupData.matchDuration;
 
             gameState = {
                 currentScore: 0,
@@ -334,23 +343,28 @@
                 bowlingHistory: [],
                 battingHistory: [],
                 ballHistory: [],
-                battingTeam: setupData ? setupData.battingTeam.name : '',
-                fieldingTeam: setupData ? setupData.fieldingTeam.name : '',
+                battingTeam: setupData.battingTeam,
+                fieldingTeam: setupData.fieldingTeam,
                 matchDuration: matchDuration,
                 startTime: null,
                 timerInterval: null,
                 timeRemaining: matchDuration * 60,
                 isPaused: false,
                 needsBowlerPrompt: false,
-                totalOvers: format === '8aside' ? 16 : 12
+                totalOvers: format === '8aside' ? 16 : 12,
+                availableBatsmen: setupData.batsmen.map(b => b.name),
+                availableBowlers: setupData.bowlers.map(b => b.name),
+                isSecondInnings: false,
+                firstInnings: {
+                    score: 0,
+                    partnerships: []
+                }
             };
 
-            if (setupData) {
-                initializePlayers(setupData.battingTeam.players, setupData.fieldingTeam.players);
-            }
-
-            document.getElementById('gameFormat').textContent = format === '8aside' ? '8-a-side' : '6-a-side';
-            document.getElementById('maxPartnerships').textContent = format === '8aside' ? '4' : '3';
+            document.getElementById('gameFormat').textContent = 
+                format === '8aside' ? '8-a-side' : '6-a-side';
+            document.getElementById('maxPartnerships').textContent = 
+                format === '8aside' ? '4' : '3';
             
             updateGameState();
         }
@@ -384,7 +398,6 @@
             const timer = document.getElementById('matchTimer');
             timer.textContent = display;
 
-            // Add warning classes based on time remaining
             timer.classList.remove('warning', 'danger');
             if (gameState.timeRemaining <= 300) { // Last 5 minutes
                 timer.classList.add('danger');
@@ -463,6 +476,11 @@
         }
 
         function addBall(isExtra = false) {
+            if (!gameState.currentBatsmen.striker || !gameState.currentBowler.name) {
+                showAlert("Please select batsmen and bowler first");
+                return;
+            }
+
             if (gameState.ballsInOver >= 6 && !isExtra) {
                 showAlert("Maximum 6 legal deliveries per over. For extras, use 'Add Extra Ball'");
                 return;
@@ -558,23 +576,75 @@
         }
 
         function updateGameState() {
-            // Add timer information to the game state
             gameState.timerDisplay = {
                 minutes: Math.floor(gameState.timeRemaining / 60),
                 seconds: gameState.timeRemaining % 60,
                 isPaused: gameState.isPaused
             };
             
-            // Update preview screen
             updatePreviewScreen();
             
-            // Save to localStorage
             localStorage.setItem('gameState', JSON.stringify(gameState));
             
-            // Send to scoreboard window if open
             if (window.opener && !window.opener.closed) {
                 window.opener.postMessage(gameState, '*');
             }
+        }
+
+        function promptForBatsmen() {
+            const modal = document.getElementById('batsmenModal');
+            const battingHistory = document.getElementById('battingHistory');
+            battingHistory.innerHTML = '';
+            
+            gameState.battingHistory.forEach(bat => {
+                const item = document.createElement('div');
+                item.className = 'batsman-history-item';
+                item.innerHTML = `
+                    ${bat.name} - ${bat.runs} runs
+                    (Partnership ${bat.partnership})
+                `;
+                battingHistory.appendChild(item);
+            });
+            
+            // Initialize player dropdowns with available batsmen
+            const strikerSelect = document.getElementById('strikerSelect');
+            const nonStrikerSelect = document.getElementById('nonStrikerSelect');
+            
+            strikerSelect.innerHTML = '<option value="">Select Striker</option>';
+            nonStrikerSelect.innerHTML = '<option value="">Select Non-Striker</option>';
+            
+            gameState.availableBatsmen.forEach(player => {
+                strikerSelect.add(new Option(player, player));
+                nonStrikerSelect.add(new Option(player, player));
+            });
+            
+            modal.style.display = 'block';
+        }
+
+        function promptForBowler() {
+            const modal = document.getElementById('bowlerModal');
+            const bowlerHistory = document.getElementById('bowlerHistory');
+            bowlerHistory.innerHTML = '';
+            
+            gameState.bowlingHistory.forEach(bowl => {
+                const item = document.createElement('div');
+                item.className = 'bowler-history-item';
+                item.innerHTML = `
+                    ${bowl.name} - Over ${bowl.over}
+                    (${bowl.wickets}/${bowl.runs})
+                `;
+                bowlerHistory.appendChild(item);
+            });
+            
+            // Initialize bowler dropdown with available bowlers
+            const bowlerSelect = document.getElementById('bowlerSelect');
+            bowlerSelect.innerHTML = '<option value="">Select Bowler</option>';
+            
+            gameState.availableBowlers.forEach(player => {
+                bowlerSelect.add(new Option(player, player));
+            });
+            
+            modal.style.display = 'block';
         }
 
         function confirmBatsmen() {
@@ -616,6 +686,10 @@
             if (gameState.needsBowlerPrompt) {
                 gameState.needsBowlerPrompt = false;
                 promptForBowler();
+            }
+            
+            if (!gameState.startTime) {
+                startTimer(); // Start timer after first batsmen are selected
             }
             
             updateGameState();
@@ -661,33 +735,6 @@
 
         function showAlert(message) {
             alert(message);
-        }
-
-        function initializePlayers(battingPlayers, fieldingPlayers) {
-            const strikerSelect = document.getElementById('strikerSelect');
-            const nonStrikerSelect = document.getElementById('nonStrikerSelect');
-            const bowlerSelect = document.getElementById('bowlerSelect');
-            
-            strikerSelect.innerHTML = '<option value="">Select Striker</option>';
-            nonStrikerSelect.innerHTML = '<option value="">Select Non-Striker</option>';
-            bowlerSelect.innerHTML = '<option value="">Select Bowler</option>';
-            
-            battingPlayers.forEach(player => {
-                strikerSelect.add(new Option(player, player));
-                nonStrikerSelect.add(new Option(player, player));
-            });
-            
-            fieldingPlayers.forEach(player => {
-                bowlerSelect.add(new Option(player, player));
-            });
-        }
-
-        function promptForBatsmen() {
-            document.getElementById('batsmenModal').style.display = 'block';
-        }
-
-        function promptForBowler() {
-            document.getElementById('bowlerModal').style.display = 'block';
         }
     </script>
 </body>
