@@ -59,7 +59,7 @@
             position: relative;
             transition: all 0.3s ease;
         }
-                .partnership-box.winning {
+        .partnership-box.winning {
             border: 2px solid #28a745;
             box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
         }
@@ -73,7 +73,7 @@
             margin-top: 0.5rem;
             text-align: center;
         }
-        .team-total {
+                .team-total {
             position: absolute;
             right: 2rem;
             top: 50%;
@@ -92,9 +92,19 @@
             border-radius: 10px;
             z-index: 1000;
             display: none;
+            min-width: 300px;
+            text-align: center;
         }
         .between-overs-info.show {
             display: block;
+        }
+        .current-batsmen {
+            margin: 1rem 0;
+            font-size: 1.2rem;
+        }
+        .bowler-info {
+            margin: 1rem 0;
+            font-size: 1.2rem;
         }
         .timer {
             position: fixed;
@@ -124,7 +134,7 @@
             padding: 1rem;
             border-radius: 10px;
         }
-                .animation-container {
+        .animation-container {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -137,7 +147,7 @@
         .animation-container.show {
             display: block;
         }
-        .game-paused {
+                .game-paused {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -224,12 +234,17 @@
             </div>
             <div class="team-total" id="secondTeamTotal">0</div>
         </div>
-
-        <!-- Between Overs Info -->
+                <!-- Between Overs Info -->
         <div class="between-overs-info" id="betweenOversInfo">
             <h3>Last Over Summary</h3>
-            <div id="batsmenInfo"></div>
-            <div id="bowlerInfo"></div>
+            <div class="current-batsmen">
+                <p><span id="strikerName">-</span>: <span id="strikerRuns">0</span>*</p>
+                <p><span id="nonStrikerName">-</span>: <span id="nonStrikerRuns">0</span></p>
+            </div>
+            <div class="bowler-info">
+                <p>Bowler: <span id="currentBowlerName">-</span></p>
+                <p>Figures: <span id="bowlerFigures">0-0</span></p>
+            </div>
         </div>
 
         <!-- Timer -->
@@ -248,7 +263,6 @@
     <audio id="warningSound" src="warning.mp3"></audio>
 
     <script>
-            <script>
         // Game State
         let gameState = {
             battingTeam: '',
@@ -265,6 +279,19 @@
                 partnerships: []
             },
             isSecondInnings: false,
+            currentBatsmen: {
+                striker: null,
+                nonStriker: null,
+                strikerRuns: 0,
+                nonStrikerRuns: 0
+            },
+            currentBowler: {
+                name: null,
+                overs: 0,
+                runs: 0,
+                wickets: 0
+            },
+            bowlerFigures: [],
             timer: {
                 isRunning: false,
                 elapsed: 0,
@@ -287,10 +314,15 @@
             overInfo: document.getElementById('overInfo'),
             animationContainer: document.getElementById('animationContainer'),
             gamePaused: document.getElementById('gamePaused'),
-            warningSound: document.getElementById('warningSound')
+            warningSound: document.getElementById('warningSound'),
+            strikerName: document.getElementById('strikerName'),
+            strikerRuns: document.getElementById('strikerRuns'),
+            nonStrikerName: document.getElementById('nonStrikerName'),
+            nonStrikerRuns: document.getElementById('nonStrikerRuns'),
+            currentBowlerName: document.getElementById('currentBowlerName'),
+            bowlerFigures: document.getElementById('bowlerFigures')
         };
-
-        // Initialize Scoreboard
+                // Initialize Scoreboard
         function initializeScoreboard() {
             const savedState = localStorage.getItem('indoorCricketGame');
             if (savedState) {
@@ -312,7 +344,8 @@
                 }
             }
         }
-                // Update Display
+
+        // Update Display
         function updateDisplay(previousState = null) {
             // Set format class on body
             document.body.dataset.format = gameState.format || '8aside';
@@ -330,6 +363,21 @@
             } else {
                 elements.firstTeamTotal.textContent = gameState.currentScore;
                 elements.secondTeamTotal.textContent = '0';
+            }
+
+            // Update batsmen info
+            if (gameState.currentBatsmen) {
+                elements.strikerName.textContent = gameState.currentBatsmen.striker || '-';
+                elements.strikerRuns.textContent = gameState.currentBatsmen.strikerRuns || 0;
+                elements.nonStrikerName.textContent = gameState.currentBatsmen.nonStriker || '-';
+                elements.nonStrikerRuns.textContent = gameState.currentBatsmen.nonStrikerRuns || 0;
+            }
+
+            // Update bowler info
+            if (gameState.currentBowler) {
+                elements.currentBowlerName.textContent = gameState.currentBowler.name || '-';
+                elements.bowlerFigures.textContent = 
+                    `${gameState.currentBowler.wickets}-${gameState.currentBowler.runs}`;
             }
 
             // Update partnerships
@@ -353,8 +401,7 @@
             // Check game paused status
             updatePausedStatus();
         }
-
-        // Update Partnerships
+                // Update Partnerships
         function updatePartnerships() {
             const partnerships = gameState.isSecondInnings ? 
                 gameState.partnerships : gameState.firstInnings.partnerships;
@@ -379,14 +426,15 @@
                     <div class="partnership-score">${partnership.score}</div>
                     <div class="partnership-details">
                         ${partnership.batsmen ? partnership.batsmen.join(' & ') : ''}
-                        ${partnership.balls ? `(${partnership.balls} balls)` : ''}
+                        ${partnership.balls ? `<br>(${partnership.balls} balls)` : ''}
                     </div>
                 `;
                 
                 container.appendChild(box);
             }
         }
-                // Update Timer
+
+        // Update Timer
         function updateTimer() {
             if (!gameState.timer) return;
 
@@ -429,8 +477,7 @@
                 secondTeam.classList.remove('active');
             }
         }
-
-        // Check for Animations
+                // Check for Animations
         function checkForAnimations(previousState) {
             if (gameState.currentScore !== previousState.currentScore) {
                 const difference = gameState.currentScore - previousState.currentScore;
@@ -441,7 +488,8 @@
                 }
             }
         }
-                // Show Animations
+
+        // Show Animations
         function showRunsAnimation(runs) {
             const container = elements.animationContainer;
             container.innerHTML = '';
@@ -491,6 +539,9 @@
                 case 'stumped':
                     content = '⚡ STUMPED!';
                     break;
+                case 'hitwicket':
+                    content = '🎯 HIT WICKET!';
+                    break;
                 case 'obstruction':
                     content = '❌ OBSTRUCTION!';
                     break;
@@ -506,9 +557,23 @@
         }
 
         // Show Between Overs Info
-        function showBetweenOversInfo(batsmenInfo, bowlerInfo) {
-            elements.batsmenInfo.innerHTML = batsmenInfo;
-            elements.bowlerInfo.innerHTML = bowlerInfo;
+        function showBetweenOversInfo() {
+            if (gameState.currentBowler) {
+                elements.bowlerInfo.innerHTML = `
+                    <p><strong>${gameState.currentBowler.name}</strong></p>
+                    <p>Overs: ${gameState.currentBowler.overs}</p>
+                    <p>Runs: ${gameState.currentBowler.runs}</p>
+                    <p>Wickets: ${gameState.currentBowler.wickets}</p>
+                `;
+            }
+
+            if (gameState.currentBatsmen) {
+                elements.batsmenInfo.innerHTML = `
+                    <p><strong>${gameState.currentBatsmen.striker}*: ${gameState.currentBatsmen.strikerRuns}</strong></p>
+                    <p><strong>${gameState.currentBatsmen.nonStriker}: ${gameState.currentBatsmen.nonStrikerRuns}</strong></p>
+                `;
+            }
+
             elements.betweenOversInfo.classList.add('show');
             setTimeout(() => {
                 elements.betweenOversInfo.classList.remove('show');
