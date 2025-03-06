@@ -7,16 +7,16 @@ const GAME_CONFIGS = {
         partnerships: 3,
         oversPerPartnership: 4,
         maxPlayers: 6,
-        minBowlers: 6,
-        maxOversPerBowler: 2
+        minBowlers: 4,
+        maxOversPerBowler: 3
     },
     '8aside': {
         totalOvers: 16,
         partnerships: 4,
         oversPerPartnership: 4,
         maxPlayers: 8,
-        minBowlers: 8,
-        maxOversPerBowler: 2
+        minBowlers: 5,
+        maxOversPerBowler: 4
     }
 };
 
@@ -36,6 +36,7 @@ class GameManager {
         this.gameState = null;
         this.listeners = new Set();
         this.firstInningsPartnerships = null;
+        this.broadcast = new BroadcastChannel('cricketGame');
         
         // Bind methods
         this.initializeGame = this.initializeGame.bind(this);
@@ -47,6 +48,16 @@ class GameManager {
         if (savedState) {
             this.gameState = JSON.parse(savedState);
         }
+
+        // Listen for broadcasts from other windows
+        this.broadcast.onmessage = (event) => {
+            if (event.data.type === 'stateUpdate') {
+                this.gameState = event.data.state;
+                this.listeners.forEach(callback => 
+                    callback(this.gameState, event.data.event)
+                );
+            }
+        };
 
         // Start timer update interval
         setInterval(() => {
@@ -161,13 +172,14 @@ class GameManager {
         updates.partnerships = [...this.gameState.partnerships];
         updates.partnerships[partnershipIndex] = {
             ...updates.partnerships[partnershipIndex],
-            runs: (updates.partnerships[partnershipIndex].runs || 0) + actualRuns
+            runs: (updates.partnerships[partnershipIndex].runs || 0) + actualRuns,
+            balls: (updates.partnerships[partnershipIndex].balls || 0) + 1
         };
 
         this.updateGameState(updates);
         this.recordBallHistory('runs', actualRuns);
 
-        // Always rotate strike in indoor cricket
+        // Always rotate strike in indoor cricket after any runs
         this.rotateStrike();
     }
 
@@ -191,7 +203,8 @@ class GameManager {
         updates.partnerships = [...this.gameState.partnerships];
         updates.partnerships[partnershipIndex] = {
             ...updates.partnerships[partnershipIndex],
-            runs: (updates.partnerships[partnershipIndex].runs || 0) + WICKET_PENALTY
+            runs: (updates.partnerships[partnershipIndex].runs || 0) + WICKET_PENALTY,
+            balls: (updates.partnerships[partnershipIndex].balls || 0) + 1
         };
 
         this.updateGameState(updates);
@@ -293,6 +306,52 @@ class GameManager {
         this.notifyListeners('timerToggled');
     }
 
+    setBatsmen(striker, nonStriker) {
+        if (!striker || !nonStriker || striker === nonStriker) {
+            throw new Error('Invalid batsmen selection');
+        }
+
+        const updates = {
+            currentBatsmen: {
+                striker,
+                nonStriker,
+                strikerRuns: 0,
+                nonStrikerRuns: 0
+            }
+        };
+
+        // Update current partnership
+        const partnershipIndex = this.getCurrentPartnershipIndex();
+        updates.partnerships = [...this.gameState.partnerships];
+        updates.partnerships[partnershipIndex] = {
+            ...updates.partnerships[partnershipIndex],
+            batsman1: striker,
+            batsman2: nonStriker
+        };
+
+        this.updateGameState(updates);
+        this.notifyListeners('batsmenSet');
+    }
+
+    setBowler(bowlerName) {
+        if (!this.validateBowlerAvailable(bowlerName)) {
+            throw new Error('Invalid bowler selection');
+        }
+
+        const updates = {
+            currentBowler: {
+                name: bowlerName,
+                overs: 0,
+                balls: 0,
+                runs: 0,
+                wickets: 0
+            }
+        };
+
+        this.updateGameState(updates);
+        this.notifyListeners('bowlerSet');
+    }
+
     endInnings() {
         if (this.gameState.isFirstInnings) {
             // Save first innings partnerships
@@ -387,7 +446,18 @@ class GameManager {
     }
 
     notifyListeners(event) {
+        // Store state in localStorage immediately
+        this.saveState();
+
+        // Notify all listeners in current window
         this.listeners.forEach(callback => callback(this.gameState, event));
+
+        // Broadcast to other windows
+        this.broadcast.postMessage({
+            type: 'stateUpdate',
+            state: this.gameState,
+            event: event
+        });
     }
 }
 
