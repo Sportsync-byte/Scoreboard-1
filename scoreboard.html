@@ -46,19 +46,20 @@
             padding: 0.5rem;
         }
         .partnership-box {
-            background: #ff0000;
-            color: white;
-            padding: 1rem;
-            min-width: 80px;
+            background: #000000;
+            color: #ff0000;
+            padding: 1.5rem;
+            min-width: 120px;
             aspect-ratio: 1;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             margin: 0;
             position: relative;
             transition: all 0.3s ease;
         }
-        .partnership-box.winning {
+                .partnership-box.winning {
             border: 2px solid #28a745;
             box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
         }
@@ -67,12 +68,17 @@
             font-weight: bold;
             margin: 0;
         }
+        .partnership-details {
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
         .team-total {
             position: absolute;
             right: 2rem;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 4rem;
+            font-size: 6rem;
             font-weight: bold;
             color: #ff0000;
         }
@@ -118,7 +124,7 @@
             padding: 1rem;
             border-radius: 10px;
         }
-        .animation-container {
+                .animation-container {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -146,6 +152,16 @@
         .game-paused.show {
             display: block;
         }
+
+        /* Format-specific styles */
+        body[data-format="6aside"] .partnership-box {
+            min-width: 160px;
+            padding: 2rem;
+        }
+        body[data-format="6aside"] .partnership-score {
+            font-size: 3rem;
+        }
+
         @keyframes flash {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -232,6 +248,7 @@
     <audio id="warningSound" src="warning.mp3"></audio>
 
     <script>
+            <script>
         // Game State
         let gameState = {
             battingTeam: '',
@@ -295,9 +312,11 @@
                 }
             }
         }
-
-        // Update Display
+                // Update Display
         function updateDisplay(previousState = null) {
+            // Set format class on body
+            document.body.dataset.format = gameState.format || '8aside';
+
             // Update team names
             elements.firstTeamName.textContent = gameState.isSecondInnings ? 
                 gameState.fieldingTeam : gameState.battingTeam;
@@ -345,7 +364,7 @@
             container.innerHTML = '';
             
             for (let i = 0; i < gameState.totalPartnerships; i++) {
-                const partnership = partnerships[i] || { score: 0 };
+                const partnership = partnerships[i] || { score: 0, balls: 0, batsmen: [] };
                 const box = document.createElement('div');
                 box.className = 'partnership-box';
                 
@@ -358,18 +377,25 @@
                 
                 box.innerHTML = `
                     <div class="partnership-score">${partnership.score}</div>
+                    <div class="partnership-details">
+                        ${partnership.batsmen ? partnership.batsmen.join(' & ') : ''}
+                        ${partnership.balls ? `(${partnership.balls} balls)` : ''}
+                    </div>
                 `;
                 
                 container.appendChild(box);
             }
         }
-
-        // Update Timer
+                // Update Timer
         function updateTimer() {
             if (!gameState.timer) return;
 
             const totalTime = gameState.matchDuration * 60 * 1000;
-            const remainingTime = Math.max(0, totalTime - gameState.timer.elapsed);
+            const elapsed = gameState.timer.isRunning ? 
+                (Date.now() - gameState.timer.startTime + gameState.timer.elapsed) : 
+                gameState.timer.elapsed;
+            const remainingTime = Math.max(0, totalTime - elapsed);
+            
             const minutes = Math.floor(remainingTime / 60000);
             const seconds = Math.floor((remainingTime % 60000) / 1000);
             
@@ -383,6 +409,10 @@
                 elements.matchTimer.classList.add('warning');
             } else {
                 elements.matchTimer.classList.remove('warning', 'danger');
+            }
+
+            if (gameState.timer.isRunning) {
+                setTimeout(updateTimer, 100);
             }
         }
 
@@ -411,8 +441,7 @@
                 }
             }
         }
-
-        // Show Animations
+                // Show Animations
         function showRunsAnimation(runs) {
             const container = elements.animationContainer;
             container.innerHTML = '';
