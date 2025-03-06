@@ -7,16 +7,16 @@ const GAME_CONFIGS = {
         partnerships: 3,
         oversPerPartnership: 4,
         maxPlayers: 6,
-        minBowlers: 4,
-        maxOversPerBowler: 3
+        minBowlers: 6,
+        maxOversPerBowler: 2
     },
     '8aside': {
         totalOvers: 16,
         partnerships: 4,
         oversPerPartnership: 4,
         maxPlayers: 8,
-        minBowlers: 5,
-        maxOversPerBowler: 4
+        minBowlers: 8,
+        maxOversPerBowler: 2
     }
 };
 
