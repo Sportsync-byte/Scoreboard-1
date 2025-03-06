@@ -3,263 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indoor Cricket Scoreboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Cricket Scoreboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #000;
-            color: #fff;
+            font-family: 'Roboto Mono', monospace;
+            background-color: #1a1a1a;
+            color: #ffffff;
             min-height: 100vh;
             box-sizing: border-box;
-            overflow: hidden;
+        }
+
+        .match-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .timer {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .timer.warning {
+            color: #ff4444;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+
+        .format {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .innings-indicator {
+            font-size: 24px;
+            color: #4CAF50;
         }
 
         .scoreboard {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             gap: 20px;
-            max-width: 1920px;
-            margin: 0 auto;
-            height: calc(100vh - 40px);
+            margin-top: 20px;
         }
 
         .team-section {
-            background-color: #1a1a1a;
-            border-radius: 10px;
-            padding: 20px;
-            display: flex;
-            flex-direction: row;
-            height: calc(50% - 30px);
-        }
-
-        .team-info {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .team-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #333;
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
         }
 
         .team-name {
-            font-size: 2.5em;
+            font-size: 32px;
             font-weight: bold;
+            margin-bottom: 15px;
             color: #4CAF50;
-            margin: 0;
-            flex: 1;
         }
 
-        .team-score {
-            font-size: 4em;
+        .score {
+            font-size: 48px;
             font-weight: bold;
-            color: #fff;
-            margin-left: 20px;
-            min-width: 200px;
-            text-align: right;
+            margin-bottom: 10px;
         }
 
-        .team-overs {
-            font-size: 1.5em;
-            color: #888;
-            text-align: right;
+        .overs {
+            font-size: 24px;
+            margin-bottom: 20px;
         }
 
-        .partnerships-grid {
+        .partnerships {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-            flex-grow: 1;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
         .partnership-box {
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            padding: 15px;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            transition: background-color 0.3s;
         }
 
         .partnership-box.active {
-            background-color: #1e4620;
+            background-color: #4CAF50;
             animation: pulse 2s infinite;
         }
 
-        .partnership-box.completed {
-            background-color: #2a2a2a;
-        }
-
         @keyframes pulse {
-            0% { background-color: #1e4620; }
-            50% { background-color: #2d6a30; }
-            100% { background-color: #1e4620; }
-        }
-
-        .partnership-number {
-            font-size: 1.2em;
-            color: #888;
-            margin-bottom: 5px;
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
         .partnership-runs {
-            font-size: 2.5em;
+            font-size: 24px;
             font-weight: bold;
-            color: #fff;
         }
 
-        .partnership-batsmen {
-            font-size: 1em;
-            color: #aaa;
-            margin-top: 5px;
+        .partnership-overs {
+            font-size: 16px;
+            color: #888;
         }
 
         .current-players {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            display: flex;
+            justify-content: space-between;
             margin-top: 20px;
         }
 
         .player-box {
-            background-color: #2a2a2a;
-            border-radius: 8px;
+            background-color: #333;
             padding: 15px;
+            border-radius: 5px;
+            flex: 1;
+            margin: 0 5px;
             text-align: center;
         }
 
-        .player-box.striker::after {
-            content: '*';
-            color: #4CAF50;
-            margin-left: 5px;
-        }
-
         .player-name {
-            font-size: 1.5em;
-            color: #fff;
+            font-size: 20px;
             margin-bottom: 5px;
         }
 
         .player-runs {
-            font-size: 1.2em;
-            color: #4CAF50;
-        }
-
-        .match-info {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            padding: 10px 20px;
-            text-align: center;
-            z-index: 1000;
-        }
-
-        .timer {
-            font-size: 2em;
+            font-size: 24px;
             font-weight: bold;
-            color: #fff;
         }
 
-        .timer.warning {
-            color: #f44336;
-            animation: timerPulse 1s infinite;
-        }
-
-        @keyframes timerPulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        .format-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 1.2em;
+        .striker-indicator {
             color: #4CAF50;
-        }
-
-        .innings-indicator {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 1.2em;
-            color: #4CAF50;
+            margin-left: 5px;
         }
     </style>
 </head>
 <body>
     <div class="match-info">
-        <div class="timer" id="matchTimer">45:00</div>
+        <div class="timer" id="timer">45:00</div>
+        <div class="format" id="format">6-a-side</div>
+        <div class="innings-indicator" id="inningsIndicator">First Innings</div>
     </div>
 
-    <div class="format-indicator" id="formatIndicator">6-a-side</div>
-    <div class="innings-indicator" id="inningsIndicator">First Innings</div>
-
     <div class="scoreboard">
-        <!-- First Team Section -->
         <div class="team-section">
-            <div class="team-info">
-                <div class="team-header">
-                    <h1 class="team-name" id="team1Name">Team 1</h1>
-                    <div class="team-score" id="team1Score">0/0</div>
+            <div class="team-name" id="team1Name">Team 1</div>
+            <div class="score" id="team1Score">0/0</div>
+            <div class="overs" id="team1Overs">0.0 overs</div>
+            
+            <div class="partnerships" id="team1Partnerships">
+                <!-- Partnership boxes will be added dynamically -->
+            </div>
+            
+            <div class="current-players">
+                <div class="player-box">
+                    <div class="player-name" id="team1Striker">-</div>
+                    <div class="player-runs" id="team1StrikerRuns">0*</div>
                 </div>
-                <div class="team-overs" id="team1Overs">0.0</div>
-                <div class="current-players" id="team1Batsmen">
-                    <div class="player-box striker">
-                        <div class="player-name" id="team1Striker">Striker</div>
-                        <div class="player-runs" id="team1StrikerRuns">0</div>
-                    </div>
-                    <div class="player-box">
-                        <div class="player-name" id="team1NonStriker">Non-Striker</div>
-                        <div class="player-runs" id="team1NonStrikerRuns">0</div>
-                    </div>
-                </div>
-                <div class="partnerships-grid" id="team1Partnerships">
-                    <!-- Partnerships will be dynamically added here -->
+                <div class="player-box">
+                    <div class="player-name" id="team1NonStriker">-</div>
+                    <div class="player-runs" id="team1NonStrikerRuns">0</div>
                 </div>
             </div>
         </div>
 
-        <!-- Second Team Section -->
         <div class="team-section">
-            <div class="team-info">
-                <div class="team-header">
-                    <h1 class="team-name" id="team2Name">Team 2</h1>
-                    <div class="team-score" id="team2Score">0/0</div>
+            <div class="team-name" id="team2Name">Team 2</div>
+            <div class="score" id="team2Score">0/0</div>
+            <div class="overs" id="team2Overs">0.0 overs</div>
+            
+            <div class="partnerships" id="team2Partnerships">
+                <!-- Partnership boxes will be added dynamically -->
+            </div>
+            
+            <div class="current-players">
+                <div class="player-box">
+                    <div class="player-name" id="team2Striker">-</div>
+                    <div class="player-runs" id="team2StrikerRuns">0*</div>
                 </div>
-                <div class="team-overs" id="team2Overs">0.0</div>
-                <div class="current-players" id="team2Batsmen">
-                    <div class="player-box striker">
-                        <div class="player-name" id="team2Striker">Striker</div>
-                        <div class="player-runs" id="team2StrikerRuns">0</div>
-                    </div>
-                    <div class="player-box">
-                        <div class="player-name" id="team2NonStriker">Non-Striker</div>
-                        <div class="player-runs" id="team2NonStrikerRuns">0</div>
-                    </div>
-                </div>
-                <div class="partnerships-grid" id="team2Partnerships">
-                    <!-- Partnerships will be dynamically added here -->
+                <div class="player-box">
+                    <div class="player-name" id="team2NonStriker">-</div>
+                    <div class="player-runs" id="team2NonStrikerRuns">0</div>
                 </div>
             </div>
         </div>
@@ -268,139 +198,99 @@
     <script type="module">
         import gameManager from './gameManager.js';
 
-        let firstInningsPartnerships = null;
+        let activeTeamSection = 1;
 
         function initializeScoreboard() {
-            // Check if game state exists
             if (!gameManager.gameState) {
                 window.location.href = 'setup.html';
                 return;
             }
 
+            const state = gameManager.gameState;
+            document.getElementById('format').textContent = 
+                `${state.format === '6aside' ? '6' : '8'}-a-side`;
+            document.getElementById('team1Name').textContent = state.teams.team1;
+            document.getElementById('team2Name').textContent = state.teams.team2;
+
             // Subscribe to game state changes
             gameManager.subscribe((state, event) => {
-                updateScoreboard(state, event);
-            });
-
-            // Set up auto-fullscreen
-            document.addEventListener('click', () => {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
+                updateDisplay(state);
+                if (event === 'firstInningsComplete') {
+                    clearFirstInningsDisplay();
                 }
             });
 
-            // Initial update
-            updateScoreboard(gameManager.gameState);
+            // Initial display update
+            updateDisplay(state);
         }
 
-        function updateScoreboard(state, event) {
+        function updateDisplay(state) {
             if (!state) return;
 
-            // Update format and innings indicators
-            document.getElementById('formatIndicator').textContent = 
-                state.format === '6aside' ? '6-a-side' : '8-a-side';
+            const activeTeam = state.isFirstInnings ? 'team1' : 'team2';
+            const inactiveTeam = state.isFirstInnings ? 'team2' : 'team1';
+            
+            // Update innings indicator
             document.getElementById('inningsIndicator').textContent = 
                 state.isFirstInnings ? 'First Innings' : 'Second Innings';
 
-            // Update team names
-            document.getElementById('team1Name').textContent = state.battingTeam.name;
-            document.getElementById('team2Name').textContent = state.fieldingTeam.name;
-
-            if (state.isFirstInnings) {
-                // Update first innings details
-                updateInningsDisplay('team1', state);
-                // Clear second innings display
-                clearInningsDisplay('team2');
-            } else {
-                // Store first innings partnerships if not already stored
-                if (!firstInningsPartnerships && event === 'firstInningsComplete') {
-                    firstInningsPartnerships = state.partnerships.map(p => ({...p}));
-                }
-                // Update second innings details
-                updateInningsDisplay('team2', state);
-                // Display stored first innings partnerships
-                if (firstInningsPartnerships) {
-                    displayStoredPartnerships('team1', firstInningsPartnerships);
-                }
-            }
+            // Update active team's display
+            updateTeamDisplay(activeTeam, state.currentInnings);
+            updatePartnerships(activeTeam, state.partnerships);
+            updateBatsmen(activeTeam, state.currentBatsmen);
 
             // Update timer
-            updateTimer(state.timer);
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = gameManager.getFormattedTimer();
+            timerElement.className = 'timer' + 
+                (state.timer.remaining < 300 ? ' warning' : '');
+
+            // If second innings, show first innings score
+            if (!state.isFirstInnings) {
+                updateTeamDisplay('team1', state.firstInnings);
+            }
         }
 
-        function updateInningsDisplay(teamId, state) {
-            // Update score and overs
+        function updateTeamDisplay(teamId, innings) {
             document.getElementById(`${teamId}Score`).textContent = 
-                `${state.currentInnings.score}/${state.currentInnings.wickets}`;
+                `${innings.score}/${innings.wickets}`;
             document.getElementById(`${teamId}Overs`).textContent = 
-                `${state.currentInnings.overs}.${state.currentInnings.balls}`;
-
-            // Update current batsmen
-            document.getElementById(`${teamId}Striker`).textContent = state.currentBatsmen.striker || '-';
-            document.getElementById(`${teamId}StrikerRuns`).textContent = state.currentBatsmen.strikerRuns || '0';
-            document.getElementById(`${teamId}NonStriker`).textContent = state.currentBatsmen.nonStriker || '-';
-            document.getElementById(`${teamId}NonStrikerRuns`).textContent = state.currentBatsmen.nonStrikerRuns || '0';
-
-            // Update partnerships
-            updatePartnerships(teamId, state.partnerships, state.currentInnings.wickets);
+                `${innings.overs}.${innings.balls} overs`;
         }
 
-        function clearInningsDisplay(teamId) {
-            document.getElementById(`${teamId}Score`).textContent = '0/0';
-            document.getElementById(`${teamId}Overs`).textContent = '0.0';
-            document.getElementById(`${teamId}Striker`).textContent = '-';
-            document.getElementById(`${teamId}StrikerRuns`).textContent = '0';
-            document.getElementById(`${teamId}NonStriker`).textContent = '-';
-            document.getElementById(`${teamId}NonStrikerRuns`).textContent = '0';
-        }
-
-        function updatePartnerships(teamId, partnerships, currentWickets) {
+        function updatePartnerships(teamId, partnerships) {
             const container = document.getElementById(`${teamId}Partnerships`);
-            const currentPartnershipIndex = Math.floor(currentWickets / 2);
-
-            container.innerHTML = partnerships.map((partnership, index) => {
-                const isActive = index === currentPartnershipIndex;
-                const isCompleted = index < currentPartnershipIndex;
-                
-                return `
-                    <div class="partnership-box ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}">
-                        <div class="partnership-number">${index + 1}</div>
-                        <div class="partnership-runs">${partnership.runs || 0}</div>
-                        ${partnership.batsman1 ? `
-                            <div class="partnership-batsmen">
-                                ${partnership.batsman1} & ${partnership.batsman2}
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function displayStoredPartnerships(teamId, partnerships) {
-            const container = document.getElementById(`${teamId}Partnerships`);
-            container.innerHTML = partnerships.map((partnership, index) => `
-                <div class="partnership-box completed">
-                    <div class="partnership-number">${index + 1}</div>
-                    <div class="partnership-runs">${partnership.runs || 0}</div>
-                    ${partnership.batsman1 ? `
-                        <div class="partnership-batsmen">
-                            ${partnership.batsman1} & ${partnership.batsman2}
-                        </div>
-                    ` : ''}
+            container.innerHTML = partnerships.map((p, index) => `
+                <div class="partnership-box${index === gameManager.getCurrentPartnershipIndex() ? ' active' : ''}">
+                    <div class="partnership-runs">${p.runs}</div>
+                    <div class="partnership-overs">${Math.floor(p.balls/6)}.${p.balls%6}</div>
                 </div>
             `).join('');
         }
 
-        function updateTimer(timer) {
-            const timerElement = document.getElementById('matchTimer');
-            timerElement.textContent = gameManager.getFormattedTimer();
-            timerElement.className = 'timer' + (timer.remaining < 300 ? ' warning' : '');
+        function updateBatsmen(teamId, batsmen) {
+            document.getElementById(`${teamId}Striker`).textContent = batsmen.striker || '-';
+            document.getElementById(`${teamId}StrikerRuns`).textContent = 
+                `${batsmen.strikerRuns}*`;
+            
+            document.getElementById(`${teamId}NonStriker`).textContent = batsmen.nonStriker || '-';
+            document.getElementById(`${teamId}NonStrikerRuns`).textContent = 
+                `${batsmen.nonStrikerRuns}`;
         }
 
-        // Initialize on page load
-        window.onload = function() {
-            initializeScoreboard();
-        };
+        function clearFirstInningsDisplay() {
+            // Clear partnership boxes for second innings
+            document.getElementById('team2Partnerships').innerHTML = '';
+            
+            // Reset batsmen display for second innings
+            document.getElementById('team2Striker').textContent = '-';
+            document.getElementById('team2StrikerRuns').textContent = '0*';
+            document.getElementById('team2NonStriker').textContent = '-';
+            document.getElementById('team2NonStrikerRuns').textContent = '0';
+        }
+
+        // Initialize when page loads
+        window.onload = initializeScoreboard;
     </script>
 </body>
 </html>
