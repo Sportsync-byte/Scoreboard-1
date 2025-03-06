@@ -3,893 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indoor Cricket - Game Setup</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Indoor Cricket Setup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
         }
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1rem;
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .card-header {
-            background: #007bff;
-            color: white;
-            border-radius: 10px 10px 0 0 !important;
+
+        h1 {
+            text-align: center;
+            color: #1a73e8;
+            margin-bottom: 30px;
         }
-        .player-list {
-            max-height: 200px;
-            overflow-y: auto;
+
+        .form-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
         }
-        .player-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem;
-            border-bottom: 1px solid #dee2e6;
+
+        .form-section h2 {
+            margin-top: 0;
+            color: #333;
         }
-        .player-item:last-child {
-            border-bottom: none;
+
+        .form-group {
+            margin-bottom: 15px;
         }
-        .remove-player {
-            color: #dc3545;
-            cursor: pointer;
-        }
-        .format-info {
-            background-color: #e9ecef;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-        }
-        .server-status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            z-index: 1000;
-        }
-        .server-status.connected {
-            background-color: #28a745;
-            color: white;
-        }
-        .server-status.disconnected {
-            background-color: #dc3545;
-            color: white;
-        }
-        .preconfigured-game {
-            cursor: pointer;
-            padding: 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            margin-bottom: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        .preconfigured-game:hover {
-            background-color: #e9ecef;
-            border-color: #007bff;
-        }
-        .preconfigured-game.selected {
-            background-color: #e3f2fd;
-            border-color: #007bff;
-        }
-        .search-box {
-            margin-bottom: 1rem;
-        }
-        .quick-fill {
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-            background-color: #e3f2fd;
-            border-radius: 5px;
-        }
-                .resume-game {
-            background-color: #fdf9e3;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            display: none;
-        }
-        .resume-game.show {
+
+        label {
             display: block;
+            margin-bottom: 5px;
+            color: #555;
         }
-        .loading-spinner {
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .player-item {
+            background-color: #e8f0fe;
+            padding: 5px 10px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .remove-player {
+            cursor: pointer;
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button.primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        button.secondary {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .error {
+            color: #d32f2f;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        #loadingSpinner {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             z-index: 1000;
         }
-        .loading-spinner.show {
-            display: block;
+
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert.error {
+            background-color: #ffebee;
+            border: 1px solid #ffcdd2;
+            color: #c62828;
+        }
+
+        .alert.success {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            color: #2e7d32;
         }
     </style>
 </head>
-<body class="bg-light">
-    <!-- Server Status Indicator -->
-    <div id="serverStatus" class="server-status disconnected">
-        🔴 Offline Mode
-    </div>
+<body>
+    <div class="container">
+        <h1>Indoor Cricket Setup</h1>
+        
+        <div id="alertBox" class="alert"></div>
 
-    <!-- Loading Spinner -->
-    <div id="loadingSpinner" class="loading-spinner">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
-
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <!-- Resume Game Section -->
-                <div id="resumeGame" class="resume-game">
-                    <h5>Resume Previous Game</h5>
-                    <p>There is a saved game available. Would you like to resume?</p>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary" onclick="resumeGame()">Resume Game</button>
-                        <button class="btn btn-secondary" onclick="hideResumeGame()">Start New Game</button>
-                    </div>
+        <form id="setupForm">
+            <div class="form-section">
+                <h2>Game Format</h2>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="format" value="6aside" checked>
+                        6-a-side
+                    </label>
+                    <label>
+                        <input type="radio" name="format" value="8aside">
+                        8-a-side
+                    </label>
                 </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0">Game Setup</h4>
-                    </div>
-                    <div class="card-body">
-                        <form id="setupForm">
-                            <!-- Game Type Selection -->
-                            <div class="mb-4">
-                                <h5>Game Type</h5>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="gameType" 
-                                           id="customGame" value="custom" checked>
-                                    <label class="form-check-label" for="customGame">
-                                        Custom Game
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="gameType" 
-                                           id="preconfiguredGame" value="preconfigured">
-                                    <label class="form-check-label" for="preconfiguredGame">
-                                        Preconfigured Game
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Preconfigured Games Section -->
-                            <div id="preconfiguredGames" style="display: none;">
-                                <div class="search-box">
-                                    <input type="text" class="form-control" id="gameSearch" 
-                                           placeholder="Search games...">
-                                </div>
-                                <div id="preconfiguredGamesList">
-                                    <!-- Games will be loaded here -->
-                                </div>
-                            </div>
-                                                        <!-- Custom Game Setup -->
-                            <div id="customGameSetup">
-                                <!-- Quick Fill Section -->
-                                <div class="quick-fill">
-                                    <h6>Quick Fill Options</h6>
-                                    <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-secondary btn-sm" 
-                                                onclick="quickFillLastMatch()">Last Match</button>
-                                        <button type="button" class="btn btn-secondary btn-sm" 
-                                                onclick="showSavedTeams()">Saved Teams</button>
-                                    </div>
-                                </div>
-
-                                <!-- Game Format -->
-                                <div class="mb-4">
-                                    <h5>Game Format</h5>
-                                    <div class="mb-3">
-                                        <label>Select Format:</label>
-                                        <select id="gameFormat" class="form-select" required 
-                                                onchange="updateFormatInfo()">
-                                            <option value="8aside">8-a-side</option>
-                                            <option value="6aside">6-a-side</option>
-                                        </select>
-                                    </div>
-                                    <div id="formatInfo" class="format-info">
-                                        <strong>8-a-side Format:</strong><br>
-                                        - 16 overs per innings<br>
-                                        - 4 overs per partnership<br>
-                                        - 2 overs per bowler
-                                    </div>
-                                </div>
-
-                                <!-- Team Information -->
-                                <div class="mb-4">
-                                    <h5>Team Information</h5>
-                                    <div class="mb-3">
-                                        <label>Batting Team Name:</label>
-                                        <input type="text" id="battingTeam" class="form-control" 
-                                               required list="savedTeamsList">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Fielding Team Name:</label>
-                                        <input type="text" id="fieldingTeam" class="form-control" 
-                                               required list="savedTeamsList">
-                                    </div>
-                                </div>
-
-                                <!-- Game Settings -->
-                                <div class="mb-4">
-                                    <h5>Game Settings</h5>
-                                    <div class="mb-3">
-                                        <label>Match Duration (minutes):</label>
-                                        <input type="number" id="matchDuration" class="form-control" 
-                                               value="40" required min="1">
-                                    </div>
-                                </div>
-                                                                <!-- Batting Team Players -->
-                                <div class="mb-4">
-                                    <h5>Batting Team Players</h5>
-                                    <div class="input-group mb-2">
-                                        <input type="text" id="newBatsman" class="form-control" 
-                                               placeholder="Enter batsman name" list="playerNamesList">
-                                        <button type="button" class="btn btn-primary" onclick="addBatsman()">Add</button>
-                                    </div>
-                                    <div id="batsmenList" class="player-list"></div>
-                                </div>
-
-                                <!-- Fielding Team Players -->
-                                <div class="mb-4">
-                                    <h5>Fielding Team Players</h5>
-                                    <div class="input-group mb-2">
-                                        <input type="text" id="newBowler" class="form-control" 
-                                               placeholder="Enter bowler name" list="playerNamesList">
-                                        <button type="button" class="btn btn-primary" onclick="addBowler()">Add</button>
-                                    </div>
-                                    <div id="bowlersList" class="player-list"></div>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-success w-100">Start Match</button>
-                        </form>
-                    </div>
+                <div class="form-group">
+                    <label for="matchDuration">Match Duration (minutes)</label>
+                    <input type="number" id="matchDuration" name="matchDuration" min="30" max="120" value="45" required>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Datalists for autocomplete -->
-    <datalist id="savedTeamsList">
-        <!-- Will be populated with saved team names -->
-    </datalist>
-    <datalist id="playerNamesList">
-        <!-- Will be populated with saved player names -->
-    </datalist>
-
-    <!-- Modal for Saved Teams -->
-    <div class="modal fade" id="savedTeamsModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Saved Teams</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="form-section">
+                <h2>Batting Team</h2>
+                <div class="form-group">
+                    <label for="battingTeamName">Team Name</label>
+                    <input type="text" id="battingTeamName" name="battingTeamName" required>
                 </div>
-                <div class="modal-body">
-                    <div id="savedTeamsList">
-                        <!-- Will be populated with saved teams -->
+                
+                <div class="form-group">
+                    <label for="batsmanName">Add Batsman</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="batsmanName" placeholder="Enter batsman name">
+                        <button type="button" onclick="addBatsman()" class="secondary">Add</button>
                     </div>
                 </div>
+                
+                <div id="batsmenList" class="player-list"></div>
             </div>
-        </div>
+
+            <div class="form-section">
+                <h2>Fielding Team</h2>
+                <div class="form-group">
+                    <label for="fieldingTeamName">Team Name</label>
+                    <input type="text" id="fieldingTeamName" name="fieldingTeamName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="bowlerName">Add Bowler</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="bowlerName" placeholder="Enter bowler name">
+                        <button type="button" onclick="addBowler()" class="secondary">Add</button>
+                    </div>
+                </div>
+                
+                <div id="bowlersList" class="player-list"></div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" onclick="loadLastMatch()" class="secondary">Quick Fill</button>
+                <button type="submit" class="primary">Start Game</button>
+            </div>
+        </form>
     </div>
 
-    <!-- Modal for Confirmation -->
-    <div class="modal fade" id="confirmationModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirmation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="confirmationMessage"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirmationAction">Confirm</button>
-                </div>
-            </div>
-        </div>
-    </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div id="loadingSpinner">Setting up game...</div>
+
+    <!-- Include GameManager first -->
+    <script src="gameManager.js"></script>
+    
     <script>
-        // Global variables
         let batsmen = [];
         let bowlers = [];
-        let savedTeams = JSON.parse(localStorage.getItem('savedTeams')) || {};
-        let serverConnected = false;
-        let selectedPreconfiguredGame = null;
 
-        // Server connection check and status update
-        async function checkServerConnection() {
-            try {
-                const response = await fetch('YOUR_SERVER_URL/ping', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                serverConnected = response.ok;
-                updateServerStatus();
-            } catch (error) {
-                serverConnected = false;
-                updateServerStatus();
-            }
+        function showAlert(message, type = 'error') {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert ${type}`;
+            alertBox.style.display = 'block';
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
         }
 
-        function updateServerStatus() {
-            const statusElement = document.getElementById('serverStatus');
-            if (serverConnected) {
-                statusElement.className = 'server-status connected';
-                statusElement.innerHTML = '🟢 Server Connected';
-            } else {
-                statusElement.className = 'server-status disconnected';
-                statusElement.innerHTML = '🔴 Offline Mode';
-            }
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
         }
 
-        // Check for saved game on load
-        function checkSavedGame() {
-            const savedGame = localStorage.getItem('indoorCricketGame');
-            if (savedGame) {
-                document.getElementById('resumeGame').classList.add('show');
-            }
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
         }
 
-        function resumeGame() {
-            window.location.href = 'umpire.html';
-        }
-
-        function hideResumeGame() {
-            document.getElementById('resumeGame').classList.remove('show');
-        }
-
-        // Game type selection handler
-        document.querySelectorAll('input[name="gameType"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                const preconfiguredSection = document.getElementById('preconfiguredGames');
-                const customSection = document.getElementById('customGameSetup');
-                
-                if (this.value === 'preconfigured') {
-                    preconfiguredSection.style.display = 'block';
-                    customSection.style.display = 'none';
-                    loadPreconfiguredGames();
-                } else {
-                    preconfiguredSection.style.display = 'none';
-                    customSection.style.display = 'block';
-                }
-            });
-        });
-
-        // Format information update
-        function updateFormatInfo() {
-            const format = document.getElementById('gameFormat').value;
-            const infoDiv = document.getElementById('formatInfo');
-            
-            if (format === '6aside') {
-                infoDiv.innerHTML = `
-                    <strong>6-a-side Format:</strong><br>
-                    - 12 overs per innings<br>
-                    - 3 overs per partnership<br>
-                    - 2 overs per bowler
-                `;
-            } else {
-                infoDiv.innerHTML = `
-                    <strong>8-a-side Format:</strong><br>
-                    - 16 overs per innings<br>
-                    - 4 overs per partnership<br>
-                    - 2 overs per bowler
-                `;
-            }
-            validatePlayerCounts();
-        }
-                // Player management functions
         function addBatsman() {
-            const input = document.getElementById('newBatsman');
-            const name = input.value.trim();
-            const format = document.getElementById('gameFormat').value;
-            const maxPlayers = format === '6aside' ? 6 : 8;
-
-            if (batsmen.length >= maxPlayers) {
-                showAlert(`Maximum ${maxPlayers} players allowed for ${format} format`);
+            const nameInput = document.getElementById('batsmanName');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                showAlert('Please enter a batsman name');
                 return;
             }
 
-            if (name) {
-                if (batsmen.some(b => b.name.toLowerCase() === name.toLowerCase())) {
-                    showAlert('Player already added to batting team');
-                    return;
-                }
-
-                batsmen.push({
-                    id: Date.now(),
-                    name: name,
-                    score: 0,
-                    balls: 0,
-                    fours: 0,
-                    sixes: 0,
-                    partnerships: []
-                });
-                updateBatsmenList();
-                input.value = '';
-                saveToLocalStorage();
+            if (batsmen.includes(name)) {
+                showAlert('This batsman has already been added');
+                return;
             }
+
+            batsmen.push(name);
+            updateBatsmenList();
+            nameInput.value = '';
+            saveToLocalStorage();
         }
 
         function addBowler() {
-            const input = document.getElementById('newBowler');
-            const name = input.value.trim();
-            const format = document.getElementById('gameFormat').value;
-            const maxPlayers = format === '6aside' ? 6 : 8;
-
-            if (bowlers.length >= maxPlayers) {
-                showAlert(`Maximum ${maxPlayers} players allowed for ${format} format`);
+            const nameInput = document.getElementById('bowlerName');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                showAlert('Please enter a bowler name');
                 return;
             }
 
-            if (name) {
-                if (bowlers.some(b => b.name.toLowerCase() === name.toLowerCase())) {
-                    showAlert('Player already added to fielding team');
-                    return;
-                }
-
-                bowlers.push({
-                    id: Date.now(),
-                    name: name,
-                    overs: 0,
-                    wickets: 0,
-                    runs: 0,
-                    maidens: 0
-                });
-                updateBowlersList();
-                input.value = '';
-                saveToLocalStorage();
+            if (bowlers.includes(name)) {
+                showAlert('This bowler has already been added');
+                return;
             }
+
+            bowlers.push(name);
+            updateBowlersList();
+            nameInput.value = '';
+            saveToLocalStorage();
         }
 
-        function removeBatsman(id) {
-            showConfirmation(
-                'Remove player?',
-                'Are you sure you want to remove this player?',
-                () => {
-                    batsmen = batsmen.filter(b => b.id !== id);
-                    updateBatsmenList();
-                    saveToLocalStorage();
-                }
-            );
+        function removeBatsman(name) {
+            batsmen = batsmen.filter(b => b !== name);
+            updateBatsmenList();
+            saveToLocalStorage();
         }
 
-        function removeBowler(id) {
-            showConfirmation(
-                'Remove player?',
-                'Are you sure you want to remove this player?',
-                () => {
-                    bowlers = bowlers.filter(b => b.id !== id);
-                    updateBowlersList();
-                    saveToLocalStorage();
-                }
-            );
+        function removeBowler(name) {
+            bowlers = bowlers.filter(b => b !== name);
+            updateBowlersList();
+            saveToLocalStorage();
         }
 
         function updateBatsmenList() {
             const list = document.getElementById('batsmenList');
-            const format = document.getElementById('gameFormat').value;
-            const maxPlayers = format === '6aside' ? 6 : 8;
-            
-            list.innerHTML = batsmen.map(batsman => `
+            list.innerHTML = batsmen.map(name => `
                 <div class="player-item">
-                    <span>${batsman.name}</span>
-                    <span class="remove-player" onclick="removeBatsman(${batsman.id})">×</span>
-                </div>
-            `).join('') + `
-                <div class="text-muted mt-2">
-                    ${batsmen.length}/${maxPlayers} players added
-                </div>
-            `;
-        }
-
-        function updateBowlersList() {
-            const list = document.getElementById('bowlersList');
-            const format = document.getElementById('gameFormat').value;
-            const maxPlayers = format === '6aside' ? 6 : 8;
-            
-            list.innerHTML = bowlers.map(bowler => `
-                <div class="player-item">
-                    <span>${bowler.name}</span>
-                    <span class="remove-player" onclick="removeBowler(${bowler.id})">×</span>
-                </div>
-            `).join('') + `
-                <div class="text-muted mt-2">
-                    ${bowlers.length}/${maxPlayers} players added
-                </div>
-            `;
-        }
-                // Preconfigured games handling
-        async function loadPreconfiguredGames() {
-            const gamesList = document.getElementById('preconfiguredGamesList');
-            showLoading();
-
-            try {
-                if (serverConnected) {
-                    // Fetch from server
-                    const response = await fetch('YOUR_SERVER_URL/games');
-                    const games = await response.json();
-                    localStorage.setItem('preconfiguredGames', JSON.stringify(games));
-                    displayPreconfiguredGames(games);
-                } else {
-                    // Load from local storage
-                    const games = JSON.parse(localStorage.getItem('preconfiguredGames')) || [];
-                    displayPreconfiguredGames(games);
-                }
-            } catch (error) {
-                showAlert('Error loading games. Please try again.');
-                console.error('Error:', error);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function displayPreconfiguredGames(games) {
-            const gamesList = document.getElementById('preconfiguredGamesList');
-            if (games.length === 0) {
-                gamesList.innerHTML = '<p class="text-muted">No games available</p>';
-                return;
-            }
-
-            gamesList.innerHTML = games.map(game => `
-                <div class="preconfigured-game" onclick="selectPreconfiguredGame(${game.id})">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">${game.homeTeam} vs ${game.awayTeam}</h6>
-                            <small class="text-muted">${new Date(game.date).toLocaleDateString()}</small>
-                            <div class="small text-muted">${game.venue}</div>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="preconfiguredGame" 
-                                   id="game${game.id}" value="${game.id}">
-                        </div>
-                    </div>
+                    ${name}
+                    <span class="remove-player" onclick="removeBatsman('${name}')">&times;</span>
                 </div>
             `).join('');
         }
 
-        function selectPreconfiguredGame(gameId) {
-            const games = JSON.parse(localStorage.getItem('preconfiguredGames')) || [];
-            const game = games.find(g => g.id === gameId);
-            if (!game) return;
-
-            selectedPreconfiguredGame = game;
-            document.querySelectorAll('.preconfigured-game').forEach(div => {
-                div.classList.remove('selected');
-            });
-            document.querySelector(`#game${gameId}`).closest('.preconfigured-game').classList.add('selected');
-        }
-
-        // Quick fill and saved teams handling
-        function quickFillLastMatch() {
-            const lastMatch = JSON.parse(localStorage.getItem('lastMatch'));
-            if (!lastMatch) {
-                showAlert('No previous match data available');
-                return;
-            }
-
-            showConfirmation(
-                'Load Last Match',
-                'This will replace current setup with last match data. Continue?',
-                () => {
-                    document.getElementById('battingTeam').value = lastMatch.battingTeam;
-                    document.getElementById('fieldingTeam').value = lastMatch.fieldingTeam;
-                    document.getElementById('gameFormat').value = lastMatch.format;
-                    batsmen = [...lastMatch.batsmen];
-                    bowlers = [...lastMatch.bowlers];
-                    updateBatsmenList();
-                    updateBowlersList();
-                    updateFormatInfo();
-                }
-            );
-        }
-               function showSavedTeams() {
-            const modal = new bootstrap.Modal(document.getElementById('savedTeamsModal'));
-            const teamsList = document.getElementById('savedTeamsList');
-            
-            teamsList.innerHTML = Object.entries(savedTeams)
-                .sort((a, b) => new Date(b[1].lastUsed) - new Date(a[1].lastUsed))
-                .map(([teamName, team]) => `
-                    <div class="saved-team-item p-2 border-bottom">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-0">${teamName}</h6>
-                                <small class="text-muted">Last used: ${new Date(team.lastUsed).toLocaleDateString()}</small>
-                            </div>
-                            <div class="btn-group">
-                                <button class="btn btn-sm btn-primary" 
-                                        onclick="loadSavedTeam('${teamName}', 'batting')">
-                                    Load as Batting
-                                </button>
-                                <button class="btn btn-sm btn-secondary" 
-                                        onclick="loadSavedTeam('${teamName}', 'fielding')">
-                                    Load as Fielding
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            
-            modal.show();
-        }
-
-        function loadSavedTeam(teamName, type) {
-            const team = savedTeams[teamName];
-            if (!team) return;
-
-            if (type === 'batting') {
-                document.getElementById('battingTeam').value = teamName;
-                batsmen = team.players.map(name => ({
-                    id: Date.now() + Math.random(),
-                    name: name,
-                    score: 0,
-                    balls: 0,
-                    fours: 0,
-                    sixes: 0,
-                    partnerships: []
-                }));
-                updateBatsmenList();
-            } else {
-                document.getElementById('fieldingTeam').value = teamName;
-                bowlers = team.players.map(name => ({
-                    id: Date.now() + Math.random(),
-                    name: name,
-                    overs: 0,
-                    wickets: 0,
-                    runs: 0,
-                    maidens: 0
-                }));
-                updateBowlersList();
-            }
-
-            bootstrap.Modal.getInstance(document.getElementById('savedTeamsModal')).hide();
-        }
-
-        // Validation and form submission
-        function validatePlayerCounts() {
-            const format = document.getElementById('gameFormat').value;
-            const maxPlayers = format === '6aside' ? 6 : 8;
-            
-            while (batsmen.length > maxPlayers) {
-                batsmen.pop();
-            }
-            while (bowlers.length > maxPlayers) {
-                bowlers.pop();
-            }
-            
-            updateBatsmenList();
-            updateBowlersList();
+        function updateBowlersList() {
+            const list = document.getElementById('bowlersList');
+            list.innerHTML = bowlers.map(name => `
+                <div class="player-item">
+                    ${name}
+                    <span class="remove-player" onclick="removeBowler('${name}')">&times;</span>
+                </div>
+            `).join('');
         }
 
         function validateForm() {
-            const format = document.getElementById('gameFormat').value;
-            const maxPlayers = format === '6aside' ? 6 : 8;
+            const format = document.querySelector('input[name="format"]:checked').value;
+            const requiredPlayers = format === '6aside' ? 6 : 8;
+            const minBowlers = format === '6aside' ? 4 : 5;
 
-            if (batsmen.length !== maxPlayers) {
-                showAlert(`Exactly ${maxPlayers} batsmen required for ${format} format`);
+            if (batsmen.length !== requiredPlayers) {
+                showAlert(`You need exactly ${requiredPlayers} batsmen for ${format}`);
                 return false;
             }
 
-            if (bowlers.length !== maxPlayers) {
-                showAlert(`Exactly ${maxPlayers} bowlers required for ${format} format`);
+            if (bowlers.length < minBowlers) {
+                showAlert(`You need at least ${minBowlers} bowlers for ${format}`);
                 return false;
             }
 
             return true;
         }
-                // Form submission and game initialization
+
+        function saveToLocalStorage() {
+            const formData = {
+                format: document.querySelector('input[name="format"]:checked').value,
+                battingTeamName: document.getElementById('battingTeamName').value,
+                fieldingTeamName: document.getElementById('fieldingTeamName').value,
+                matchDuration: document.getElementById('matchDuration').value,
+                batsmen,
+                bowlers
+            };
+            localStorage.setItem('lastMatchSetup', JSON.stringify(formData));
+        }
+
+        function loadLastMatch() {
+            const lastMatch = localStorage.getItem('lastMatchSetup');
+            if (!lastMatch) {
+                showAlert('No previous match data found');
+                return;
+            }
+
+            const data = JSON.parse(lastMatch);
+            
+            // Set format
+            document.querySelector(`input[name="format"][value="${data.format}"]`).checked = true;
+            
+            // Set team names
+            document.getElementById('battingTeamName').value = data.battingTeamName;
+            document.getElementById('fieldingTeamName').value = data.fieldingTeamName;
+            
+            // Set match duration
+            document.getElementById('matchDuration').value = data.matchDuration;
+            
+            // Set players
+            batsmen = [...data.batsmen];
+            bowlers = [...data.bowlers];
+            updateBatsmenList();
+            updateBowlersList();
+        }
+
+        // Form submission handler
         document.getElementById('setupForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             if (!validateForm()) return;
 
-            const gameType = document.querySelector('input[name="gameType"]:checked').value;
-            let gameState;
-
-            if (gameType === 'preconfigured' && selectedPreconfiguredGame) {
-                gameState = initializePreconfiguredGame();
-            } else {
-                gameState = initializeCustomGame();
-            }
-
             try {
                 showLoading();
                 
-                // Save game state
-                localStorage.setItem('indoorCricketGame', JSON.stringify(gameState));
-                
-                // Save as last match
-                localStorage.setItem('lastMatch', JSON.stringify({
-                    battingTeam: gameState.battingTeam,
-                    fieldingTeam: gameState.fieldingTeam,
-                    format: gameState.format,
-                    batsmen: batsmen,
-                    bowlers: bowlers,
-                    date: new Date().toISOString()
-                }));
+                const setupData = {
+                    format: document.querySelector('input[name="format"]:checked').value,
+                    battingTeam: {
+                        name: document.getElementById('battingTeamName').value,
+                        players: batsmen
+                    },
+                    fieldingTeam: {
+                        name: document.getElementById('fieldingTeamName').value,
+                        players: bowlers
+                    },
+                    matchDuration: document.getElementById('matchDuration').value,
+                    batsmen,
+                    bowlers
+                };
 
-                // Save team details
-                saveTeamDetails(gameState.battingTeam, batsmen);
-                saveTeamDetails(gameState.fieldingTeam, bowlers);
+                // Initialize game through GameManager
+                gameManager.initializeGame(setupData);
 
-                // Open scoreboard in new window
+                // Save current setup as last match
+                saveToLocalStorage();
+
+                // Open scoreboard and redirect to umpire interface
                 window.open('scoreboard.html', 'scoreboardWindow', 'width=1920,height=1080');
-                
-                // Redirect to umpire interface
                 window.location.href = 'umpire.html';
             } catch (error) {
-                console.error('Error starting game:', error);
-                showAlert('Error starting game. Please try again.');
+                console.error('Setup error:', error);
+                showAlert('Error setting up game: ' + error.message);
                 hideLoading();
             }
         });
 
-        function initializeCustomGame() {
-            const format = document.getElementById('gameFormat').value;
-            return {
-                format: format,
-                battingTeam: document.getElementById('battingTeam').value,
-                fieldingTeam: document.getElementById('fieldingTeam').value,
-                matchDuration: parseInt(document.getElementById('matchDuration').value),
-                totalOvers: format === '6aside' ? 12 : 16,
-                partnershipOvers: format === '6aside' ? 3 : 4,
-                currentScore: 0,
-                wickets: 0,
-                currentOver: 0,
-                currentPartnership: 0,
-                totalPartnerships: format === '6aside' ? 3 : 4,
-                batsmen: batsmen,
-                bowlers: bowlers,
-                currentBatsmen: {
-                    striker: null,
-                    nonStriker: null
-                },
-                currentBowler: null,
-                ballHistory: [],
-                partnerships: [],
-                extras: {
-                    wides: 0,
-                    noBalls: 0,
-                    legsideWides: 0
-                },
-                timer: {
-                    isRunning: false,
-                    elapsed: 0,
-                    startTime: 0
-                },
-                matchStatus: 'active',
-                matchId: Date.now(),
-                isSecondInnings: false,
-                firstInnings: {
-                    score: 0,
-                    partnerships: []
+        // Auto-save form data on input changes
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('change', saveToLocalStorage);
+        });
+
+        // Load saved data on page load
+        window.onload = function() {
+            const savedData = localStorage.getItem('lastMatchSetup');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('battingTeamName').value = data.battingTeamName || '';
+                document.getElementById('fieldingTeamName').value = data.fieldingTeamName || '';
+                if (data.matchDuration) {
+                    document.getElementById('matchDuration').value = data.matchDuration;
                 }
-            };
-        }
-               function initializePreconfiguredGame() {
-            const gameState = initializeCustomGame();
-            Object.assign(gameState, {
-                venue: selectedPreconfiguredGame.venue,
-                competition: selectedPreconfiguredGame.competition,
-                date: selectedPreconfiguredGame.date,
-                preconfiguredGameId: selectedPreconfiguredGame.id
-            });
-            return gameState;
-        }
-
-        function saveTeamDetails(teamName, players) {
-            if (!teamName) return;
-            
-            savedTeams[teamName] = {
-                players: players.map(p => p.name),
-                lastUsed: new Date().toISOString()
-            };
-            localStorage.setItem('savedTeams', JSON.stringify(savedTeams));
-            updateTeamAutocomplete();
-        }
-
-        // Utility functions
-        function showLoading() {
-            document.getElementById('loadingSpinner').classList.add('show');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingSpinner').classList.remove('show');
-        }
-
-        function showAlert(message) {
-            // You can replace this with a custom alert UI
-            alert(message);
-        }
-
-        function showConfirmation(title, message, onConfirm) {
-            const modal = document.getElementById('confirmationModal');
-            const modalInstance = new bootstrap.Modal(modal);
-            
-            modal.querySelector('.modal-title').textContent = title;
-            modal.querySelector('#confirmationMessage').textContent = message;
-            
-            const confirmButton = modal.querySelector('#confirmationAction');
-            confirmButton.onclick = () => {
-                onConfirm();
-                modalInstance.hide();
-            };
-            
-            modalInstance.show();
-        }
-
-        function saveToLocalStorage() {
-            const setupData = {
-                batsmen,
-                bowlers,
-                format: document.getElementById('gameFormat').value,
-                battingTeam: document.getElementById('battingTeam').value,
-                fieldingTeam: document.getElementById('fieldingTeam').value,
-                matchDuration: document.getElementById('matchDuration').value
-            };
-            localStorage.setItem('setupInProgress', JSON.stringify(setupData));
-        }
-
-        function loadFromLocalStorage() {
-            const setupData = JSON.parse(localStorage.getItem('setupInProgress'));
-            if (setupData) {
-                document.getElementById('gameFormat').value = setupData.format;
-                document.getElementById('battingTeam').value = setupData.battingTeam;
-                document.getElementById('fieldingTeam').value = setupData.fieldingTeam;
-                document.getElementById('matchDuration').value = setupData.matchDuration;
-                batsmen = setupData.batsmen || [];
-                bowlers = setupData.bowlers || [];
-                updateBatsmenList();
-                updateBowlersList();
-                updateFormatInfo();
             }
-        }
-
-        // Search functionality for preconfigured games
-        document.getElementById('gameSearch').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const games = JSON.parse(localStorage.getItem('preconfiguredGames')) || [];
-            const filteredGames = games.filter(game => 
-                game.homeTeam.toLowerCase().includes(searchTerm) ||
-                game.awayTeam.toLowerCase().includes(searchTerm) ||
-                game.venue.toLowerCase().includes(searchTerm)
-            );
-            displayPreconfiguredGames(filteredGames);
-        });
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            checkServerConnection();
-            checkSavedGame();
-            loadFromLocalStorage();
-            updateTeamAutocomplete();
-            
-            // Set up autosave
-            ['gameFormat', 'battingTeam', 'fieldingTeam', 'matchDuration'].forEach(id => {
-                document.getElementById(id).addEventListener('change', saveToLocalStorage);
-            });
-        });
-
-        function updateTeamAutocomplete() {
-            const datalist = document.getElementById('savedTeamsList');
-            datalist.innerHTML = Object.keys(savedTeams).map(team => 
-                `<option value="${team}">`
-            ).join('');
-        }
+        };
     </script>
 </body>
-</html> 
+</html>
