@@ -197,7 +197,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="batsmanName">Add Batsman</label>
+                    <label for="batsmanName">Add Batsman (Optional)</label>
                     <div style="display: flex; gap: 10px;">
                         <input type="text" id="batsmanName" placeholder="Enter batsman name">
                         <button type="button" onclick="addBatsman()" class="secondary">Add</button>
@@ -215,7 +215,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="bowlerName">Add Bowler</label>
+                    <label for="bowlerName">Add Bowler (Optional)</label>
                     <div style="display: flex; gap: 10px;">
                         <input type="text" id="bowlerName" placeholder="Enter bowler name">
                         <button type="button" onclick="addBowler()" class="secondary">Add</button>
@@ -341,17 +341,19 @@
         }
 
         function validateForm() {
-            const format = document.querySelector('input[name="format"]:checked').value;
-            const requiredPlayers = format === '6aside' ? 6 : 8;
-            const minBowlers = format === '6aside' ? 4 : 5;
-
-            if (batsmen.length !== requiredPlayers) {
-                showAlert(`You need exactly ${requiredPlayers} batsmen for ${format}`);
+            // Only validate required fields
+            if (!document.getElementById('battingTeamName').value.trim()) {
+                showAlert('Please enter batting team name');
                 return false;
             }
 
-            if (bowlers.length < minBowlers) {
-                showAlert(`You need at least ${minBowlers} bowlers for ${format}`);
+            if (!document.getElementById('fieldingTeamName').value.trim()) {
+                showAlert('Please enter fielding team name');
+                return false;
+            }
+
+            if (!document.getElementById('matchDuration').value) {
+                showAlert('Please enter match duration');
                 return false;
             }
 
